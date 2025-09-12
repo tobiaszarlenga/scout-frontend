@@ -2,7 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Estilos base mínimos (opcional) */
 :root {
   --background: #ffffff;
   --foreground: #111111;
