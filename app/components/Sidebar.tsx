@@ -25,35 +25,42 @@ export default function Sidebar({
   const pathname = usePathname();
 
   const content = (
-    <aside className="flex h-full w-64 flex-col gap-2 bg-white p-4 shadow-sm">
-      {/* Header + close (solo mobile) */}
-      <div className="mb-2 flex items-center justify-between lg:hidden">
-        <div className="font-semibold">SoftScout</div>
+    <aside className="flex h-full w-64 flex-col bg-white p-4 shadow-sm border-r border-slate-200">
+      {/* Header del sidebar: siempre visible; el botón X solo en mobile */}
+      <div className="mb-4 flex items-center justify-between">
+        <div>
+          <div className="text-xl font-bold">SoftScout</div>
+          <div className="text-sm text-slate-500">Scouting System</div>
+        </div>
         <button
           aria-label="Cerrar menú"
           onClick={onClose}
-          className="rounded-lg p-2 hover:bg-slate-100"
+          className="rounded-lg p-2 hover:bg-slate-100 lg:hidden"
         >
           <X size={20} />
         </button>
       </div>
 
       <nav className="space-y-1">
-        {nav.map(({ href, label }) => {
-          const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
+        {nav.map(({ href, label, icon: Icon }) => {
+          const active = href === "/"
+            ? pathname === "/"
+            : pathname.startsWith(href);
           return (
             <Link
               key={href}
               href={href}
               className={[
-                "block rounded-lg px-3 py-2 text-sm",
+                "flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition",
                 active
                   ? "bg-slate-100 text-slate-900 font-medium"
                   : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
               ].join(" ")}
-              onClick={onClose}
+              aria-current={active ? "page" : undefined}
+              onClick={onClose} // en mobile cierra el menú al navegar
             >
-              {label}
+              <Icon size={18} />
+              <span>{label}</span>
             </Link>
           );
         })}
@@ -65,8 +72,8 @@ export default function Sidebar({
 
   return (
     <>
-      {/* Desktop: fijo */}
-      <div className="hidden lg:block">{content}</div>
+      {/* Desktop: fijo y sticky */}
+      <div className="hidden lg:block sticky top-0 min-h-dvh">{content}</div>
 
       {/* Mobile: off-canvas */}
       <div
