@@ -10,7 +10,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   const [open, setOpen] = useState(false);
 
   return (
-    <html lang="es" suppressHydrationWarning>    {/* 👈 para el warning de extensiones */}
+    <html lang="es">   
       <body className="bg-slate-50 text-slate-800">
         {/* 👇 Todo tu shell envuelto por Providers */}
         <Providers>
