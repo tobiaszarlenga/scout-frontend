@@ -1,80 +1,90 @@
 "use client";
 
 import { useState } from "react";
-import type { Equipo } from "../types";
+import type { Equipo } from "@/types/equipo"; // ajustá la ruta exacta
 
-export default function EquipoForm({
-  initial,
-  onSubmit,
-  onCancel,
-}: {
-  initial?: Partial<Equipo>;
-  onSubmit: (values: Omit<Equipo, "id">) => void;
+type Props = {
+  initial?: Partial<Pick<Equipo, "id" | "nombre" | "ciudad">>;
+  onSubmit: (values: Pick<Equipo, "nombre" | "ciudad">) => Promise<void> | void;
   onCancel: () => void;
-}) {
+};
+
+export default function EquipoForm({ initial, onSubmit, onCancel }: Props) {
   const [nombre, setNombre] = useState(initial?.nombre ?? "");
   const [ciudad, setCiudad] = useState(initial?.ciudad ?? "");
-  const [liga, setLiga] = useState(initial?.liga ?? "");
   const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!nombre.trim()) {
-      setError("El nombre es obligatorio");
+    const nombreTrim = nombre.trim();
+    const ciudadTrim = ciudad?.trim() ?? "";
+
+    if (nombreTrim.length < 2) {
+      setError("El nombre debe tener al menos 2 caracteres.");
       return;
     }
-    onSubmit({ nombre: nombre.trim(), ciudad: ciudad.trim() || undefined, liga: liga.trim() || undefined });
+
+    try {
+      setSubmitting(true);
+      setError(null);
+      // Importante: siempre incluir la clave `ciudad`
+     await onSubmit({ nombre: nombreTrim, ciudad: ciudadTrim || undefined });
+
+    } catch (err: unknown) { // <- sin any
+      const msg = err instanceof Error ? err.message : "Ocurrió un error.";
+      setError(msg);
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3">
-      <div className="space-y-1">
-        <label className="text-sm text-slate-600">Nombre *</label>
-        <input
-          value={nombre}
-          onChange={(e) => setNombre(e.target.value)}
-          className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-slate-400"
-          placeholder="Ej: Tucumán Sox"
-        />
-      </div>
+  <form onSubmit={handleSubmit} className="space-y-4">
+    <div>
+      <label className="block text-sm font-medium">Nombre *</label>
+      <input
+        type="text"
+        value={nombre}
+        onChange={(e) => setNombre(e.target.value)}
+        className="mt-1 w-full rounded-md border px-3 py-2 outline-none focus:ring"
+        placeholder="Ej: Tigres U18"
+      />
+    </div>
 
-      <div className="space-y-1">
-        <label className="text-sm text-slate-600">Ciudad</label>
-        <input
-          value={ciudad}
-          onChange={(e) => setCiudad(e.target.value)}
-          className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-slate-400"
-          placeholder="Ej: San Miguel de Tucumán"
-        />
-      </div>
+    <div>
+      <label className="block text-sm font-medium">Ciudad</label>
+      <input
+        type="text"
+        value={ciudad}
+        onChange={(e) => setCiudad(e.target.value)}
+        className="mt-1 w-full rounded-md border px-3 py-2 outline-none focus:ring"
+        placeholder="Opcional"
+      />
+    </div>
 
-      <div className="space-y-1">
-        <label className="text-sm text-slate-600">Liga</label>
-        <input
-          value={liga}
-          onChange={(e) => setLiga(e.target.value)}
-          className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-slate-400"
-          placeholder="Ej: Litoral"
-        />
-      </div>
+    {error && <p className="text-sm text-red-600">{error}</p>}
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+    <div className="flex justify-end gap-2 pt-2">
+      <button
+        type="button"
+        onClick={onCancel}
+        className="rounded-md border px-3 py-2 hover:bg-gray-50 disabled:opacity-50"
+        disabled={submitting}
+      >
+        Cancelar
+      </button>
+      <button
+        type="submit"
+        className="rounded-md bg-green-600 px-3 py-2 text-white hover:bg-green-700 disabled:opacity-50"
+        disabled={submitting}
+      >
+        {submitting ? "Guardando..." : "Guardar"}
+      </button>
+    </div>
 
-      <div className="mt-4 flex justify-end gap-2">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="rounded-xl border border-slate-300 px-3 py-2 text-sm hover:bg-slate-50"
-        >
-          Cancelar
-        </button>
-        <button
-          type="submit"
-          className="rounded-xl bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800"
-        >
-          Guardar
-        </button>
-      </div>
-    </form>
-  );
+    <p className="text-xs text-gray-500">* El nombre debe ser único.</p>
+  </form>
+);
+
 }
