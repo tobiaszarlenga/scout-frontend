@@ -1,6 +1,6 @@
 "use client";
 
-import { useEquipos } from "@/hooks/useEquipos";
+import { useEquipos } from "src/hooks/useEquipos";
 import NewEquipoModal from "./NewEquipoModal";
 
 export default function EquiposPage() {
