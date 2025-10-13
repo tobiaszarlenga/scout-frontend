@@ -1,10 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import Modal from "../components/Modal"; // ajustá la ruta si es otra
+import Modal from "../components/Modal"; // 👈 Corregido para usar el alias
 import EquipoForm from "./EquipoForm";
-import { useEquipos } from "@/hooks/useEquipos";
-import type { CreateEquipoInput } from "../../src/types/equipo"; // 👈 usa el alias común
+import { useEquipos } from '@/hooks/useEquipos';
+import type { Equipo } from "@/types/equipo"; // 👈 Corregido para usar el alias
+
+// Definimos el tipo para los datos del formulario, excluyendo el 'id'
+type CreateEquipoInput = Omit<Equipo, 'id'>;
 
 export default function NewEquipoModal() {
   const { create } = useEquipos();
@@ -23,8 +26,15 @@ export default function NewEquipoModal() {
         <div className="p-4 sm:p-6">
           <h2 className="text-lg font-semibold">Nuevo equipo</h2>
           <EquipoForm
-            onSubmit={async (values: CreateEquipoInput) => { 
-              await create.mutateAsync(values);              
+            onSubmit={async (values: CreateEquipoInput) => {
+              // --- INICIO DE LA CORRECCIÓN ---
+              const dataToSubmit = {
+                nombre: values.nombre,
+                ciudad: values.ciudad || null, // Asegura que 'ciudad' sea string o null
+              };
+              await create.mutateAsync(dataToSubmit);
+              // --- FIN DE LA CORRECCIÓN ---
+              
               alert(`Equipo "${values.nombre}" creado correctamente`);
               setOpen(false);
             }}
