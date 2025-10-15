@@ -3,8 +3,8 @@
 import { useState } from "react";
 import Modal from "../components/Modal"; // ajustá la ruta si es otra
 import EquipoForm from "./EquipoForm";
-import { useEquipos } from "@/hooks/useEquipos";
-import type { CreateEquipoInput } from "../../src/types/equipo"; // 👈 usa el alias común
+import { useEquipos } from "hooks/useEquipos";
+import type { CreateEquipoInput } from "types/equipo"; // 👈 usa el alias común
 
 export default function NewEquipoModal() {
   const { create } = useEquipos();

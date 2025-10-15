@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useEquipos } from "src/hooks/useEquipos";
+import { useEquipos } from "hooks/useEquipos";
 import NewEquipoModal from "./NewEquipoModal";
 import EditEquipoModal from "./EditEquipoModal";
-import type { Equipo } from "../../src/types/equipo";
+import type { Equipo } from "../../types/equipo";
 
 export default function EquiposPage() {
   // 1. Obtenemos la función 'update' del hook

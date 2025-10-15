@@ -6,7 +6,7 @@ import EquipoForm from "./EquipoForm";
 
 // 2. Definimos el tipo para el objeto 'equipo'
 //    (Asegúrate de que la ruta de importación sea la correcta para tu proyecto)
-import type { Equipo } from "../../src/types/equipo"; 
+import type { Equipo } from "../../types/equipo"; 
 
 // 3. Definimos la "forma" que deben tener las props del componente
 interface EditEquipoModalProps {
