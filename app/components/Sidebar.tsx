@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  Home, Calendar, Users, UserCircle, Target, BarChart3, FileText, Settings, X
+  Home, Calendar, Users, UserCircle, FileText, X
 } from "lucide-react";
 
 const nav = [
@@ -11,11 +11,11 @@ const nav = [
   { href: "/partidos", label: "Partidos", icon: Calendar },
   { href: "/equipos", label: "Equipos", icon: Users },
   { href: "/pitchers", label: "Pitchers", icon: UserCircle },
-  { href: "/bateadores", label: "Bateadores", icon: Target },
-  { href: "/lanzamientos", label: "Lanzamientos", icon: BarChart3 },
-  { href: "/estadisticas", label: "Estadísticas", icon: BarChart3 },
+ 
+
+
   { href: "/reportes", label: "Reportes", icon: FileText },
-  { href: "/configuracion", label: "Configuración", icon: Settings },
+
 ];
 
 export default function Sidebar({
