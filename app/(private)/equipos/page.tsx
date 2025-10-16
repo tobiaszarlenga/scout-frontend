@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useEquipos } from "hooks/useEquipos";
 import NewEquipoModal from "./NewEquipoModal";
-import EditEquipoModal from "./EditEquipoModal";
-import type { Equipo } from "../../types/equipo";
+import EditEquipoModal from "@/app/(private)/equipos/EditEquipoModal";
+import type { Equipo } from "@/types/equipo";
 
 export default function EquiposPage() {
   // 1. Obtenemos la función 'update' del hook

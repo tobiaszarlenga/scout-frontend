@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Modal from "../components/Modal"; // ajustá la ruta si es otra
+import Modal from "@/app/components/Modal"; // ajustá la ruta si es otra
 import EquipoForm from "./EquipoForm";
 import { useEquipos } from "hooks/useEquipos";
 import type { CreateEquipoInput } from "types/equipo"; // 👈 usa el alias común

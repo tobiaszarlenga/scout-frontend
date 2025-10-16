@@ -1,6 +1,10 @@
+// scout-frontend/app/components/Modal/index.tsx
+
 "use client";
 
 import { useEffect } from "react";
+// 1. Importamos la magia de "createPortal" desde react-dom
+import { createPortal } from "react-dom";
 
 export default function Modal({
   open,
@@ -13,7 +17,7 @@ export default function Modal({
   title?: string;
   children: React.ReactNode;
 }) {
-  // Cerrar con ESC
+  // Todo este código de useEffect se queda exactamente igual
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -21,7 +25,6 @@ export default function Modal({
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
-  // Bloquear scroll del body
   useEffect(() => {
     if (!open) return;
     const prev = document.body.style.overflow;
@@ -33,8 +36,10 @@ export default function Modal({
 
   if (!open) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+  // 2. Usamos el portal para "teletransportar" el JSX del modal
+  //    directamente al <body> del documento.
+  return createPortal(
+    <div className="fixed inset-0 z-[999] flex items-center justify-center p-4">
       {/* Overlay */}
       <div
         className="absolute inset-0 bg-black/40"
@@ -51,6 +56,7 @@ export default function Modal({
         {title && <h3 className="mb-3 text-lg font-semibold">{title}</h3>}
         {children}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
