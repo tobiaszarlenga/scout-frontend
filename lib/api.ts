@@ -4,6 +4,7 @@ export const API_URL = process.env.NEXT_PUBLIC_API_URL!;
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${API_URL}${path}`, {
     headers: { 'Content-Type': 'application/json' },
+     credentials: 'include',
     ...options,
     // En producción podrías agregar cache: 'no-store' según el caso
   });

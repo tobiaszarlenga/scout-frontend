@@ -3,7 +3,9 @@
 
 import { useState } from "react";
 // ¡MODIFICADO! Importamos el tipo que espera nuestra mutación del hook.
-import type { CreateEquipoInput } from "types/equipo"; 
+
+import { useAuth } from "@/context/AuthContext"; // 👈 1. Importa el hook de autenticación
+import type { CreateEquipoInput } from "@/types/equipo"; // 👈 2. Importa el tipo correcto
 
 type Props = {
   initial?: Partial<CreateEquipoInput>;
@@ -13,6 +15,7 @@ type Props = {
 };
 
 export default function EquipoForm({ initial, onSubmit, onCancel }: Props) {
+  const { user } = useAuth(); // 👈 2. Obtén el usuario del contexto
   const [nombre, setNombre] = useState(initial?.nombre ?? "");
   const [ciudad, setCiudad] = useState(initial?.ciudad ?? "");
   const [error, setError] = useState<string | null>(null);
@@ -20,6 +23,14 @@ export default function EquipoForm({ initial, onSubmit, onCancel }: Props) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+
+    // Validaciones simples del lado del cliente
+       if (!user) {
+      setError("No se ha podido identificar al usuario. Por favor, inicia sesión de nuevo.");
+      return;
+    }
+
+
     const nombreTrim = nombre.trim();
     const ciudadTrim = ciudad?.trim() ?? "";
 
@@ -37,7 +48,7 @@ export default function EquipoForm({ initial, onSubmit, onCancel }: Props) {
       const valuesToSubmit: CreateEquipoInput = {
         nombre: nombreTrim,
         ciudad: ciudadTrim || null, // Usamos null para consistencia con la DB
-        autorId: 1, // <-- Nuestra "trampa inteligente" para la prueba
+        autorId: user.id, // 👈 3. Añadimos el ID del usuario autenticado
       };
 
       await onSubmit(valuesToSubmit);

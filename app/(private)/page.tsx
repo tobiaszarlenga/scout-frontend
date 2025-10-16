@@ -1,4 +1,4 @@
-import MetricCard from "./components/MetricCard";
+import MetricCard from "@/app/components/MetricCard";
 import { Activity, Target, Zap, TrendingUp } from "lucide-react";
 
 export default function DashboardPage() {
