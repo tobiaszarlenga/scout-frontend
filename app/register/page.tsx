@@ -51,19 +51,19 @@ export default function RegisterPage() {
         <form onSubmit={handleSubmit}>
           
           <div className={styles.username}>
-            <input type="text" required value={name} onChange={(e) => setName(e.target.value)} />
+            <input type="text" required value={name} onChange={(e) => setName(e.target.value)} placeholder=" " autoComplete="name" />
             <span></span>
             <label>Nombre y Apellido</label>
           </div>
 
           <div className={styles.username}>
-            <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+            <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder=" " autoComplete="email" />
             <span></span>
             <label>Email</label>
           </div>
 
           <div className={styles.username}>
-            <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+            <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder=" " autoComplete="new-password" />
             <span></span>
             <label>Contraseña</label>
           </div>

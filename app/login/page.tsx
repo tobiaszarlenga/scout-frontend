@@ -31,11 +31,13 @@ export default function LoginPage() {
           
           <div className={styles.username}>
             <input
-              type="email"
-              required // Para que funcione el :valid de CSS
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={isPending}
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            disabled={isPending}
+            placeholder=" "
+            autoComplete="email"
             />
             <span></span>
             <label>Email</label>
@@ -43,11 +45,13 @@ export default function LoginPage() {
 
           <div className={styles.username}>
             <input
-              type="password"
-              required // Para que funcione el :valid de CSS
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={isPending}
+            type="password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            disabled={isPending}
+            placeholder=" "
+            autoComplete="current-password"
             />
             <span></span>
             <label>Contraseña</label>

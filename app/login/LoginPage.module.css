@@ -42,6 +42,11 @@ form .username {
     background: none;
 }
 
+/* Ocultamos el placeholder visual (usamos " " para habilitar :placeholder-shown) */
+.username input::placeholder {
+    color: transparent;
+}
+
 .username label {
     position: absolute;
     top: 50%;
@@ -66,7 +71,10 @@ form .username {
 }
 
 .username input:focus ~ label,
-.username input:valid ~ label {
+/* Sube el label cuando hay texto (aunque aún no sea válido) */
+.username input:not(:placeholder-shown) ~ label,
+/* Sube el label cuando el navegador autocompleta */
+.username input:-webkit-autofill ~ label {
     top: -5px;
     /* CAMBIO: Color del label al enfocar */
     color: #012F8A;
@@ -105,7 +113,7 @@ form .username {
 
 .submitBtn:hover {
     /* CAMBIO: Color del botón al pasar el mouse */
-    background: #012F8A;
+    background: #90aff2;
 }
 
 .submitBtn:disabled {
