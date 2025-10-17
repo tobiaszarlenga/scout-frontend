@@ -47,17 +47,20 @@ export default function EquiposPage() {
   const equipos = list.data ?? [];
 
   return (
-    <main className="min-h-screen w-full bg-gradient-to-br from-[#D2B48C] to-[#8B4513] p-6 sm:p-10 font-sans">
-      
-      <header className="flex items-center justify-between pb-8">
-        <h1 className="text-4xl font-bold text-white" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.3)' }}>
-          Equipos
-        </h1>
-        <NewEquipoModal />
-      </header>
+    // Importante: evitar w-screen para no empujar más allá del layout. Usamos w-full y control de overflow.
+  <main className="min-h-full w-full max-w-full overflow-x-hidden bg-gradient-to-br from-[#D2B48C] to-[#8B4513] px-6 py-6 font-sans sm:px-10 sm:py-8">
+      {/* Contenedor centrado que limita el ancho de contenido para prevenir desbordes */}
+      <div className="mx-auto w-full max-w-6xl">
+        <header className="flex items-center justify-between pb-8">
+          <h1 className="text-4xl font-bold text-white" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.3)' }}>
+            Equipos
+          </h1>
+          <NewEquipoModal />
+        </header>
 
-      <div className="rounded-xl bg-white/90 p-2 shadow-xl backdrop-blur-sm">
-        <div className="space-y-2">
+        {/* Si en el futuro volvés a tabla, envolvé con overflow-x-auto para scroll horizontal solo en el contenido */}
+        <div className="rounded-xl bg-white/90 p-2 shadow-xl backdrop-blur-sm">
+          <div className="space-y-2">
           {equipos.map((e) => (
             <div 
               key={e.id} 
@@ -96,21 +99,22 @@ export default function EquiposPage() {
               </div>
             </div>
           ))}
-        </div>
-        
-        {equipos.length === 0 && (
-          <div className="p-10 text-center text-gray-500">
-            <p>No hay equipos registrados. ¡Crea el primero!</p>
           </div>
-        )}
-      </div>
+          
+          {equipos.length === 0 && (
+            <div className="p-10 text-center text-gray-500">
+              <p>No hay equipos registrados. ¡Crea el primero!</p>
+            </div>
+          )}
+        </div>
 
-      <EditEquipoModal
-        open={equipoAEditar !== null}
-        equipo={equipoAEditar}
-        onClose={handleCloseEditModal}
-        onSave={handleSaveEquipo}
-      />
+        <EditEquipoModal
+          open={equipoAEditar !== null}
+          equipo={equipoAEditar}
+          onClose={handleCloseEditModal}
+          onSave={handleSaveEquipo}
+        />
+      </div>
     </main>
   );
 }

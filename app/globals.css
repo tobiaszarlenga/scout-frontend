@@ -9,6 +9,8 @@
 
 html, body {
   height: 100%;
+  /* Bloquear scroll horizontal global como red de seguridad */
+  overflow-x: hidden;
 }
 
 body {

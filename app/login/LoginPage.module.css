@@ -5,7 +5,7 @@
     padding:0;
     font-family: Arial, sans-serif;
     /* CAMBIO: Gradiente con tonos marrones */
-    background: linear-gradient(150deg, #D2B48C, #8B4513);
+    background: linear-gradient(150deg, #6ca1e7, #122d85);
     height: 100vh;
     display: flex;
     align-items: center;

@@ -29,21 +29,21 @@ export default function PitchersPage() {
   const pitchers = list.data ?? [];
 
   return (
-    // 1. Contenedor principal con el fondo de gradiente y padding
-    <main className="min-h-screen w-full bg-gradient-to-br from-[#D2B48C] to-[#8B4513] p-6 sm:p-10 font-sans">
-      
-      {/* 2. Encabezado con nuevos estilos */}
-      <header className="flex items-center justify-between pb-8">
-        <h1 className="text-4xl font-bold text-white" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.3)' }}>
-          Pitchers
-        </h1>
-        {/* Este es tu componente modal, el botón que lo abre está dentro de él */}
-        <NewPitcherModal />
-      </header>
+    // 1. Contenedor principal con el fondo de gradiente y padding. Evitamos min-h-screen.
+  <main className="min-h-full w-full max-w-full overflow-x-hidden bg-gradient-to-br from-[#D2B48C] to-[#8B4513] px-6 py-6 pb-10 font-sans sm:px-10 sm:py-8">
+      <div className="mx-auto w-full max-w-6xl">
+        {/* 2. Encabezado con nuevos estilos */}
+        <header className="flex items-center justify-between pb-8">
+          <h1 className="text-4xl font-bold text-white" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.3)' }}>
+            Pitchers
+          </h1>
+          {/* Este es tu componente modal, el botón que lo abre está dentro de él */}
+          <NewPitcherModal />
+        </header>
 
-      {/* 3. La nueva cuadrícula (grid) para las tarjetas */}
-      {pitchers.length > 0 ? (
-        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {/* 3. La nueva cuadrícula (grid) para las tarjetas */}
+        {pitchers.length > 0 ? (
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           
           {/* 4. Mapeamos los pitchers para crear cada tarjeta */}
           {pitchers.map((p) => (
@@ -82,19 +82,20 @@ export default function PitchersPage() {
               </div>
             </div>
           ))}
-        </div>
-      ) : (
-        // Mensaje para cuando no hay pitchers
-        <div className="flex h-64 items-center justify-center rounded-lg bg-white/20">
-          <p className="text-xl text-white">No hay pitchers registrados todavía.</p>
-        </div>
-      )}
+          </div>
+        ) : (
+          // Mensaje para cuando no hay pitchers
+          <div className="flex h-64 items-center justify-center rounded-lg bg-white/20">
+            <p className="text-xl text-white">No hay pitchers registrados todavía.</p>
+          </div>
+        )}
 
-      {/* Tu componente modal de edición sigue funcionando igual */}
-      <EditPitcherModal
-        pitcher={pitcherAEditar}
-        onClose={() => setPitcherAEditar(null)}
-      />
+        {/* Tu componente modal de edición sigue funcionando igual */}
+        <EditPitcherModal
+          pitcher={pitcherAEditar}
+          onClose={() => setPitcherAEditar(null)}
+        />
+      </div>
     </main>
   );
 }

@@ -12,12 +12,14 @@ export default function PrivateLayout({ children }: { children: React.ReactNode 
 
   // Este es el Shell que antes estaba en el layout principal
   const Shell = (
-    <div className="flex min-h-screen">
+    // Evitamos scroll horizontal y alineamos alto exacto al viewport
+    <div className="flex min-h-dvh overflow-x-hidden">
       {/* 2. Añade el componente Toaster aquí. Se encargará de mostrar las notificaciones. */}
       <Toaster position="top-right" />
 
-      <Sidebar open={open} onClose={() => setOpen(false)} />
-      <div className="flex min-h-screen flex-1 flex-col">
+  <Sidebar open={open} onClose={() => setOpen(false)} />
+  {/* min-w-0 permite que el contenedor flex hijo pueda encogerse sin forzar overflow */}
+  <div className="flex min-h-dvh flex-1 min-w-0 flex-col">
         <header className="sticky top-0 z-40 border-b border-slate-200 bg-white lg:hidden">
           <div className="flex items-center gap-3 p-3">
             <button
@@ -30,7 +32,8 @@ export default function PrivateLayout({ children }: { children: React.ReactNode 
             <span className="font-semibold">SoftScout</span>
           </div>
         </header>
-        <main className="flex-1 p-4 lg:p-8">{children}</main>
+        {/* max-w-full/min-w-0 evitan desbordes; overflow-y-auto muestra scroll solo cuando hace falta */}
+        <main className="flex-1 min-w-0 max-w-full overflow-y-auto p-4 lg:p-8">{children}</main>
       </div>
     </div>
   );
