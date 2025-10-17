@@ -2,20 +2,22 @@
 "use client";
 
 import { useState } from "react";
-// ¡MODIFICADO! Importamos el tipo que espera nuestra mutación del hook.
 
-import { useAuth } from "@/context/AuthContext"; // 👈 1. Importa el hook de autenticación
-import type { CreateEquipoInput } from "@/types/equipo"; // 👈 2. Importa el tipo correcto
+// El tipo de datos que este formulario maneja y devuelve
+type EquipoFormData = {
+  nombre: string;
+  ciudad: string | null;
+};
 
 type Props = {
-  initial?: Partial<CreateEquipoInput>;
-  // ¡MODIFICADO! La función onSubmit ahora espera recibir el objeto completo, incluyendo autorId.
-  onSubmit: (values: CreateEquipoInput) => Promise<void> | void;
+  initial?: Partial<EquipoFormData>;
+  // La función onSubmit ahora solo espera 'nombre' y 'ciudad'
+  onSubmit: (values: EquipoFormData) => Promise<void> | void;
   onCancel: () => void;
 };
 
 export default function EquipoForm({ initial, onSubmit, onCancel }: Props) {
-  const { user } = useAuth(); // 👈 2. Obtén el usuario del contexto
+  // Ya no necesitamos 'useAuth' aquí
   const [nombre, setNombre] = useState(initial?.nombre ?? "");
   const [ciudad, setCiudad] = useState(initial?.ciudad ?? "");
   const [error, setError] = useState<string | null>(null);
@@ -23,13 +25,6 @@ export default function EquipoForm({ initial, onSubmit, onCancel }: Props) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-
-    // Validaciones simples del lado del cliente
-       if (!user) {
-      setError("No se ha podido identificar al usuario. Por favor, inicia sesión de nuevo.");
-      return;
-    }
-
 
     const nombreTrim = nombre.trim();
     const ciudadTrim = ciudad?.trim() ?? "";
@@ -43,14 +38,14 @@ export default function EquipoForm({ initial, onSubmit, onCancel }: Props) {
       setSubmitting(true);
       setError(null);
 
-      // --- ¡AQUÍ ESTÁ LA MAGIA! ---
-      // Creamos el objeto de datos y añadimos nuestro autorId "hardcodeado".
-      const valuesToSubmit: CreateEquipoInput = {
+      // --- ¡AQUÍ ESTÁ EL CAMBIO! ---
+      // Creamos el objeto de datos SIN el autorId.
+      const valuesToSubmit: EquipoFormData = {
         nombre: nombreTrim,
-        ciudad: ciudadTrim || null, // Usamos null para consistencia con la DB
-        autorId: user.id, // 👈 3. Añadimos el ID del usuario autenticado
+        ciudad: ciudadTrim || null,
       };
 
+      // Le pasamos los datos limpios al componente padre (NewEquipoModal)
       await onSubmit(valuesToSubmit);
 
     } catch (err: unknown) {

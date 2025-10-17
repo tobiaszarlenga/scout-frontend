@@ -3,15 +3,18 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
+  --background: #90D1F2fff;
   --foreground: #111111;
 }
 
 html, body {
   height: 100%;
+  /* Bloquear scroll horizontal global como red de seguridad */
+  overflow-x: hidden;
 }
 
 body {
+  @apply bg-slate-50 text-slate-800;
   background: var(--background);
   color: var(--foreground);
 }
