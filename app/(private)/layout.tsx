@@ -3,8 +3,9 @@
 
 import { useState } from "react";
 import { Menu } from "lucide-react";
-import AuthGuard from "@/app/components/AuthGuard"; // El guardián protege este layout
-import Sidebar from "@/app/components/Sidebar"; // Ajusta la ruta si es necesario
+import AuthGuard from "@/app/components/AuthGuard";
+import Sidebar from "@/app/components/Sidebar";
+import { Toaster } from "react-hot-toast"; // 1. Importa el componente Toaster
 
 export default function PrivateLayout({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
@@ -12,6 +13,9 @@ export default function PrivateLayout({ children }: { children: React.ReactNode 
   // Este es el Shell que antes estaba en el layout principal
   const Shell = (
     <div className="flex min-h-screen">
+      {/* 2. Añade el componente Toaster aquí. Se encargará de mostrar las notificaciones. */}
+      <Toaster position="top-right" />
+
       <Sidebar open={open} onClose={() => setOpen(false)} />
       <div className="flex min-h-screen flex-1 flex-col">
         <header className="sticky top-0 z-40 border-b border-slate-200 bg-white lg:hidden">

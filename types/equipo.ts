@@ -9,6 +9,9 @@ export type Equipo = {
   creadoEn: string;
   actualizadoEn: string;
   autorId: number;
+  _count?: {
+    pitchers: number;
+  };
 };
 
 // ¡NUEVO! Este es el tipo para los DATOS NECESARIOS PARA CREAR un equipo.
@@ -16,5 +19,4 @@ export type Equipo = {
 export type CreateEquipoInput = {
   nombre: string;
   ciudad?: string | null;
-  autorId: number;
 };

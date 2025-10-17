@@ -1,21 +1,21 @@
+// app/(private)/components/Sidebar.tsx
+
 'use client';
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  Home, Calendar, Users, UserCircle, FileText, X
+  Home, Calendar, Users, UserCircle, FileText, X,
+  LogOut // 1. Importamos el ícono de LogOut
 } from "lucide-react";
+import { useAuth } from "@/context/AuthContext"; // y el hook de autenticación
 
 const nav = [
   { href: "/", label: "Inicio", icon: Home },
   { href: "/partidos", label: "Partidos", icon: Calendar },
   { href: "/equipos", label: "Equipos", icon: Users },
   { href: "/pitchers", label: "Pitchers", icon: UserCircle },
- 
-
-
   { href: "/reportes", label: "Reportes", icon: FileText },
-
 ];
 
 export default function Sidebar({
@@ -23,8 +23,10 @@ export default function Sidebar({
   onClose,
 }: { open?: boolean; onClose?: () => void }) {
   const pathname = usePathname();
+  const { logout } = useAuth(); // 2. Obtenemos la función de logout desde el hook
 
   const content = (
+    // Envolvemos todo en un flex-col para poder usar mt-auto
     <aside className="flex h-full w-64 flex-col bg-white p-4 shadow-sm border-r border-slate-200">
       {/* Header del sidebar: siempre visible; el botón X solo en mobile */}
       <div className="mb-4 flex items-center justify-between">
@@ -66,7 +68,17 @@ export default function Sidebar({
         })}
       </nav>
 
-      <div className="mt-auto text-xs text-slate-400">SoftScout v1.0</div>
+      {/* 3. Contenedor del footer que se empuja hacia abajo */}
+      <div className="mt-auto">
+        <button
+          onClick={logout}
+          className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-200 hover:text-red"
+        >
+          <LogOut size={18} />
+          <span className="font-medium">Cerrar Sesión</span>
+        </button>
+        <div className="mt-4 text-xs text-center text-slate-400">SoftScout v1.0</div>
+      </div>
     </aside>
   );
 

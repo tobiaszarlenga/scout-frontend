@@ -1,43 +1,52 @@
+// app/(private)/equipos/EditEquipoModal.tsx
 "use client";
 
-import Modal from "@/app/components/Modal";
+import type { Equipo } from "@/types/equipo";
 import EquipoForm from "./EquipoForm";
-// import { useEquipos } from "@/hooks/useEquipos"; // 1. Eliminamos esta línea, no se usa
 
-// 2. Definimos el tipo para el objeto 'equipo'
-//    (Asegúrate de que la ruta de importación sea la correcta para tu proyecto)
-import type { Equipo } from "../../../types/equipo"; 
-
-// 3. Definimos la "forma" que deben tener las props del componente
+// 1. Interfaz de Props corregida
+// - Añadimos 'open' que es la propiedad que realmente se usa para abrir/cerrar.
+// - Simplificamos 'onSave' para que reciba el objeto Equipo completo.
 interface EditEquipoModalProps {
   open: boolean;
-  equipo: Equipo | null; // Puede ser un Equipo o null cuando está cerrado
-  onClose: () => void; // Una función que no devuelve nada
-  onSave: (values: Equipo) => Promise<void>; // Una función que recibe los valores y es asíncrona
+  equipo: Equipo | null;
+  onClose: () => void;
+  onSave: (values: Equipo) => Promise<void> | void;
 }
 
-// 4. Aplicamos los tipos a las props
-export default function EditEquipoModal({ equipo, open, onClose, onSave }: EditEquipoModalProps) {
-  if (!open || !equipo) return null;
+export default function EditEquipoModal({
+  open,
+  equipo,
+  onClose,
+  onSave,
+}: EditEquipoModalProps) {
+  // Si el modal no está abierto o no hay un equipo para editar, no mostramos nada.
+  if (!open || !equipo) {
+    return null;
+  }
 
+  // 2. Reemplazamos el <modal> por una estructura de divs con Tailwind para crear el modal.
   return (
-    <Modal open={open} onClose={onClose}>
-      <div className="p-4 sm:p-6">
-        <h2 className="text-lg font-semibold">Editar equipo</h2>
+    // Fondo oscuro semi-transparente
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+      {/* Contenedor del modal */}
+      <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
+        <h2 className="mb-4 text-lg font-semibold">Editar Equipo</h2>
+
         <EquipoForm
           initial={equipo}
+          onCancel={onClose}
+          // El formulario nos devuelve solo los campos que se pueden editar (nombre, ciudad)
           onSubmit={async (values) => {
-            // Pasamos el ID junto con los nuevos valores, incluyendo las fechas existentes
+            // 3. Construimos el objeto completo que espera la función onSave.
+            // Tomamos los nuevos valores del formulario y le añadimos el 'id' del equipo original.
             await onSave({
-              ...values,
-              id: equipo.id,
-              creadoEn: equipo.creadoEn,
-              actualizadoEn: equipo.actualizadoEn,
+              ...equipo, // Empezamos con los datos originales del equipo
+              ...values, // Sobrescribimos con los nuevos valores del formulario
             });
           }}
-          onCancel={onClose}
         />
       </div>
-    </Modal>
+    </div>
   );
 }

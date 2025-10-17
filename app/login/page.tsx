@@ -3,9 +3,10 @@
 
 import { useState } from 'react';
 import { useLogin } from '../../hooks/useAuth';
+// 👇 1. Importamos el archivo de estilos
+import styles from './LoginPage.module.css';
 
 export default function LoginPage() {
-  // 👇 1. CAMBIO AQUÍ: Pedimos 'isError' en lugar de 'error'
   const { mutate: login, isPending, isError } = useLogin();
 
   const [email, setEmail] = useState('');
@@ -20,50 +21,59 @@ export default function LoginPage() {
     login({ email, password });
   };
 
+  // 👇 2. Reemplazamos todo el return con la nueva estructura
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100">
-      <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-md">
-        <h1 className="mb-6 text-center text-2xl font-bold">Iniciar Sesión</h1>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium">Email</label>
+    <div className={styles.mainContainer}>
+      <div className={styles.formulario}>
+        <h1>Inicio de Sesión</h1>
+        
+        <form onSubmit={handleSubmit}>
+          
+          <div className={styles.username}>
             <input
               type="email"
+              required // Para que funcione el :valid de CSS
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 w-full rounded-md border px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="tu@email.com"
               disabled={isPending}
             />
+            <span></span>
+            <label>Email</label>
           </div>
-          <div>
-            <label className="block text-sm font-medium">Contraseña</label>
+
+          <div className={styles.username}>
             <input
               type="password"
+              required // Para que funcione el :valid de CSS
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 w-full rounded-md border px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="••••••••"
               disabled={isPending}
             />
+            <span></span>
+            <label>Contraseña</label>
           </div>
           
-          {/* 👇 2. CAMBIO AQUÍ: Comprobamos si 'isError' es verdadero */}
+          <div className={styles.recordar}>¿Olvidó su contraseña?</div>
+          
+          {/* Mensaje de error de React TanStack Query */}
           {isError && (
-            <p className="text-sm text-red-600">
+            <p className={styles.errorMessage}>
               Error: Las credenciales son inválidas.
             </p>
           )}
 
-          <div>
-            <button
-              type="submit"
-              className="w-full rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
-              disabled={isPending}
-            >
-              {isPending ? "Ingresando..." : "Ingresar"}
-            </button>
+          <button
+            type="submit"
+            className={styles.submitBtn}
+            disabled={isPending}
+          >
+            {isPending ? "Ingresando..." : "Iniciar"}
+          </button>
+          
+          <div className={styles.registrarse}>
+            Quiero hacer el <a href="/register">registro</a>
           </div>
+
         </form>
       </div>
     </div>
