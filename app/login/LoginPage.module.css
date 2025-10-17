@@ -61,7 +61,7 @@ form .username {
     width: 0%;
     height: 2px;
     /* CAMBIO: Color de la línea al enfocar */
-    background: #8B4513; 
+    background: #012F8A; 
     transition: .5s;
 }
 
@@ -69,7 +69,7 @@ form .username {
 .username input:valid ~ label {
     top: -5px;
     /* CAMBIO: Color del label al enfocar */
-    color: #8B4513;
+    color: #012F8A;
 }
 
 .username input:focus ~ span::before,
@@ -93,7 +93,7 @@ form .username {
     height: 50px;
     border: 1px solid;
     /* CAMBIO: Color del botón a marrón oscuro */
-    background: #8B4513;
+    background: #012F8A;
     border-radius: 25px;
     color: white;
     font-size: 18px;
@@ -122,7 +122,7 @@ form .username {
 
 .registrarse a {
     /* CAMBIO: Color del enlace a marrón */
-    color: #8B4513;
+    color: #012F8A;
     text-decoration: none;
 }
 

@@ -1,6 +1,6 @@
 export default function PartidosPage() {
   return (
-    <main className="min-h-full w-full max-w-full overflow-x-hidden bg-gradient-to-br from-[#D2B48C] to-[#8B4513] px-6 py-6 sm:px-10 sm:py-8">
+    <main className="min-h-full w-full max-w-full overflow-x-hidden bg-gradient-to-br from-[#90D1F2] to-[#012F8A] px-6 py-6 sm:px-10 sm:py-8">
       <div className="mx-auto w-full max-w-6xl">
         <header className="flex items-center justify-between pb-8">
           <h1

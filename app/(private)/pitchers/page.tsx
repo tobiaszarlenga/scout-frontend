@@ -16,7 +16,7 @@ export default function PitchersPage() {
 
   if (list.isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-gradient-to-br from-[#D2B48C] to-[#8B4513]">
+      <div className="flex h-screen items-center justify-center bg-gradient-to-br from-[#90D1F2] to-[#012F8A]">
         <p className="text-2xl font-bold text-white">Cargando pitchers...</p>
       </div>
     );
@@ -30,7 +30,7 @@ export default function PitchersPage() {
 
   return (
     // 1. Contenedor principal con el fondo de gradiente y padding. Evitamos min-h-screen.
-  <main className="min-h-full w-full max-w-full overflow-x-hidden bg-gradient-to-br from-[#D2B48C] to-[#8B4513] px-6 py-6 pb-10 font-sans sm:px-10 sm:py-8">
+  <main className="min-h-full w-full max-w-full overflow-x-hidden bg-gradient-to-br from-[#90D1F2] to-[#012F8A] px-6 py-6 pb-10 font-sans sm:px-10 sm:py-8">
       <div className="mx-auto w-full max-w-6xl">
         {/* 2. Encabezado con nuevos estilos */}
         <header className="flex items-center justify-between pb-8">

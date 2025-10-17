@@ -3,7 +3,7 @@
 /* Contenedor principal de la página, con el mismo fondo del login */
 .pageContainer {
     font-family: Arial, sans-serif;
-    background: linear-gradient(150deg, #D2B48C, #8B4513);
+    background: linear-gradient(150deg, #90D1F2, #012F8A);
     min-height: 100vh;
     padding: 40px;
     box-sizing: border-box;
