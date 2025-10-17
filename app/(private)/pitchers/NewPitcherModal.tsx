@@ -42,7 +42,7 @@ export default function NewPitcherModal() {
       {/* 3. Estilizamos el botón para que coincida con el diseño de la app */}
       <button
         onClick={() => setIsOpen(true)}
-        className="flex items-center gap-2 rounded-full bg-white px-5 py-2 font-bold text-[#6B3503] shadow-lg transition-transform duration-300 hover:-translate-y-1"
+        className="flex items-center gap-2 rounded-full bg-white px-5 py-2 font-bold text-[#012F8A] shadow-lg transition-transform duration-300 hover:-translate-y-1"
       >
         <PlusIcon className="h-5 w-5" />
         Nuevo Pitcher
