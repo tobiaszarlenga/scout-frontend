@@ -1,11 +1,11 @@
-// En /app/(private)/partidos/NuevoPartidoForm.tsx
+// scout-frontend/app/(private)/partidos/NuevoPartidoForm.tsx
 'use client';
 
 import React, { useState } from 'react';
 import type { Equipo } from '@/types/equipo';
 import type { Pitcher } from '@/types/pitcher';
 
-// Definimos los datos que este formulario debe manejar
+// ... (tipo PartidoFormData sin cambios) ...
 export type PartidoFormData = {
   equipoLocalId: string;
   pitcherLocalId: string;
@@ -16,13 +16,13 @@ export type PartidoFormData = {
   campo: string;
 };
 
+// ... (interface Props sin cambios) ...
 interface Props {
-  // Le pasamos los equipos y pitchers para los <select>
   equipos: Equipo[];
   pitchers: Pitcher[];
-  // Funciones que el padre nos da
-  onSubmit: (values: PartidoFormData) => Promise<void> | void; // Igual que en EquipoForm
+  onSubmit: (values: PartidoFormData) => Promise<void> | void;
   onCancel: () => void;
+  isLoadingOptions?: boolean;
 }
 
 export default function NuevoPartidoForm({
@@ -30,9 +30,10 @@ export default function NuevoPartidoForm({
   pitchers,
   onSubmit,
   onCancel,
+  isLoadingOptions,
 }: Props) {
   
-  // Estado inicial del formulario
+  // ... (estado formData sin cambios) ...
   const [formData, setFormData] = useState<PartidoFormData>({
     equipoLocalId: '',
     pitcherLocalId: '',
@@ -43,12 +44,11 @@ export default function NuevoPartidoForm({
     campo: '',
   });
 
-  // --- Lógica interna del formulario (igual que EquipoForm) ---
+  // ... (estados error y submitting sin cambios) ...
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  // ---------------------------------------------------------
 
-  // Manejador genérico para todos los inputs/selects
+  // ... (función handleChange sin cambios) ...
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -59,19 +59,33 @@ export default function NuevoPartidoForm({
     }));
   };
   
-  // handleSubmit (igual que EquipoForm)
+  // --- ¡CAMBIO AQUÍ! ---
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Aquí podrías añadir validaciones, por ejemplo:
-    if (!formData.equipoLocalId || !formData.pitcherLocalId /* ...etc */) {
+    // Reseteamos el error en cada envío
+    setError(null);
+
+    // ¡Validación completa!
+    // Revisamos todos los campos requeridos. 'campo' es opcional.
+    if (
+      !formData.equipoLocalId ||
+      !formData.equipoVisitanteId ||
+      !formData.pitcherLocalId ||
+      !formData.pitcherVisitanteId ||
+      !formData.fecha ||
+      !formData.horario
+    ) {
       setError('Por favor, completa todos los campos obligatorios.');
-      return;
+      return; // Detiene la ejecución si falta algo
     }
+
+    // --- FIN DEL CAMBIO ---
 
     try {
       setSubmitting(true);
-      setError(null);
+      // ¡El error se borró arriba!
+      // setError(null); 
       
       // Pasamos los datos al componente padre (NewPartidoModal)
       await onSubmit(formData);
@@ -84,7 +98,7 @@ export default function NuevoPartidoForm({
     }
   };
 
-  // Filtramos pitchers basados en el equipo seleccionado
+  // ... (lógica de pitchersLocales y pitchersVisitantes sin cambios) ...
   const pitchersLocales = pitchers.filter(
     (p) => p.equipoId === +formData.equipoLocalId
   );
@@ -93,7 +107,7 @@ export default function NuevoPartidoForm({
   );
 
   return (
-    // Aplicamos 'space-y-4' como en EquipoForm
+    // ... (Todo el JSX del formulario <form>... es idéntico y está perfecto) ...
     <form onSubmit={handleSubmit} className="space-y-4 pt-4">
       
       {/* --- FILA 1: EQUIPOS --- */}
@@ -104,12 +118,13 @@ export default function NuevoPartidoForm({
             name="equipoLocalId"
             value={formData.equipoLocalId}
             onChange={handleChange}
-            // --- ESTILOS DE TU EquipoForm ---
             className="mt-1 w-full rounded-md border px-3 py-2 outline-none focus:ring"
             required
-            disabled={submitting}
+            disabled={submitting || isLoadingOptions}
           >
-            <option value="">Seleccionar equipo...</option>
+            <option value="">
+              {isLoadingOptions ? 'Cargando...' : 'Seleccionar equipo...'}
+            </option>
             {equipos.map((eq) => (
               <option key={eq.id} value={eq.id}>{eq.nombre}</option>
             ))}
@@ -122,12 +137,13 @@ export default function NuevoPartidoForm({
             name="equipoVisitanteId"
             value={formData.equipoVisitanteId}
             onChange={handleChange}
-            // --- ESTILOS DE TU EquipoForm ---
             className="mt-1 w-full rounded-md border px-3 py-2 outline-none focus:ring"
             required
-            disabled={submitting}
+            disabled={submitting || isLoadingOptions}
           >
-            <option value="">Seleccionar equipo...</option>
+            <option value="">
+              {isLoadingOptions ? 'Cargando...' : 'Seleccionar equipo...'}
+            </option>
             {equipos.map((eq) => (
               <option key={eq.id} value={eq.id}>{eq.nombre}</option>
             ))}
@@ -143,12 +159,13 @@ export default function NuevoPartidoForm({
             name="pitcherLocalId"
             value={formData.pitcherLocalId}
             onChange={handleChange}
-            // --- ESTILOS DE TU EquipoForm ---
             className="mt-1 w-full rounded-md border px-3 py-2 outline-none focus:ring"
             required
-            disabled={!formData.equipoLocalId || submitting} // Deshabilitado hasta elegir equipo
+            disabled={!formData.equipoLocalId || submitting || isLoadingOptions}
           >
-            <option value="">Seleccionar pitcher...</option>
+            <option value="">
+              {isLoadingOptions ? 'Cargando...' : 'Seleccionar pitcher...'}
+            </option>
             {pitchersLocales.map((p) => (
               <option key={p.id} value={p.id}>{p.nombre} {p.apellido}</option>
             ))}
@@ -161,12 +178,13 @@ export default function NuevoPartidoForm({
             name="pitcherVisitanteId"
             value={formData.pitcherVisitanteId}
             onChange={handleChange}
-            // --- ESTILOS DE TU EquipoForm ---
             className="mt-1 w-full rounded-md border px-3 py-2 outline-none focus:ring"
             required
-            disabled={!formData.equipoVisitanteId || submitting} // Deshabilitado hasta elegir equipo
+            disabled={!formData.equipoVisitanteId || submitting || isLoadingOptions}
           >
-            <option value="">Seleccionar pitcher...</option>
+            <option value="">
+              {isLoadingOptions ? 'Cargando...' : 'Seleccionar pitcher...'}
+            </option>
             {pitchersVisitantes.map((p) => (
               <option key={p.id} value={p.id}>{p.nombre} {p.apellido}</option>
             ))}
@@ -183,7 +201,6 @@ export default function NuevoPartidoForm({
             name="fecha"
             value={formData.fecha}
             onChange={handleChange}
-            // --- ESTILOS DE TU EquipoForm ---
             className="mt-1 w-full rounded-md border px-3 py-2 outline-none focus:ring"
             required
             disabled={submitting}
@@ -196,7 +213,6 @@ export default function NuevoPartidoForm({
             name="horario"
             value={formData.horario}
             onChange={handleChange}
-            // --- ESTILOS DE TU EquipoForm ---
             className="mt-1 w-full rounded-md border px-3 py-2 outline-none focus:ring"
             required
             disabled={submitting}
@@ -210,7 +226,6 @@ export default function NuevoPartidoForm({
             value={formData.campo}
             onChange={handleChange}
             placeholder="Opcional"
-            // --- ESTILOS DE TU EquipoForm ---
             className="mt-1 w-full rounded-md border px-3 py-2 outline-none focus:ring"
             disabled={submitting}
           />
