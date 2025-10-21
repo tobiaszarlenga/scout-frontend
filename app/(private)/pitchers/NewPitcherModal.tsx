@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { usePitchers } from "@/hooks/usePitchers";
 import { useEquipos } from "@/hooks/useEquipos";
-import { CreatePitcherDto } from "@/lib/api";
+import type { CreatePitcherDto } from "@/types/pitcher";
 import { toast } from "react-hot-toast"; // 1. Importamos toast
 import { PlusIcon } from "@heroicons/react/24/solid"; // Opcional: para el botón
 
