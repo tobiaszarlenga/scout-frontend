@@ -1,5 +1,6 @@
 // scout-frontend/lib/api.ts
 
+import type { Pitcher, CreatePitcherDto } from '@/types/pitcher';
 export const API_URL = process.env.NEXT_PUBLIC_API_URL!;
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
@@ -30,37 +31,6 @@ export const api = {
   delete: (path: string) =>
     request<void>(path, { method: 'DELETE' }),
 };
-
-// --- SECCIÓN AÑADIDA PARA PITCHERS ---
-
-// 1. Definimos los tipos de datos para TypeScript
-// (Esto da súper poderes a tu editor para autocompletar y detectar errores)
-
-// Representa un equipo (lo necesitaremos dentro del Pitcher)
-interface Equipo {
-  id: number;
-  nombre: string;
-  ciudad: string | null;
-}
-
-// Representa un pitcher completo, como viene del backend
-export interface Pitcher {
-  id: number;
-  nombre: string;
-  apellido: string;
-  edad: number;
-  numero_camiseta: number;
-  equipoId: number;
-  creadoEn: string;
-  actualizadoEn: string;
-  equipo?: Equipo; // El equipo es opcional, por si la API no lo incluye siempre
-}
-
-// Representa los datos necesarios para CREAR un pitcher
-export type CreatePitcherDto = Omit<Pitcher, 'id' | 'creadoEn' | 'actualizadoEn' | 'equipo'>;
-
-
-// 2. Creamos un objeto específico para las llamadas a la API de pitchers
 export const pitcherApi = {
   getAll: () => api.get<Pitcher[]>('/pitchers'),
   create: (data: CreatePitcherDto) => api.post<Pitcher>('/pitchers', data),

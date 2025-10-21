@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import { usePitchers } from "@/hooks/usePitchers";
-import type { Pitcher } from "@/lib/api";
+import type { Pitcher } from "@/types/pitcher";
 import NewPitcherModal from "./NewPitcherModal";
 import EditPitcherModal from "./EditPitcherModal";
 

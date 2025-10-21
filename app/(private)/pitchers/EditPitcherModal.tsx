@@ -5,7 +5,7 @@ import { useEffect } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { usePitchers } from "@/hooks/usePitchers";
 import { useEquipos } from "@/hooks/useEquipos";
-import type { Pitcher, CreatePitcherDto } from "@/lib/api";
+import type { Pitcher, CreatePitcherDto } from "@/types/pitcher";
 import { toast } from "react-hot-toast"; // 1. Importamos toast
 
 interface EditPitcherModalProps {
