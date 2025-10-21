@@ -1,83 +1,72 @@
-// En /app/(private)/partidos/page.tsx
+// scout-frontend/app/(private)/partidos/page.tsx
 'use client';
 
-import React, { useState } from 'react';
-// Importamos los tipos
-import type { Equipo } from '@/types/equipo';
-import type { Pitcher } from '@/types/pitcher';
-import type { Partido } from '@/types/partido'; // Importamos el tipo base
-
-// --- COMPONENTES (desde la misma carpeta) ---
+import React from 'react';
+// Importamos los componentes desde la misma carpeta
 import PartidosProgramados from './PartidosProgramados';
 import PartidosFinalizados from './PartidosFinalizados';
-// CAMBIO: Importamos el nuevo componente "inteligente"
-import NewPartidoModal from './NewPartidoModal'; 
+import NewPartidoModal from './NewPartidoModal';
+// Importamos el tipo unificado
+import type { PartidoConDetalles } from 'types/partido';
 
-// --- Tipos y Datos de Ejemplo (Mock Data) ---
-// Creamos el tipo 'PartidoConDetalles' extendiendo el 'Partido' base
-export type PartidoConDetalles = Partido & {
-  equipoLocal: Pick<Equipo, 'nombre'>;
-  equipoVisitante: Pick<Equipo, 'nombre'>;
-  pitcherLocal: Pick<Pitcher, 'nombre' | 'apellido'>;
-  pitcherVisitante: Pick<Pitcher, 'nombre' | 'apellido'>;
-};
+// --- DATOS DE PRUEBA (MOCK DATA) ---
+// (Usamos los datos corregidos con 'string' en las fechas)
 
-// Nuestros datos de ejemplo
-const mockPartidos: PartidoConDetalles[] = [
-  // ... (los datos de ejemplo quedan igual) ...
+const mockPartidosProgramados: PartidoConDetalles[] = [
   {
     id: 1,
-    fecha: new Date('2025-10-17T22:57:00'),
-    horario: '22:57',
+    fecha: '2025-10-17T12:37:00.000Z',
     campo: 'dsfsd',
     estado: 'PROGRAMADO',
     equipoLocalId: 1,
     equipoVisitanteId: 2,
     pitcherLocalId: 1,
     pitcherVisitanteId: 2,
-    creadoEn: new Date(),
-    actualizadoEn: new Date(),
+    autorId: 1,
+    creadoEn: '2025-10-16T10:00:00.000Z',
+    actualizadoEn: '2025-10-16T10:00:00.000Z',
     equipoLocal: { nombre: 'Tigres' },
-    equipoVisitante: { nombre: 'Tigres' },
+    equipoVisitante: { nombre: 'Águilas' },
     pitcherLocal: { nombre: 'Juan', apellido: 'Pérez' },
-    pitcherVisitante: { nombre: 'Ana', apellido: 'Martínez' },
+    pitcherVisitante: { nombre: 'Ana', apellido: 'Martinez' },
   },
+];
+
+const mockPartidosFinalizados: PartidoConDetalles[] = [
   {
     id: 2,
-    fecha: new Date('2025-10-17T19:00:00'),
-    horario: '19:00',
+    fecha: '2025-10-15T18:00:00.000Z',
     campo: 'cef',
     estado: 'FINALIZADO',
     equipoLocalId: 1,
     equipoVisitanteId: 2,
     pitcherLocalId: 1,
     pitcherVisitanteId: 2,
-    creadoEn: new Date(),
-    actualizadoEn: new Date(),
+    autorId: 1,
+    creadoEn: '2025-10-14T09:00:00.000Z',
+    actualizadoEn: '2025-10-15T21:00:00.000Z',
     equipoLocal: { nombre: 'Tigres' },
     equipoVisitante: { nombre: 'Tigres' },
     pitcherLocal: { nombre: 'Juan', apellido: 'Pérez' },
-    pitcherVisitante: { nombre: 'Ana', apellido: 'Martínez' },
+    pitcherVisitante: { nombre: 'Ana', apellido: 'Martinez' },
   },
 ];
+// --- FIN DE DATOS DE PRUEBA ---
+
 
 // --- COMPONENTE PRINCIPAL DE LA PÁGINA ---
 export default function PartidosPage() {
-  // El 'useState' para los partidos se queda
-  const [partidos, setPartidos] = useState<PartidoConDetalles[]>(mockPartidos);
-
-  // BORRAMOS: const [isModalOpen, setIsModalOpen] = useState(false);
-  // BORRAMOS: const handleCrearPartido = (...)
-
-  const programados = partidos.filter((p) => p.estado === 'PROGRAMADO');
-  const finalizados = partidos.filter((p) => p.estado === 'FINALIZADO');
+  // Por ahora, usamos los datos de prueba.
+  // ¡El próximo paso es reemplazar esto con usePartidos().list!
+  const programados = mockPartidosProgramados;
+  const finalizados = mockPartidosFinalizados;
 
   return (
     // 1. Tu layout principal con el fondo azul
     <main className="min-h-full w-full max-w-full overflow-x-hidden bg-gradient-to-br from-[#90D1F2] to-[#012F8A] px-6 py-6 sm:px-10 sm:py-8">
       <div className="mx-auto w-full max-w-6xl">
         
-        {/* 2. Tu cabecera */}
+        {/* 2. Tu cabecera con estilos de texto blanco */}
         <header className="flex items-center justify-between pb-8">
           <div>
             <h1
@@ -91,23 +80,23 @@ export default function PartidosPage() {
             </p>
           </div>
           
-          {/* 3. CAMBIO CLAVE: Reemplazamos el botón por el componente modal */}
+          {/* 3. El componente modal en la cabecera */}
           <NewPartidoModal />
           
         </header>
 
-        {/* 4. Las listas de partidos (esto queda igual) */}
+        {/* 4. Las listas de partidos en tarjetas blancas */}
         <div className="bg-white p-6 rounded-lg shadow-xl mb-8">
           <h2 className="text-xl font-semibold mb-4 text-gray-800">Partidos Programados</h2>
+          {/* ¡CORREGIDO! Usamos 'partidos={programados}' */}
           <PartidosProgramados partidos={programados} />
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow-xl">
           <h2 className="text-xl font-semibold mb-4 text-gray-800">Partidos Finalizados</h2>
+          {/* ¡CORREGIDO! Usamos 'partidos={finalizados}' */}
           <PartidosFinalizados partidos={finalizados} />
         </div>
-
-        {/* 5. BORRAMOS: El <NuevoPartidoModal ... /> de aquí */}
         
       </div>
     </main>

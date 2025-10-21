@@ -31,19 +31,6 @@ export const api = {
   delete: (path: string) =>
     request<void>(path, { method: 'DELETE' }),
 };
-
-// --- SECCIÓN AÑADIDA PARA PITCHERS ---
-
-// 1. Definimos los tipos de datos para TypeScript
-// (Esto da súper poderes a tu editor para autocompletar y detectar errores)
-
-// Representa un equipo (lo necesitaremos dentro del Pitcher)
-
-
-
-// Representa un pitcher completo, como viene del backend
-
-// 2. Creamos un objeto específico para las llamadas a la API de pitchers
 export const pitcherApi = {
   getAll: () => api.get<Pitcher[]>('/pitchers'),
   create: (data: CreatePitcherDto) => api.post<Pitcher>('/pitchers', data),

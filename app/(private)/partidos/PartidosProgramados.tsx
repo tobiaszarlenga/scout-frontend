@@ -1,13 +1,13 @@
-// En /app/(private)/partidos/PartidosProgramados.tsx
-'use client'; // Necesario para useRouter
+'use client';
 
 import React from 'react';
-// Importamos el tipo desde el page.tsx de este mismo directorio
-import type { PartidoConDetalles } from './page'; 
+import type { PartidoConDetalles } from 'types/partido';
 import { useRouter } from 'next/navigation';
-import { format } from 'date-fns'; // Recuerda: npm install date-fns
+// ¡Asegúrate de tener date-fns instalado! (npm install date-fns)
+import { format } from 'date-fns';
 
 interface Props {
+  // Esto ya está perfecto
   partidos: PartidoConDetalles[];
 }
 
@@ -41,28 +41,39 @@ export default function PartidosProgramados({ partidos }: Props) {
           </tr>
         </thead>
         <tbody>
-          {partidos.map((partido) => (
-            <tr key={partido.id} className="border-b hover:bg-gray-50 text-gray-800">
-              <td className="py-3 px-4">{format(partido.fecha, 'dd-MM-yyyy')}</td>
-              <td className="py-3 px-4">{partido.horario}</td>
-              <td className="py-3 px-4">
-                {partido.equipoLocal.nombre} vs {partido.equipoVisitante.nombre}
-              </td>
-              <td className="py-3 px-4 text-sm">
-                {partido.pitcherLocal.nombre} {partido.pitcherLocal.apellido} <br />
-                {partido.pitcherVisitante.nombre} {partido.pitcherVisitante.apellido}
-              </td>
-              <td className="py-3 px-4">{partido.campo}</td>
-              <td className="py-3 px-4">
-                <button
-                  onClick={() => handleEmpezar(partido.id)}
-                  className="bg-gray-800 text-white px-4 py-2 rounded-lg text-sm"
-                >
-                  Empezar
-                </button>
-              </td>
-            </tr>
-          ))}
+          {partidos.map((partido) => {
+            // Creamos el objeto Date una sola vez para usarlo en ambos campos
+            const fechaHora = new Date(partido.fecha);
+
+            return (
+              <tr key={partido.id} className="border-b hover:bg-gray-50 text-gray-800">
+                {/* --- SOLUCIÓN 1 --- */}
+                {/* Convertimos el string a Date ANTES de formatear */}
+                <td className="py-3 px-4">{format(fechaHora, 'dd-MM-yyyy')}</td>
+                
+                {/* --- SOLUCIÓN 2 --- */}
+                {/* Extraemos la hora (HH:mm) del mismo objeto Date */}
+                <td className="py-3 px-4">{format(fechaHora, 'HH:mm')}</td>
+                
+                <td className="py-3 px-4">
+                  {partido.equipoLocal.nombre} vs {partido.equipoVisitante.nombre}
+                </td>
+                <td className="py-3 px-4 text-sm">
+                  {partido.pitcherLocal.nombre} {partido.pitcherLocal.apellido} <br />
+                  {partido.pitcherVisitante.nombre} {partido.pitcherVisitante.apellido}
+                </td>
+                <td className="py-3 px-4">{partido.campo}</td>
+                <td className="py-3 px-4">
+                  <button
+                    onClick={() => handleEmpezar(partido.id)}
+                    className="bg-gray-800 text-white px-4 py-2 rounded-lg text-sm"
+                  >
+                    Empezar
+                  </button>
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

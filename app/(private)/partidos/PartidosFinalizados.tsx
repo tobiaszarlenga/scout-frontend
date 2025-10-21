@@ -1,9 +1,8 @@
-// En /app/(private)/partidos/PartidosFinalizados.tsx
+// scout-frontend/components/partidos/PartidosFinalizados.tsx
 'use client'; // Necesario para useRouter
 
 import React from 'react';
-// Importamos el tipo desde el page.tsx de este mismo directorio
-import type { PartidoConDetalles } from './page'; 
+import type { PartidoConDetalles } from 'types/partido';
 import { useRouter } from 'next/navigation';
 import { format } from 'date-fns'; // Recuerda: npm install date-fns
 
@@ -43,7 +42,9 @@ export default function PartidosFinalizados({ partidos }: Props) {
         <tbody>
           {partidos.map((partido) => (
             <tr key={partido.id} className="border-b hover:bg-gray-50 text-gray-800">
-              <td className="py-3 px-4">{format(partido.fecha, 'dd-MM-yyyy')}</td>
+              {/* --- ¡AQUÍ ESTÁ LA CORRECCIÓN! --- */}
+              {/* Convertimos el string a Date antes de formatear */}
+              <td className="py-3 px-4">{format(new Date(partido.fecha), 'dd-MM-yyyy')}</td>
               <td className="py-3 px-4">
                 {partido.equipoLocal.nombre} vs {partido.equipoVisitante.nombre}
               </td>

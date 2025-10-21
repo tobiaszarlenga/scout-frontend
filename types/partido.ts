@@ -1,24 +1,45 @@
-// En /types/partido.ts
-import type { Equipo } from './equipo'; // Importamos tu tipo existente
-import type { Pitcher } from './pitcher'; // Importamos el tipo de pitcher
+// scout-frontend/types/partido.ts
 
-// Este tipo representa la tabla 'Partido'
-export interface Partido {
-  id: number;
-  fecha: Date; // Usaremos Date de JS
-  horario: string;
-  campo: string | null;
-  estado: string; // "PROGRAMADO" o "FINALIZADO"
+import type { Equipo } from './equipo';
+import type { Pitcher } from './pitcher'; // Asumo que tienes 'types/pitcher.ts'
+
+// --- 1. Tipo para CREAR (El formulario) ---
+// Este es el tipo que define los datos que enviamos en el POST
+export type CreatePartidoInput = {
   equipoLocalId: number;
   equipoVisitanteId: number;
   pitcherLocalId: number;
   pitcherVisitanteId: number;
+  fecha: string;    // "dd/mm/yyyy"
+  horario: string;  // "HH:mm"
+  campo?: string;
+};
+
+// --- 2. Tipo BASE (Coincide con el modelo Prisma) ---
+// Ajustado para coincidir con la respuesta JSON de la API
+export interface Partido {
+  id: number;
+  // JSON no tiene tipo 'Date', devuelve strings en formato ISO
+  fecha: string; // ej: "2025-10-21T18:00:00.000Z"
+  campo: string | null;
+  // Usamos un tipo unión para ser más específicos
+  estado: 'PROGRAMADO' | 'FINALIZADO' | 'CANCELADO';
   
-  creadoEn: Date;
-  actualizadoEn: Date;
+  // IDs de relaciones
+  equipoLocalId: number;
+  equipoVisitanteId: number;
+  pitcherLocalId: number;
+  pitcherVisitanteId: number;
+  autorId: number; // El backend también devuelve esto
+  
+  // Campos de Prisma (devueltos como string por JSON)
+  creadoEn: string;
+  actualizadoEn: string;
 }
 
-// Este tipo "anidado" es el que usaremos en las listas
+// --- 3. Tipo para LISTAR (Con detalles) ---
+// ¡Tu tipo PartidoConDetalles ya era perfecto!
+// Lo usamos para la respuesta de 'listarPartidos' que incluye los nombres
 export type PartidoConDetalles = Partido & {
   equipoLocal: Pick<Equipo, 'nombre'>;
   equipoVisitante: Pick<Equipo, 'nombre'>;
