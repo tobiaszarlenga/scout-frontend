@@ -9,7 +9,7 @@ import React from 'react';
 
 import StrikeZoneGrid from '@/app/components/StrikeZoneGrid';
 import ScoutCounterCard from '@/app/(private)/partidos/ScoutCounterCard';
-// ¡Importamos el nuevo componente de Cuenta!
+import ActivePitcherToggle from '@/app/(private)/partidos/ActivePitcherToggle';
 import ScoutCountCard from '@/app/(private)/partidos/ScoutCountCard';
 
 export default function ScoutPage({ params }: { params: { id: string } }) {
@@ -57,13 +57,10 @@ export default function ScoutPage({ params }: { params: { id: string } }) {
           </section>
 
           {/* --- PITCHER ACTIVO --- */}
-          <section className="bg-white p-4 rounded-lg shadow-md border border-gray-200 mb-6">
-            {/* TODO: Crear el componente <ActivePitcher /> */}
-            Sección de Pitcher Activo...
-          </section>
+     <ActivePitcherToggle />
 
           {/* --- ZONA DE STRIKE --- */}
-          <section className="flex flex-col items-center">
+          <section className="flex flex-col items-center mt-6">
             <StrikeZoneGrid />
           </section>
 
