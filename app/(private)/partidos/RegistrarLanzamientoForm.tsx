@@ -20,11 +20,10 @@ interface RegistrarLanzamientoFormProps {
 // --- 2. Datos de ejemplo para los <select> ---
 // (Más adelante, esto podría venir de tu base de datos)
 const tiposDeEfecto = [
-  'Recta (4 costuras)',
-  'Recta (2 costuras)',
+ 'Drop',
+  'Trepadora',
   'Curva',
-  'Slider',
-  'Cambio (Circle)',
+  'Cambio',
 ];
 
 // (Basado en tu maqueta image_f039d5.png)
