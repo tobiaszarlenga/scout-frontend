@@ -2,70 +2,56 @@
 'use client';
 
 import React, { useState } from 'react';
+// --- CAMBIO 1: Importamos el nuevo hook ---
+// (Ajusta la ruta si tu alias '@/' es diferente)
+import { useLookups } from '@/hooks/useLookups';
 
-// --- 1. Definimos los tipos de datos que este formulario manejará ---
+// --- CAMBIO 2: ¡Actualizamos la interfaz de datos! ---
+// Ahora enviaremos los IDs (números) en lugar de texto.
 export interface LanzamientoData {
   velocidad: number | null;
-  tipoEfecto: string;
-  resultado: string;
+  tipoId: number | null;
+  resultadoId: number | null;
 }
 
 interface RegistrarLanzamientoFormProps {
-  // Función para llamar cuando el usuario guarda (le pasamos los datos)
   onSubmit: (data: LanzamientoData) => void;
-  // Función para llamar cuando el usuario cancela
   onCancel: () => void;
 }
 
-// --- 2. Datos de ejemplo para los <select> ---
-// (Más adelante, esto podría venir de tu base de datos)
-const tiposDeEfecto = [
- 'Drop',
-  'Trepadora',
-  'Curva',
-  'Cambio',
-];
-
-// (Basado en tu maqueta image_f039d5.png)
-const resultadosDeLanzamiento = [
-  'Strike',
-  'Bola',
-  'Hit',
-  'Out',
-  'Foul',
-];
+// --- CAMBIO 3: ¡Borramos los arrays 'harcodeados'! ---
+// (Ya no necesitamos 'tiposDeEfecto' ni 'resultadosDeLanzamiento')
 
 export default function RegistrarLanzamientoForm({
   onSubmit,
   onCancel,
 }: RegistrarLanzamientoFormProps) {
   
-  // --- 3. Estados internos para guardar los valores del formulario ---
+  // --- CAMBIO 4: Llamamos al hook para cargar los datos ---
+  const { tipos, resultados } = useLookups();
+
+  // --- CAMBIO 5: Actualizamos los estados internos ---
+  // Ahora guardan 'number | null' en lugar de 'string'
   const [velocidad, setVelocidad] = useState<number | null>(null);
-  const [tipoEfecto, setTipoEfecto] = useState('');
-  const [resultado, setResultado] = useState('');
+  const [tipoId, setTipoId] = useState<number | null>(null);
+  const [resultadoId, setResultadoId] = useState<number | null>(null);
 
-  // --- 4. Manejador del botón "Guardar" ---
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault(); // Evita que la página se recargue
-
-    // TODO: Agregar validación (ej. que los campos no estén vacíos)
+    e.preventDefault();
     
-    // Llamamos a la función 'onSubmit' que nos pasó el padre
-    // y le entregamos los datos del estado.
+    // --- CAMBIO 6: Enviamos los IDs ---
     onSubmit({
       velocidad,
-      tipoEfecto,
-      resultado,
+      tipoId,
+      resultadoId,
     });
   };
 
   return (
-    // Usamos <form> para que funcione el 'onSubmit'
     <form onSubmit={handleSubmit}>
       <div className="flex flex-col space-y-4">
         
-        {/* --- Campo Velocidad --- */}
+        {/* --- Campo Velocidad (Sin cambios) --- */}
         <div>
           <label
             htmlFor="velocidad"
@@ -76,14 +62,14 @@ export default function RegistrarLanzamientoForm({
           <input
             type="number"
             id="velocidad"
-            value={velocidad ?? ''} // '??' para manejar el 'null'
+            value={velocidad ?? ''}
             onChange={(e) => setVelocidad(e.target.valueAsNumber || null)}
             placeholder="Ej: 65"
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
           />
         </div>
 
-        {/* --- Campo Tipo de Efecto --- */}
+        {/* --- CAMBIO 7: Campo Tipo de Efecto (Ahora dinámico) --- */}
         <div>
           <label
             htmlFor="tipoEfecto"
@@ -93,18 +79,24 @@ export default function RegistrarLanzamientoForm({
           </label>
           <select
             id="tipoEfecto"
-            value={tipoEfecto}
-            onChange={(e) => setTipoEfecto(e.target.value)}
+            value={tipoId ?? ''} // Controlado por 'tipoId'
+            // Convertimos el valor (string) de vuelta a número
+            onChange={(e) => setTipoId(e.target.value ? Number(e.target.value) : null)}
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+            disabled={tipos.isLoading || tipos.isError} // Desactivado si está cargando
           >
             <option value="">Seleccionar efecto</option>
-            {tiposDeEfecto.map((tipo) => (
-              <option key={tipo} value={tipo}>{tipo}</option>
+            {/* --- Lógica de Carga --- */}
+            {tipos.isLoading && <option>Cargando tipos...</option>}
+            {tipos.isError && <option>Error al cargar</option>}
+            {/* --- Mapeamos los datos de la API --- */}
+            {tipos.data?.map((tipo) => (
+              <option key={tipo.id} value={tipo.id}>{tipo.nombre}</option>
             ))}
           </select>
         </div>
 
-        {/* --- Campo Resultado --- */}
+        {/* --- CAMBIO 8: Campo Resultado (Ahora dinámico) --- */}
         <div>
           <label
             htmlFor="resultado"
@@ -114,28 +106,33 @@ export default function RegistrarLanzamientoForm({
           </label>
           <select
             id="resultado"
-            value={resultado}
-            onChange={(e) => setResultado(e.target.value)}
+            value={resultadoId ?? ''} // Controlado por 'resultadoId'
+            onChange={(e) => setResultadoId(e.target.value ? Number(e.target.value) : null)}
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+            disabled={resultados.isLoading || resultados.isError} // Desactivado si está cargando
           >
             <option value="">Seleccionar resultado</option>
-            {resultadosDeLanzamiento.map((res) => (
-              <option key={res} value={res}>{res}</option>
+            {/* --- Lógica de Carga --- */}
+            {resultados.isLoading && <option>Cargando resultados...</option>}
+            {resultados.isError && <option>Error al cargar</option>}
+            {/* --- Mapeamos los datos de la API --- */}
+            {resultados.data?.map((res) => (
+              <option key={res.id} value={res.id}>{res.nombre}</option>
             ))}
           </select>
         </div>
 
-        {/* --- Botones de Acción --- */}
+        {/* --- Botones de Acción (Sin cambios) --- */}
         <div className="flex justify-end space-x-3 pt-4">
           <button
-            type="button" // 'type="button"' para que no envíe el formulario
-            onClick={onCancel} // Llama a la función 'onCancel' del padre
+            type="button"
+            onClick={onCancel}
             className="rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200"
           >
             Cancelar
           </button>
           <button
-            type="submit" // 'type="submit"' para que llame a 'handleSubmit'
+            type="submit"
             className="rounded-lg bg-gray-800 px-4 py-2 text-sm font-medium text-white hover:bg-gray-900"
           >
             Guardar
