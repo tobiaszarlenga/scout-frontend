@@ -16,6 +16,9 @@ import RegistrarLanzamientoForm, {
   LanzamientoData 
 } from '@/app/(private)/partidos/RegistrarLanzamientoForm';
 
+// --- NUEVO: Importamos el hook de lookups ---
+import { useLookups } from '@/hooks/useLookups';
+
 type ActivePitcher = 'local' | 'visitante';
 
 // --- NUEVO: Tipo para los lanzamientos guardados ---
@@ -27,6 +30,9 @@ interface LanzamientoGuardado extends LanzamientoData {
 
 export default function ScoutPage({ params }: { params: { id: string } }) {
   
+  // --- NUEVO: Cargamos los lookups (tipos y resultados) ---
+  const { tipos, resultados } = useLookups();
+
   // --- Estado del Pitcher (ya lo teníamos) ---
   const [activePitcher, setActivePitcher] = useState<ActivePitcher>('local');
   
@@ -43,6 +49,19 @@ export default function ScoutPage({ params }: { params: { id: string } }) {
   // (Datos falsos)
   const fakeLocalPitcher = { nombre: 'Laura Fernández', equipo: 'Leones' };
   const fakeVisitantePitcher = { nombre: 'Juan Pérez', equipo: 'Tigres' };
+  
+  // --- FUNCIONES HELPER PARA CONVERTIR IDs A NOMBRES ---
+  const getTipoNombre = (tipoId: number | null): string => {
+    if (!tipoId || !tipos.data) return '-';
+    const tipo = tipos.data.find((t) => t.id === tipoId);
+    return tipo ? tipo.nombre : `ID ${tipoId}`;
+  };
+
+  const getResultadoNombre = (resultadoId: number | null): string => {
+    if (!resultadoId || !resultados.data) return '-';
+    const resultado = resultados.data.find((r) => r.id === resultadoId);
+    return resultado ? resultado.nombre : `ID ${resultadoId}`;
+  };
   
   // --- NUEVO 3: MANEJADORES PARA EL MODAL Y FORMULARIO ---
 
@@ -147,8 +166,8 @@ export default function ScoutPage({ params }: { params: { id: string } }) {
               </p>
               {lanzamientos.length > 0 && (
                 <p className="text-sm text-gray-500 mt-1">
-                  Último: Tipo ID {lanzamientos[lanzamientos.length - 1].tipoId} - 
-                  Resultado ID {lanzamientos[lanzamientos.length - 1].resultadoId} - 
+                  Último: {getTipoNombre(lanzamientos[lanzamientos.length - 1].tipoId)} - 
+                  {getResultadoNombre(lanzamientos[lanzamientos.length - 1].resultadoId)} - 
                   Zona {lanzamientos[lanzamientos.length - 1].zona}
                 </p>
               )}
@@ -179,8 +198,8 @@ export default function ScoutPage({ params }: { params: { id: string } }) {
                         <tr>
                           <th className="border border-gray-300 px-3 py-2 text-left">#</th>
                           <th className="border border-gray-300 px-3 py-2 text-left">Zona</th>
-                          <th className="border border-gray-300 px-3 py-2 text-left">Tipo ID</th>
-                          <th className="border border-gray-300 px-3 py-2 text-left">Resultado ID</th>
+                          <th className="border border-gray-300 px-3 py-2 text-left">Tipo</th>
+                          <th className="border border-gray-300 px-3 py-2 text-left">Resultado</th>
                           <th className="border border-gray-300 px-3 py-2 text-left">Velocidad</th>
                         </tr>
                       </thead>
@@ -191,8 +210,8 @@ export default function ScoutPage({ params }: { params: { id: string } }) {
                             <tr key={index} className="hover:bg-blue-50">
                               <td className="border border-gray-300 px-3 py-2">{index + 1}</td>
                               <td className="border border-gray-300 px-3 py-2">{lanz.zona}</td>
-                              <td className="border border-gray-300 px-3 py-2">{lanz.tipoId ?? '-'}</td>
-                              <td className="border border-gray-300 px-3 py-2">{lanz.resultadoId ?? '-'}</td>
+                              <td className="border border-gray-300 px-3 py-2">{getTipoNombre(lanz.tipoId)}</td>
+                              <td className="border border-gray-300 px-3 py-2">{getResultadoNombre(lanz.resultadoId)}</td>
                               <td className="border border-gray-300 px-3 py-2">
                                 {lanz.velocidad ? `${lanz.velocidad} km/h` : '-'}
                               </td>
@@ -221,8 +240,8 @@ export default function ScoutPage({ params }: { params: { id: string } }) {
                         <tr>
                           <th className="border border-gray-300 px-3 py-2 text-left">#</th>
                           <th className="border border-gray-300 px-3 py-2 text-left">Zona</th>
-                          <th className="border border-gray-300 px-3 py-2 text-left">Tipo ID</th>
-                          <th className="border border-gray-300 px-3 py-2 text-left">Resultado ID</th>
+                          <th className="border border-gray-300 px-3 py-2 text-left">Tipo</th>
+                          <th className="border border-gray-300 px-3 py-2 text-left">Resultado</th>
                           <th className="border border-gray-300 px-3 py-2 text-left">Velocidad</th>
                         </tr>
                       </thead>
@@ -233,8 +252,8 @@ export default function ScoutPage({ params }: { params: { id: string } }) {
                             <tr key={index} className="hover:bg-red-50">
                               <td className="border border-gray-300 px-3 py-2">{index + 1}</td>
                               <td className="border border-gray-300 px-3 py-2">{lanz.zona}</td>
-                              <td className="border border-gray-300 px-3 py-2">{lanz.tipoId ?? '-'}</td>
-                              <td className="border border-gray-300 px-3 py-2">{lanz.resultadoId ?? '-'}</td>
+                              <td className="border border-gray-300 px-3 py-2">{getTipoNombre(lanz.tipoId)}</td>
+                              <td className="border border-gray-300 px-3 py-2">{getResultadoNombre(lanz.resultadoId)}</td>
                               <td className="border border-gray-300 px-3 py-2">
                                 {lanz.velocidad ? `${lanz.velocidad} km/h` : '-'}
                               </td>
