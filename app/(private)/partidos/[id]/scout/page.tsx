@@ -63,6 +63,12 @@ export default function ScoutPage({ params }: { params: { id: string } }) {
   const fakeLocalPitcher = { nombre: 'Laura Fernández', equipo: 'Leones' };
   const fakeVisitantePitcher = { nombre: 'Juan Pérez', equipo: 'Tigres' };
   
+  // --- Filtrar lanzamientos del pitcher activo ---
+  const lanzamientosDelPitcherActivo = lanzamientos.filter(l => l.pitcher === activePitcher);
+  const ultimoLanzamiento = lanzamientosDelPitcherActivo.length > 0 
+    ? lanzamientosDelPitcherActivo[lanzamientosDelPitcherActivo.length - 1] 
+    : null;
+  
   // --- FUNCIONES HELPER PARA CONVERTIR IDs A NOMBRES ---
   const getTipoNombre = (tipoId: number | null): string => {
     if (!tipoId || !tipos.data) return '-';
@@ -301,19 +307,19 @@ export default function ScoutPage({ params }: { params: { id: string } }) {
 
           {/* --- ZONA DE STRIKE --- */}
           <section className="flex flex-col items-center mt-6">
-            {/* Contador de lanzamientos registrados */}
+            {/* Contador de lanzamientos registrados del pitcher activo */}
             <div className="mb-4 text-center">
               <p className="text-lg font-semibold text-gray-700">
-                Lanzamientos Registrados: 
+                Lanzamientos Registrados ({activePitcher === 'local' ? fakeLocalPitcher.nombre : fakeVisitantePitcher.nombre}): 
                 <span className="ml-2 text-2xl text-blue-600 font-bold">
-                  {lanzamientos.length}
+                  {lanzamientosDelPitcherActivo.length}
                 </span>
               </p>
-              {lanzamientos.length > 0 && (
+              {ultimoLanzamiento && (
                 <p className="text-sm text-gray-500 mt-1">
-                  Último: {getTipoNombre(lanzamientos[lanzamientos.length - 1].tipoId)} - 
-                  {getResultadoNombre(lanzamientos[lanzamientos.length - 1].resultadoId)} - 
-                  Zona {lanzamientos[lanzamientos.length - 1].zona}
+                  Último: {getTipoNombre(ultimoLanzamiento.tipoId)} - 
+                  {getResultadoNombre(ultimoLanzamiento.resultadoId)} - 
+                  Zona {ultimoLanzamiento.zona}
                 </p>
               )}
             </div>
