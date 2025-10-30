@@ -1,7 +1,7 @@
 // En: app/(private)/partidos/ScoutCounterCard.tsx
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 // Props: Definimos qué "parámetros" necesita este componente
 interface ScoutCounterCardProps {
@@ -9,6 +9,8 @@ interface ScoutCounterCardProps {
   initialValue?: number;
   // Opcional: Para mostrar texto extra, como "Lanzando: Tigres"
   footerText?: string; 
+  // Opcional: Valor controlado desde el padre
+  value?: number;
 }
 
 /**
@@ -18,12 +20,20 @@ interface ScoutCounterCardProps {
 export default function ScoutCounterCard({ 
   title, 
   initialValue = 0, 
-  footerText 
+  footerText,
+  value 
 }: ScoutCounterCardProps) {
   
   // --- 1. Estado ---
   // Usamos 'useState' para guardar el valor actual del contador
   const [count, setCount] = useState(initialValue);
+  
+  // Si se pasa un valor controlado, actualizar el estado interno
+  useEffect(() => {
+    if (value !== undefined) {
+      setCount(value);
+    }
+  }, [value]);
 
   // --- 2. Manejadores de Clic ---
   const increment = () => {

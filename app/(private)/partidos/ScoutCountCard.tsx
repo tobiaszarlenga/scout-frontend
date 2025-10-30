@@ -1,22 +1,19 @@
 // En: app/(private)/partidos/ScoutCountCard.tsx
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 
 /**
  * Tarjeta para mostrar la cuenta de Bolas y Strikes,
  * con un botón para reiniciar.
  */
-export default function ScoutCountCard() {
-  
-  // Usamos dos estados separados para bolas y strikes
-  const [bolas, setBolas] = useState(0);
-  const [strikes, setStrikes] = useState(0);
+interface ScoutCountCardProps {
+  bolas: number;
+  strikes: number;
+  onReset: () => void;
+}
 
-  const handleReset = () => {
-    setBolas(0);
-    setStrikes(0);
-  };
+export default function ScoutCountCard({ bolas, strikes, onReset }: ScoutCountCardProps) {
 
   return (
     // Tarjeta principal
@@ -51,7 +48,7 @@ export default function ScoutCountCard() {
       {/* Botón de Reiniciar */}
       <div className="text-center">
         <button 
-          onClick={handleReset}
+          onClick={onReset}
           className="text-sm text-blue-600 hover:text-blue-800 transition-colors"
         >
           Reiniciar Cuenta

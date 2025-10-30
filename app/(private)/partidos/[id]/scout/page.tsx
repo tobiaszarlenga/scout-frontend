@@ -36,6 +36,11 @@ export default function ScoutPage({ params }: { params: { id: string } }) {
   // --- Estado del Pitcher (ya lo teníamos) ---
   const [activePitcher, setActivePitcher] = useState<ActivePitcher>('local');
   
+  // --- Estados para el contador de cuenta (Bolas y Strikes) ---
+  const [bolas, setBolas] = useState(0);
+  const [strikes, setStrikes] = useState(0);
+  const [outs, setOuts] = useState(0);
+  
   // --- NUEVO 2: ESTADOS PARA EL MODAL ---
   // 'isModalOpen' controla si el modal se ve o no.
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -61,6 +66,75 @@ export default function ScoutPage({ params }: { params: { id: string } }) {
     if (!resultadoId || !resultados.data) return '-';
     const resultado = resultados.data.find((r) => r.id === resultadoId);
     return resultado ? resultado.nombre : `ID ${resultadoId}`;
+  };
+  
+  // --- FUNCIÓN PARA REINICIAR LA CUENTA ---
+  const resetCuenta = () => {
+    setBolas(0);
+    setStrikes(0);
+  };
+  
+  // --- FUNCIÓN PARA PROCESAR LA LÓGICA DEL BÉISBOL ---
+  const procesarResultado = (resultadoId: number | null) => {
+    if (!resultadoId || !resultados.data) return;
+    
+    const resultado = resultados.data.find((r) => r.id === resultadoId);
+    if (!resultado) return;
+    
+    const nombreResultado = resultado.nombre.toUpperCase();
+    
+    switch (nombreResultado) {
+      case 'STRIKE':
+        // Agregar un strike
+        if (strikes + 1 >= 3) {
+          // 3 strikes = OUT
+          setOuts((prev) => prev + 1);
+          resetCuenta();
+          console.log('⚾ 3 STRIKES - OUT!');
+        } else {
+          setStrikes((prev) => prev + 1);
+          console.log(`⚾ Strike #${strikes + 1}`);
+        }
+        break;
+        
+      case 'BOLA':
+        // Agregar una bola
+        if (bolas + 1 >= 4) {
+          // 4 bolas = BASE POR BOLAS
+          resetCuenta();
+          console.log('⚾ 4 BOLAS - BASE POR BOLAS!');
+        } else {
+          setBolas((prev) => prev + 1);
+          console.log(`⚾ Bola #${bolas + 1}`);
+        }
+        break;
+        
+      case 'FOUL':
+        // Foul cuenta como strike, pero no puede hacer el tercer strike
+        if (strikes < 2) {
+          setStrikes((prev) => prev + 1);
+          console.log(`⚾ Foul - Strike #${strikes + 1}`);
+        } else {
+          console.log('⚾ Foul - Strike se mantiene en 2');
+        }
+        break;
+        
+      case 'HIT':
+        // Hit = reiniciar la cuenta
+        resetCuenta();
+        console.log('⚾ HIT - Cuenta reiniciada');
+        break;
+        
+      case 'OUT':
+        // Out directo (ej: out jugado)
+        setOuts((prev) => prev + 1);
+        resetCuenta();
+        console.log('⚾ OUT - Cuenta reiniciada');
+        break;
+        
+      default:
+        console.log(`⚾ Resultado no reconocido: ${nombreResultado}`);
+    }
   };
   
   // --- NUEVO 3: MANEJADORES PARA EL MODAL Y FORMULARIO ---
@@ -90,6 +164,9 @@ export default function ScoutPage({ params }: { params: { id: string } }) {
     console.log('Datos del Formulario:', data);
     console.log('Pitcher Activo:', activePitcher);
     console.log('Zona Seleccionada:', selectedZone);
+    
+    // --- PROCESAR LA LÓGICA DEL BÉISBOL ---
+    procesarResultado(data.resultadoId);
     
     // --- GUARDAR EN LA "CAJA" (ARRAY) ---
     // Creamos un objeto completo con TODOS los datos del lanzamiento
@@ -142,8 +219,15 @@ export default function ScoutPage({ params }: { params: { id: string } }) {
               initialValue={1}
               footerText="Lanzando: Tigres"
             />
-            <ScoutCountCard />
-            <ScoutCounterCard title="Outs" initialValue={0} />
+            <ScoutCountCard 
+              bolas={bolas} 
+              strikes={strikes} 
+              onReset={resetCuenta}
+            />
+            <ScoutCounterCard 
+              title="Outs" 
+              value={outs}
+            />
           </section>
 
           {/* --- PITCHER ACTIVO --- */}
