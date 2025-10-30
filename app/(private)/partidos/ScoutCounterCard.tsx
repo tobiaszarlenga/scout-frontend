@@ -11,6 +11,8 @@ interface ScoutCounterCardProps {
   footerText?: string; 
   // Opcional: Valor controlado desde el padre
   value?: number;
+  // Opcional: Valor máximo permitido
+  maxValue?: number;
 }
 
 /**
@@ -21,7 +23,8 @@ export default function ScoutCounterCard({
   title, 
   initialValue = 0, 
   footerText,
-  value 
+  value,
+  maxValue
 }: ScoutCounterCardProps) {
   
   // --- 1. Estado ---
@@ -37,7 +40,10 @@ export default function ScoutCounterCard({
 
   // --- 2. Manejadores de Clic ---
   const increment = () => {
-    // Más adelante, podríamos poner límites (ej. outs no puede ser > 3)
+    // Si hay un maxValue definido, no permitir superar ese valor
+    if (maxValue !== undefined && count >= maxValue) {
+      return; // No hacer nada si ya está en el máximo
+    }
     setCount(prevCount => prevCount + 1);
   };
 
@@ -61,7 +67,10 @@ export default function ScoutCounterCard({
         {/* Botón de Restar */}
         <button 
           onClick={decrement}
-          className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-2xl text-gray-600 hover:bg-gray-200"
+          disabled={count === 0}
+          className={`w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-2xl text-gray-600 hover:bg-gray-200 ${
+            count === 0 ? 'opacity-50 cursor-not-allowed' : ''
+          }`}
           aria-label={`Disminuir ${title}`}
         >
           -
@@ -75,7 +84,10 @@ export default function ScoutCounterCard({
         {/* Botón de Sumar */}
         <button 
           onClick={increment}
-          className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-2xl text-gray-600 hover:bg-gray-200"
+          disabled={maxValue !== undefined && count >= maxValue}
+          className={`w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-2xl text-gray-600 hover:bg-gray-200 ${
+            maxValue !== undefined && count >= maxValue ? 'opacity-50 cursor-not-allowed' : ''
+          }`}
           aria-label={`Aumentar ${title}`}
         >
           +

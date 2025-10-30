@@ -88,9 +88,16 @@ export default function ScoutPage({ params }: { params: { id: string } }) {
         // Agregar un strike
         if (strikes + 1 >= 3) {
           // 3 strikes = OUT
-          setOuts((prev) => prev + 1);
+          const nuevosOuts = outs + 1;
+          if (nuevosOuts >= 3) {
+            // 3 outs = CAMBIO DE INNING
+            console.log('⚾⚾⚾ 3 OUTS - ¡CAMBIO DE INNING!');
+            setOuts(0);
+          } else {
+            setOuts(nuevosOuts);
+            console.log(`⚾ 3 STRIKES - OUT! (${nuevosOuts}/3 outs)`);
+          }
           resetCuenta();
-          console.log('⚾ 3 STRIKES - OUT!');
         } else {
           setStrikes((prev) => prev + 1);
           console.log(`⚾ Strike #${strikes + 1}`);
@@ -127,9 +134,16 @@ export default function ScoutPage({ params }: { params: { id: string } }) {
         
       case 'OUT':
         // Out directo (ej: out jugado)
-        setOuts((prev) => prev + 1);
+        const nuevosOuts = outs + 1;
+        if (nuevosOuts >= 3) {
+          // 3 outs = CAMBIO DE INNING
+          console.log('⚾⚾⚾ 3 OUTS - ¡CAMBIO DE INNING!');
+          setOuts(0);
+        } else {
+          setOuts(nuevosOuts);
+          console.log(`⚾ OUT! (${nuevosOuts}/3 outs)`);
+        }
         resetCuenta();
-        console.log('⚾ OUT - Cuenta reiniciada');
         break;
         
       default:
@@ -227,6 +241,7 @@ export default function ScoutPage({ params }: { params: { id: string } }) {
             <ScoutCounterCard 
               title="Outs" 
               value={outs}
+              maxValue={2}
             />
           </section>
 
