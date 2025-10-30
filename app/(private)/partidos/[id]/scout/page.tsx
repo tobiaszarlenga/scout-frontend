@@ -26,6 +26,8 @@ interface LanzamientoGuardado extends LanzamientoData {
   zona: number; // Índice de la zona de strike (0-24)
   pitcher: ActivePitcher; // Quién lanzó ('local' o 'visitante')
   timestamp: Date; // Cuándo se registró
+  inning: number; // En qué inning se registró
+  ladoInning: 'abre' | 'cierra'; // Si fue abriendo o cerrando el inning
 }
 
 export default function ScoutPage({ params }: { params: { id: string } }) {
@@ -37,9 +39,15 @@ export default function ScoutPage({ params }: { params: { id: string } }) {
   const [activePitcher, setActivePitcher] = useState<ActivePitcher>('local');
   
   // --- Estados para el contador de cuenta (Bolas y Strikes) ---
+  const [inning, setInning] = useState(1);
   const [bolas, setBolas] = useState(0);
   const [strikes, setStrikes] = useState(0);
   const [outs, setOuts] = useState(0);
+  
+  // Estado para controlar qué lado del inning estamos
+  // 'abre' = Local lanza (primeros 3 outs)
+  // 'cierra' = Visitante lanza (últimos 3 outs)
+  const [ladoInning, setLadoInning] = useState<'abre' | 'cierra'>('abre');
   
   // --- NUEVO 2: ESTADOS PARA EL MODAL ---
   // 'isModalOpen' controla si el modal se ve o no.
@@ -74,6 +82,37 @@ export default function ScoutPage({ params }: { params: { id: string } }) {
     setStrikes(0);
   };
   
+  // --- FUNCIÓN PARA MANEJAR CAMBIOS EN EL INNING ---
+  const handleInningChange = (nuevoInning: number) => {
+    setInning(nuevoInning);
+    // Cuando cambia el inning manualmente, resetear todo y volver a 'abre'
+    setOuts(0);
+    setLadoInning('abre');
+    setActivePitcher('local'); // Local abre el inning
+    resetCuenta();
+    console.log(`⚾ Cambio al Inning ${nuevoInning} - Reseteo completo, Local abre`);
+  };
+  
+  // --- FUNCIÓN PARA MANEJAR 3 OUTS (CAMBIO DE LADO O INNING) ---
+  const handleTresOuts = () => {
+    if (ladoInning === 'abre') {
+      // Local terminó de lanzar (abrió el inning), ahora cierra el visitante
+      console.log('⚾⚾⚾ 3 OUTS - El visitante ahora CIERRA el inning');
+      setLadoInning('cierra');
+      setActivePitcher('visitante');
+      setOuts(0);
+      resetCuenta();
+    } else {
+      // Visitante terminó de lanzar (cerró el inning), cambio de inning completo
+      console.log('⚾⚾⚾ 3 OUTS - ¡FIN DEL INNING! Pasando al siguiente...');
+      setInning((prev) => prev + 1);
+      setLadoInning('abre'); // El nuevo inning lo abre el local
+      setActivePitcher('local');
+      setOuts(0);
+      resetCuenta();
+    }
+  };
+  
   // --- FUNCIÓN PARA PROCESAR LA LÓGICA DEL BÉISBOL ---
   const procesarResultado = (resultadoId: number | null) => {
     if (!resultadoId || !resultados.data) return;
@@ -90,14 +129,14 @@ export default function ScoutPage({ params }: { params: { id: string } }) {
           // 3 strikes = OUT
           const nuevosOuts = outs + 1;
           if (nuevosOuts >= 3) {
-            // 3 outs = CAMBIO DE INNING
-            console.log('⚾⚾⚾ 3 OUTS - ¡CAMBIO DE INNING!');
-            setOuts(0);
+            // 3 outs = CAMBIO DE LADO O INNING
+            console.log('⚾ 3 STRIKES - OUT!');
+            handleTresOuts();
           } else {
             setOuts(nuevosOuts);
+            resetCuenta();
             console.log(`⚾ 3 STRIKES - OUT! (${nuevosOuts}/3 outs)`);
           }
-          resetCuenta();
         } else {
           setStrikes((prev) => prev + 1);
           console.log(`⚾ Strike #${strikes + 1}`);
@@ -136,14 +175,14 @@ export default function ScoutPage({ params }: { params: { id: string } }) {
         // Out directo (ej: out jugado)
         const nuevosOuts = outs + 1;
         if (nuevosOuts >= 3) {
-          // 3 outs = CAMBIO DE INNING
-          console.log('⚾⚾⚾ 3 OUTS - ¡CAMBIO DE INNING!');
-          setOuts(0);
+          // 3 outs = CAMBIO DE LADO O INNING
+          console.log('⚾ OUT!');
+          handleTresOuts();
         } else {
           setOuts(nuevosOuts);
+          resetCuenta();
           console.log(`⚾ OUT! (${nuevosOuts}/3 outs)`);
         }
-        resetCuenta();
         break;
         
       default:
@@ -189,6 +228,8 @@ export default function ScoutPage({ params }: { params: { id: string } }) {
       zona: selectedZone ?? 0, // La zona donde se clickeó
       pitcher: activePitcher, // Quién lanzó (local o visitante)
       timestamp: new Date(), // Cuándo se registró
+      inning: inning, // En qué inning
+      ladoInning: ladoInning, // Si estaba abriendo o cerrando
     };
 
     // Agregamos el nuevo lanzamiento al array
@@ -230,8 +271,13 @@ export default function ScoutPage({ params }: { params: { id: string } }) {
           <section className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <ScoutCounterCard
               title="Inning"
-              initialValue={1}
-              footerText="Lanzando: Tigres"
+              value={inning}
+              onChange={handleInningChange}
+              footerText={
+                ladoInning === 'abre' 
+                  ? `${fakeLocalPitcher.equipo} abre` 
+                  : `${fakeVisitantePitcher.equipo} cierra`
+              }
             />
             <ScoutCountCard 
               bolas={bolas} 
@@ -241,7 +287,7 @@ export default function ScoutPage({ params }: { params: { id: string } }) {
             <ScoutCounterCard 
               title="Outs" 
               value={outs}
-              maxValue={2}
+              readOnly={true}
             />
           </section>
 

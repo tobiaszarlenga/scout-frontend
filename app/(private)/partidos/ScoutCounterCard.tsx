@@ -13,6 +13,10 @@ interface ScoutCounterCardProps {
   value?: number;
   // Opcional: Valor máximo permitido
   maxValue?: number;
+  // Opcional: Callback cuando cambia el valor
+  onChange?: (newValue: number) => void;
+  // Opcional: Deshabilitar botones (solo lectura)
+  readOnly?: boolean;
 }
 
 /**
@@ -24,7 +28,9 @@ export default function ScoutCounterCard({
   initialValue = 0, 
   footerText,
   value,
-  maxValue
+  maxValue,
+  onChange,
+  readOnly = false
 }: ScoutCounterCardProps) {
   
   // --- 1. Estado ---
@@ -44,12 +50,22 @@ export default function ScoutCounterCard({
     if (maxValue !== undefined && count >= maxValue) {
       return; // No hacer nada si ya está en el máximo
     }
-    setCount(prevCount => prevCount + 1);
+    const newValue = count + 1;
+    setCount(newValue);
+    // Notificar al padre si hay callback
+    if (onChange) {
+      onChange(newValue);
+    }
   };
 
   const decrement = () => {
     // No permitimos valores negativos
-    setCount(prevCount => Math.max(0, prevCount - 1)); 
+    const newValue = Math.max(0, count - 1);
+    setCount(newValue);
+    // Notificar al padre si hay callback
+    if (onChange) {
+      onChange(newValue);
+    }
   };
 
   // --- 3. Renderizado ---
@@ -65,33 +81,37 @@ export default function ScoutCounterCard({
       {/* Cuerpo principal con botones y número */}
       <div className="flex items-center justify-center space-x-4">
         {/* Botón de Restar */}
-        <button 
-          onClick={decrement}
-          disabled={count === 0}
-          className={`w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-2xl text-gray-600 hover:bg-gray-200 ${
-            count === 0 ? 'opacity-50 cursor-not-allowed' : ''
-          }`}
-          aria-label={`Disminuir ${title}`}
-        >
-          -
-        </button>
+        {!readOnly && (
+          <button 
+            onClick={decrement}
+            disabled={count === 0}
+            className={`w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-2xl text-gray-600 hover:bg-gray-200 ${
+              count === 0 ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
+            aria-label={`Disminuir ${title}`}
+          >
+            -
+          </button>
+        )}
 
         {/* Número */}
-        <span className="text-6xl font-bold text-gray-800 w-20 text-center">
+        <span className={`text-6xl font-bold text-gray-800 text-center ${readOnly ? 'w-full' : 'w-20'}`}>
           {count}
         </span>
 
         {/* Botón de Sumar */}
-        <button 
-          onClick={increment}
-          disabled={maxValue !== undefined && count >= maxValue}
-          className={`w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-2xl text-gray-600 hover:bg-gray-200 ${
-            maxValue !== undefined && count >= maxValue ? 'opacity-50 cursor-not-allowed' : ''
-          }`}
-          aria-label={`Aumentar ${title}`}
-        >
-          +
-        </button>
+        {!readOnly && (
+          <button 
+            onClick={increment}
+            disabled={maxValue !== undefined && count >= maxValue}
+            className={`w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-2xl text-gray-600 hover:bg-gray-200 ${
+              maxValue !== undefined && count >= maxValue ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
+            aria-label={`Aumentar ${title}`}
+          >
+            +
+          </button>
+        )}
       </div>
 
       {/* Texto de pie de página (opcional) */}
