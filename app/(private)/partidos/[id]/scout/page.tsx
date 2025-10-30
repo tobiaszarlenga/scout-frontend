@@ -19,6 +19,9 @@ import RegistrarLanzamientoForm, {
 // --- NUEVO: Importamos el hook de lookups ---
 import { useLookups } from '@/hooks/useLookups';
 
+// --- CAMBIO 1: Importamos el nuevo componente ---
+import PitcherCard from './PitcherCard';
+
 type ActivePitcher = 'local' | 'visitante';
 
 // --- NUEVO: Tipo para los lanzamientos guardados ---
@@ -68,6 +71,18 @@ export default function ScoutPage({ params }: { params: { id: string } }) {
   const ultimoLanzamiento = lanzamientosDelPitcherActivo.length > 0 
     ? lanzamientosDelPitcherActivo[lanzamientosDelPitcherActivo.length - 1] 
     : null;
+  
+  // --- Helper para obtener rango de innings de un pitcher ---
+  const getInningsRange = (pitcherType: ActivePitcher): string => {
+    const lanzamientosPitcher = lanzamientos.filter(l => l.pitcher === pitcherType);
+    if (lanzamientosPitcher.length === 0) return '-';
+    
+    const innings = lanzamientosPitcher.map(l => l.inning);
+    const min = Math.min(...innings);
+    const max = Math.max(...innings);
+    
+    return min === max ? `${min}` : `${min}-${max}`;
+  };
   
   // --- FUNCIONES HELPER PARA CONVERTIR IDs A NOMBRES ---
   const getTipoNombre = (tipoId: number | null): string => {
@@ -328,97 +343,55 @@ export default function ScoutPage({ params }: { params: { id: string } }) {
             <StrikeZoneGrid onZoneClick={handleZoneClick} />
           </section>
 
-          {/* --- TABLAS DE LANZAMIENTOS SEPARADAS POR PITCHER --- */}
+          {/* --- CARDS DE PITCHERS --- */}
           {lanzamientos.length > 0 && (
             <section className="mt-8">
               <h2 className="text-xl font-bold text-gray-800 mb-4 text-center">
-                Historial de Lanzamientos
+                Historial de Lanzamientos por Pitcher
               </h2>
               
-              {/* Grid de 2 columnas para las tablas */}
+              {/* Grid de 2 columnas para las cards */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 
-                {/* TABLA PITCHER LOCAL */}
+                {/* COLUMNA IZQUIERDA: PITCHERS LOCALES */}
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-700 mb-2 text-center">
-                    Pitcher Local ({fakeLocalPitcher.nombre})
+                  <h3 className="text-lg font-semibold text-gray-700 mb-3 text-center uppercase tracking-wide">
+                    {fakeLocalPitcher.equipo}
                   </h3>
-                  <div className="overflow-x-auto">
-                    <table className="w-full border-collapse border border-gray-300">
-                      <thead className="bg-blue-100">
-                        <tr>
-                          <th className="border border-gray-300 px-3 py-2 text-left">#</th>
-                          <th className="border border-gray-300 px-3 py-2 text-left">Zona</th>
-                          <th className="border border-gray-300 px-3 py-2 text-left">Tipo</th>
-                          <th className="border border-gray-300 px-3 py-2 text-left">Resultado</th>
-                          <th className="border border-gray-300 px-3 py-2 text-left">Velocidad</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {lanzamientos
-                          .filter((lanz) => lanz.pitcher === 'local')
-                          .map((lanz, index) => (
-                            <tr key={index} className="hover:bg-blue-50">
-                              <td className="border border-gray-300 px-3 py-2">{index + 1}</td>
-                              <td className="border border-gray-300 px-3 py-2">{lanz.zona}</td>
-                              <td className="border border-gray-300 px-3 py-2">{getTipoNombre(lanz.tipoId)}</td>
-                              <td className="border border-gray-300 px-3 py-2">{getResultadoNombre(lanz.resultadoId)}</td>
-                              <td className="border border-gray-300 px-3 py-2">
-                                {lanz.velocidad ? `${lanz.velocidad} km/h` : '-'}
-                              </td>
-                            </tr>
-                          ))}
-                        {lanzamientos.filter((lanz) => lanz.pitcher === 'local').length === 0 && (
-                          <tr>
-                            <td colSpan={5} className="border border-gray-300 px-3 py-4 text-center text-gray-500">
-                              Sin lanzamientos registrados
-                            </td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </table>
+                  <div className="space-y-3">
+                    {/* Por ahora solo un pitcher, luego agregaremos relevos */}
+                    <PitcherCard
+                      nombre={fakeLocalPitcher.nombre}
+                      equipo={fakeLocalPitcher.equipo}
+                      cantidadLanzamientos={lanzamientos.filter(l => l.pitcher === 'local').length}
+                      innings={getInningsRange('local')}
+                      onClick={() => {
+                        // TODO: Navegar a página de detalle
+                        console.log('Click en pitcher local');
+                      }}
+                      tipo="local"
+                    />
                   </div>
                 </div>
 
-                {/* TABLA PITCHER VISITANTE */}
+                {/* COLUMNA DERECHA: PITCHERS VISITANTES */}
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-700 mb-2 text-center">
-                    Pitcher Visitante ({fakeVisitantePitcher.nombre})
+                  <h3 className="text-lg font-semibold text-gray-700 mb-3 text-center uppercase tracking-wide">
+                    {fakeVisitantePitcher.equipo}
                   </h3>
-                  <div className="overflow-x-auto">
-                    <table className="w-full border-collapse border border-gray-300">
-                      <thead className="bg-red-100">
-                        <tr>
-                          <th className="border border-gray-300 px-3 py-2 text-left">#</th>
-                          <th className="border border-gray-300 px-3 py-2 text-left">Zona</th>
-                          <th className="border border-gray-300 px-3 py-2 text-left">Tipo</th>
-                          <th className="border border-gray-300 px-3 py-2 text-left">Resultado</th>
-                          <th className="border border-gray-300 px-3 py-2 text-left">Velocidad</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {lanzamientos
-                          .filter((lanz) => lanz.pitcher === 'visitante')
-                          .map((lanz, index) => (
-                            <tr key={index} className="hover:bg-red-50">
-                              <td className="border border-gray-300 px-3 py-2">{index + 1}</td>
-                              <td className="border border-gray-300 px-3 py-2">{lanz.zona}</td>
-                              <td className="border border-gray-300 px-3 py-2">{getTipoNombre(lanz.tipoId)}</td>
-                              <td className="border border-gray-300 px-3 py-2">{getResultadoNombre(lanz.resultadoId)}</td>
-                              <td className="border border-gray-300 px-3 py-2">
-                                {lanz.velocidad ? `${lanz.velocidad} km/h` : '-'}
-                              </td>
-                            </tr>
-                          ))}
-                        {lanzamientos.filter((lanz) => lanz.pitcher === 'visitante').length === 0 && (
-                          <tr>
-                            <td colSpan={5} className="border border-gray-300 px-3 py-4 text-center text-gray-500">
-                              Sin lanzamientos registrados
-                            </td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </table>
+                  <div className="space-y-3">
+                    {/* Por ahora solo un pitcher, luego agregaremos relevos */}
+                    <PitcherCard
+                      nombre={fakeVisitantePitcher.nombre}
+                      equipo={fakeVisitantePitcher.equipo}
+                      cantidadLanzamientos={lanzamientos.filter(l => l.pitcher === 'visitante').length}
+                      innings={getInningsRange('visitante')}
+                      onClick={() => {
+                        // TODO: Navegar a página de detalle
+                        console.log('Click en pitcher visitante');
+                      }}
+                      tipo="visitante"
+                    />
                   </div>
                 </div>
 
