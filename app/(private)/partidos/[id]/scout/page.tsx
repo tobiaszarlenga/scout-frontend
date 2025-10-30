@@ -18,6 +18,13 @@ import RegistrarLanzamientoForm, {
 
 type ActivePitcher = 'local' | 'visitante';
 
+// --- NUEVO: Tipo para los lanzamientos guardados ---
+interface LanzamientoGuardado extends LanzamientoData {
+  zona: number; // Índice de la zona de strike (0-24)
+  pitcher: ActivePitcher; // Quién lanzó ('local' o 'visitante')
+  timestamp: Date; // Cuándo se registró
+}
+
 export default function ScoutPage({ params }: { params: { id: string } }) {
   
   // --- Estado del Pitcher (ya lo teníamos) ---
@@ -28,6 +35,10 @@ export default function ScoutPage({ params }: { params: { id: string } }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   // 'selectedZone' guarda el número (0-24) de la zona clickeada.
   const [selectedZone, setSelectedZone] = useState<number | null>(null);
+
+  // --- NUEVO 3: LA "CAJA" DONDE GUARDAMOS TODOS LOS LANZAMIENTOS ---
+  // Este array irá creciendo cada vez que se registre un lanzamiento
+  const [lanzamientos, setLanzamientos] = useState<LanzamientoGuardado[]>([]);
 
   // (Datos falsos)
   const fakeLocalPitcher = { nombre: 'Laura Fernández', equipo: 'Leones' };
@@ -61,10 +72,20 @@ export default function ScoutPage({ params }: { params: { id: string } }) {
     console.log('Pitcher Activo:', activePitcher);
     console.log('Zona Seleccionada:', selectedZone);
     
-    // --- LÓGICA FUTURA ---
-    // Aquí es donde guardaremos 'data', 'activePitcher' y 'selectedZone'
-    // en nuestros 'arrays' de estado (cajaDeLanzamientosLocal, etc.)
-    // Y también actualizaremos la cuenta (Bolas/Strikes/Outs)
+    // --- GUARDAR EN LA "CAJA" (ARRAY) ---
+    // Creamos un objeto completo con TODOS los datos del lanzamiento
+    const nuevoLanzamiento: LanzamientoGuardado = {
+      ...data, // tipo, resultado, velocidad, comentario
+      zona: selectedZone ?? 0, // La zona donde se clickeó
+      pitcher: activePitcher, // Quién lanzó (local o visitante)
+      timestamp: new Date(), // Cuándo se registró
+    };
+
+    // Agregamos el nuevo lanzamiento al array
+    // (Usamos la función de actualización para garantizar que tengamos el estado más reciente)
+    setLanzamientos((prevLanzamientos) => [...prevLanzamientos, nuevoLanzamiento]);
+
+    console.log('✅ Lanzamiento guardado en el array:', nuevoLanzamiento);
 
     handleCloseModal(); // Cerramos el modal después de guardar
   };
@@ -116,9 +137,69 @@ export default function ScoutPage({ params }: { params: { id: string } }) {
 
           {/* --- ZONA DE STRIKE --- */}
           <section className="flex flex-col items-center mt-6">
+            {/* Contador de lanzamientos registrados */}
+            <div className="mb-4 text-center">
+              <p className="text-lg font-semibold text-gray-700">
+                Lanzamientos Registrados: 
+                <span className="ml-2 text-2xl text-blue-600 font-bold">
+                  {lanzamientos.length}
+                </span>
+              </p>
+              {lanzamientos.length > 0 && (
+                <p className="text-sm text-gray-500 mt-1">
+                  Último: Tipo ID {lanzamientos[lanzamientos.length - 1].tipoId} - 
+                  Resultado ID {lanzamientos[lanzamientos.length - 1].resultadoId} - 
+                  Zona {lanzamientos[lanzamientos.length - 1].zona}
+                </p>
+              )}
+            </div>
+
             {/* --- NUEVO 4: PASAMOS LA PROP 'onZoneClick' --- */}
             <StrikeZoneGrid onZoneClick={handleZoneClick} />
           </section>
+
+          {/* --- TABLA DE LANZAMIENTOS GUARDADOS --- */}
+          {lanzamientos.length > 0 && (
+            <section className="mt-8">
+              <h2 className="text-xl font-bold text-gray-800 mb-4">
+                Historial de Lanzamientos
+              </h2>
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse border border-gray-300">
+                  <thead className="bg-gray-100">
+                    <tr>
+                      <th className="border border-gray-300 px-3 py-2 text-left">#</th>
+                      <th className="border border-gray-300 px-3 py-2 text-left">Pitcher</th>
+                      <th className="border border-gray-300 px-3 py-2 text-left">Zona</th>
+                      <th className="border border-gray-300 px-3 py-2 text-left">Tipo ID</th>
+                      <th className="border border-gray-300 px-3 py-2 text-left">Resultado ID</th>
+                      <th className="border border-gray-300 px-3 py-2 text-left">Velocidad</th>
+                      <th className="border border-gray-300 px-3 py-2 text-left">Hora</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {lanzamientos.map((lanz, index) => (
+                      <tr key={index} className="hover:bg-gray-50">
+                        <td className="border border-gray-300 px-3 py-2">{index + 1}</td>
+                        <td className="border border-gray-300 px-3 py-2">
+                          {lanz.pitcher === 'local' ? 'Local' : 'Visitante'}
+                        </td>
+                        <td className="border border-gray-300 px-3 py-2">{lanz.zona}</td>
+                        <td className="border border-gray-300 px-3 py-2">{lanz.tipoId ?? '-'}</td>
+                        <td className="border border-gray-300 px-3 py-2">{lanz.resultadoId ?? '-'}</td>
+                        <td className="border border-gray-300 px-3 py-2">
+                          {lanz.velocidad ? `${lanz.velocidad} km/h` : '-'}
+                        </td>
+                        <td className="border border-gray-300 px-3 py-2 text-sm text-gray-500">
+                          {lanz.timestamp.toLocaleTimeString()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          )}
 
         </div>
         
