@@ -158,45 +158,100 @@ export default function ScoutPage({ params }: { params: { id: string } }) {
             <StrikeZoneGrid onZoneClick={handleZoneClick} />
           </section>
 
-          {/* --- TABLA DE LANZAMIENTOS GUARDADOS --- */}
+          {/* --- TABLAS DE LANZAMIENTOS SEPARADAS POR PITCHER --- */}
           {lanzamientos.length > 0 && (
             <section className="mt-8">
-              <h2 className="text-xl font-bold text-gray-800 mb-4">
+              <h2 className="text-xl font-bold text-gray-800 mb-4 text-center">
                 Historial de Lanzamientos
               </h2>
-              <div className="overflow-x-auto">
-                <table className="w-full border-collapse border border-gray-300">
-                  <thead className="bg-gray-100">
-                    <tr>
-                      <th className="border border-gray-300 px-3 py-2 text-left">#</th>
-                      <th className="border border-gray-300 px-3 py-2 text-left">Pitcher</th>
-                      <th className="border border-gray-300 px-3 py-2 text-left">Zona</th>
-                      <th className="border border-gray-300 px-3 py-2 text-left">Tipo ID</th>
-                      <th className="border border-gray-300 px-3 py-2 text-left">Resultado ID</th>
-                      <th className="border border-gray-300 px-3 py-2 text-left">Velocidad</th>
-                      <th className="border border-gray-300 px-3 py-2 text-left">Hora</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {lanzamientos.map((lanz, index) => (
-                      <tr key={index} className="hover:bg-gray-50">
-                        <td className="border border-gray-300 px-3 py-2">{index + 1}</td>
-                        <td className="border border-gray-300 px-3 py-2">
-                          {lanz.pitcher === 'local' ? 'Local' : 'Visitante'}
-                        </td>
-                        <td className="border border-gray-300 px-3 py-2">{lanz.zona}</td>
-                        <td className="border border-gray-300 px-3 py-2">{lanz.tipoId ?? '-'}</td>
-                        <td className="border border-gray-300 px-3 py-2">{lanz.resultadoId ?? '-'}</td>
-                        <td className="border border-gray-300 px-3 py-2">
-                          {lanz.velocidad ? `${lanz.velocidad} km/h` : '-'}
-                        </td>
-                        <td className="border border-gray-300 px-3 py-2 text-sm text-gray-500">
-                          {lanz.timestamp.toLocaleTimeString()}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              
+              {/* Grid de 2 columnas para las tablas */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                
+                {/* TABLA PITCHER LOCAL */}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-700 mb-2 text-center">
+                    Pitcher Local ({fakeLocalPitcher.nombre})
+                  </h3>
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse border border-gray-300">
+                      <thead className="bg-blue-100">
+                        <tr>
+                          <th className="border border-gray-300 px-3 py-2 text-left">#</th>
+                          <th className="border border-gray-300 px-3 py-2 text-left">Zona</th>
+                          <th className="border border-gray-300 px-3 py-2 text-left">Tipo ID</th>
+                          <th className="border border-gray-300 px-3 py-2 text-left">Resultado ID</th>
+                          <th className="border border-gray-300 px-3 py-2 text-left">Velocidad</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {lanzamientos
+                          .filter((lanz) => lanz.pitcher === 'local')
+                          .map((lanz, index) => (
+                            <tr key={index} className="hover:bg-blue-50">
+                              <td className="border border-gray-300 px-3 py-2">{index + 1}</td>
+                              <td className="border border-gray-300 px-3 py-2">{lanz.zona}</td>
+                              <td className="border border-gray-300 px-3 py-2">{lanz.tipoId ?? '-'}</td>
+                              <td className="border border-gray-300 px-3 py-2">{lanz.resultadoId ?? '-'}</td>
+                              <td className="border border-gray-300 px-3 py-2">
+                                {lanz.velocidad ? `${lanz.velocidad} km/h` : '-'}
+                              </td>
+                            </tr>
+                          ))}
+                        {lanzamientos.filter((lanz) => lanz.pitcher === 'local').length === 0 && (
+                          <tr>
+                            <td colSpan={5} className="border border-gray-300 px-3 py-4 text-center text-gray-500">
+                              Sin lanzamientos registrados
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* TABLA PITCHER VISITANTE */}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-700 mb-2 text-center">
+                    Pitcher Visitante ({fakeVisitantePitcher.nombre})
+                  </h3>
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse border border-gray-300">
+                      <thead className="bg-red-100">
+                        <tr>
+                          <th className="border border-gray-300 px-3 py-2 text-left">#</th>
+                          <th className="border border-gray-300 px-3 py-2 text-left">Zona</th>
+                          <th className="border border-gray-300 px-3 py-2 text-left">Tipo ID</th>
+                          <th className="border border-gray-300 px-3 py-2 text-left">Resultado ID</th>
+                          <th className="border border-gray-300 px-3 py-2 text-left">Velocidad</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {lanzamientos
+                          .filter((lanz) => lanz.pitcher === 'visitante')
+                          .map((lanz, index) => (
+                            <tr key={index} className="hover:bg-red-50">
+                              <td className="border border-gray-300 px-3 py-2">{index + 1}</td>
+                              <td className="border border-gray-300 px-3 py-2">{lanz.zona}</td>
+                              <td className="border border-gray-300 px-3 py-2">{lanz.tipoId ?? '-'}</td>
+                              <td className="border border-gray-300 px-3 py-2">{lanz.resultadoId ?? '-'}</td>
+                              <td className="border border-gray-300 px-3 py-2">
+                                {lanz.velocidad ? `${lanz.velocidad} km/h` : '-'}
+                              </td>
+                            </tr>
+                          ))}
+                        {lanzamientos.filter((lanz) => lanz.pitcher === 'visitante').length === 0 && (
+                          <tr>
+                            <td colSpan={5} className="border border-gray-300 px-3 py-4 text-center text-gray-500">
+                              Sin lanzamientos registrados
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
               </div>
             </section>
           )}
