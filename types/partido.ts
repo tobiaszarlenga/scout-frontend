@@ -46,3 +46,20 @@ export type PartidoConDetalles = Partido & {
   pitcherLocal: Pick<Pitcher, 'nombre' | 'apellido'>;
   pitcherVisitante: Pick<Pitcher, 'nombre' | 'apellido'>;
 };
+
+// --- 4. Tipo para SCOUT (Con todos los pitchers del equipo) ---
+// Este tipo se usa en la página de scout donde necesitamos todos los pitchers
+export type PartidoParaScout = Partido & {
+  equipoLocal: {
+    id: number;
+    nombre: string;
+    pitchers: Pick<Pitcher, 'id' | 'nombre' | 'apellido' | 'numero_camiseta'>[];
+  };
+  equipoVisitante: {
+    id: number;
+    nombre: string;
+    pitchers: Pick<Pitcher, 'id' | 'nombre' | 'apellido' | 'numero_camiseta'>[];
+  };
+  pitcherLocal: Pick<Pitcher, 'id' | 'nombre' | 'apellido' | 'numero_camiseta'>;
+  pitcherVisitante: Pick<Pitcher, 'id' | 'nombre' | 'apellido' | 'numero_camiseta'>;
+};

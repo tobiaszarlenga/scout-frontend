@@ -17,6 +17,7 @@ interface ActivePitcherToggleProps {
   onToggle: (pitcher: ActivePitcher) => void;
   localPitcher: PitcherInfo;
   visitantePitcher: PitcherInfo;
+  onCambiarPitcher: (tipo: ActivePitcher) => void; // Nueva prop para cambiar pitcher
 }
 
 export default function ActivePitcherToggle({
@@ -25,6 +26,7 @@ export default function ActivePitcherToggle({
   onToggle,
   localPitcher,
   visitantePitcher,
+  onCambiarPitcher,
 }: ActivePitcherToggleProps) {
   
   // (¡Hemos borrado el 'useState' de aquí!)
@@ -69,7 +71,10 @@ export default function ActivePitcherToggle({
       </div>
       
       <div className="text-right mt-2">
-        <button className="text-xs text-blue-600 hover:text-blue-800 font-medium">
+        <button 
+          onClick={() => onCambiarPitcher(active)}
+          className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+        >
           Cambiar Pitcher (Relevo)
         </button>
       </div>
