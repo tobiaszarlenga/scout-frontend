@@ -3,6 +3,7 @@
 
 // (Importamos 'useState' y 'useEffect' que necesitamos)
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 // --- Tus importaciones ---
 import StrikeZoneGrid from '@/app/components/StrikeZoneGrid';
@@ -50,6 +51,9 @@ export default function ScoutPage({ params }: { params: Promise<{ id: string }> 
   
   // --- Unwrap params (Next.js 15+) ---
   const { id } = React.use(params);
+  
+  // --- Router para navegación ---
+  const router = useRouter();
   
   // --- Cargar datos del partido desde la API ---
   const { data: partido, isLoading: loadingPartido } = usePartido(id);
@@ -454,7 +458,7 @@ export default function ScoutPage({ params }: { params: Promise<{ id: string }> 
             {/* Contador de lanzamientos registrados del pitcher activo */}
             <div className="mb-4 text-center">
               <p className="text-lg font-semibold text-gray-700">
-                Lanzamientos Registrados ({getPitcherActivo().nombre}): 
+                Lanzamientos Registrados ({activePitcher === 'local' ? (pitcherLocalActivo?.nombre ?? '-') : (pitcherVisitanteActivo?.nombre ?? '-')}): 
                 <span className="ml-2 text-2xl text-blue-600 font-bold">
                   {lanzamientosDelPitcherActivo.length}
                 </span>
@@ -508,8 +512,7 @@ export default function ScoutPage({ params }: { params: Promise<{ id: string }> 
                             cantidadLanzamientos={lanzamientosPitcher.length}
                             innings={inningsRange}
                             onClick={() => {
-                              // TODO: Navegar a página de detalle
-                              console.log('Click en pitcher:', pitcher.nombre);
+                              router.push(`/partidos/${id}/pitcher/${pitcher.id}`);
                             }}
                             tipo="local"
                           />
@@ -545,8 +548,7 @@ export default function ScoutPage({ params }: { params: Promise<{ id: string }> 
                             cantidadLanzamientos={lanzamientosPitcher.length}
                             innings={inningsRange}
                             onClick={() => {
-                              // TODO: Navegar a página de detalle
-                              console.log('Click en pitcher:', pitcher.nombre);
+                              router.push(`/partidos/${id}/pitcher/${pitcher.id}`);
                             }}
                             tipo="visitante"
                           />

@@ -4,19 +4,22 @@
 import React from 'react';
 
 // --- 1. Definimos las Props ---
-// Le decimos a este componente que ESPERA recibir
-// una función llamada 'onZoneClick' del padre.
 interface StrikeZoneGridProps {
   onZoneClick: (zoneIndex: number) => void;
+  highlightedZone?: number | null; // Zona a resaltar en rojo
+  readOnly?: boolean; // Si es true, no se puede hacer clic
 }
 
 /**
  * Representa la cuadrícula interactiva de 5x5 (25 zonas).
- * Es un componente "controlado": informa al padre (página)
- * cuando se hace clic en una zona, pero no sabe qué pasa después.
+ * Puede usarse en modo interactivo (para seleccionar) o 
+ * en modo solo lectura (para visualizar).
  */
-// --- 2. Usamos las Props ---
-export default function StrikeZoneGrid({ onZoneClick }: StrikeZoneGridProps) {
+export default function StrikeZoneGrid({ 
+  onZoneClick, 
+  highlightedZone = null,
+  readOnly = false 
+}: StrikeZoneGridProps) {
   
   // (La lógica de zonas y strikeZoneIndices se queda igual)
   const zones = Array.from({ length: 25 });
@@ -39,26 +42,28 @@ export default function StrikeZoneGrid({ onZoneClick }: StrikeZoneGridProps) {
         
         {zones.map((_, index) => {
           const isStrikeZone = strikeZoneIndices.includes(index);
+          const isHighlighted = highlightedZone === index;
 
           return (
             <button
               key={index}
               
-              // --- 4. Conectamos el 'onClick' a la Prop ---
-              // Cuando se hace clic, llamamos a la función
-              // 'onZoneClick' que nos pasó el padre, y le
-              // enviamos el 'index' de la zona clickeada.
-              onClick={() => onZoneClick(index)}
+              // Conectamos el 'onClick' a la Prop (solo si no es readOnly)
+              onClick={() => !readOnly && onZoneClick(index)}
+              disabled={readOnly}
               
               className={`
                 w-14 h-14 md:w-16 md:h-16 
                 transition-colors duration-150
                 ${
-                  isStrikeZone
+                  isHighlighted
+                    ? 'bg-red-500 border-2 border-red-700 shadow-lg'
+                    : isStrikeZone
                     ? 'bg-blue-100 border border-blue-300 hover:bg-blue-200'
                     : 'bg-white border border-gray-300 hover:bg-gray-100'
                 }
-                focus:outline-none focus:ring-2 focus:ring-blue-500 focus:z-10
+                ${readOnly ? 'cursor-default' : 'cursor-pointer'}
+                ${!readOnly && 'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:z-10'}
               `}
             >
               {/* Vacío */}
