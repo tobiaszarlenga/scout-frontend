@@ -30,7 +30,7 @@ interface PitcherDetalleProp {
 export default function PitcherDetallePage({ params }: PitcherDetalleProp) {
   const router = useRouter();
   const { id: partidoId, pitcherId } = React.use(params);
-  const { getState } = useScout();
+  const scout = useScout();
   const { tipos, resultados } = useLookups();
   
   // Estado para el modal de visualización de zona
@@ -38,7 +38,7 @@ export default function PitcherDetallePage({ params }: PitcherDetalleProp) {
   const [isModalZonaOpen, setIsModalZonaOpen] = useState(false);
   
   // Obtener estado del partido desde el contexto
-  const state = getState(partidoId);
+  const state = scout.getState(partidoId);
   const pitcher = state?.pitchersEnPartido.find(p => p.id === String(pitcherId));
   const pitcherNombre = pitcher?.nombre ?? 'Pitcher';
   const equipoNombre = pitcher?.equipo ?? '';
@@ -103,14 +103,67 @@ export default function PitcherDetallePage({ params }: PitcherDetalleProp) {
   };
   
   const handleEditar = (lanzamientoId: string) => {
-    console.log('Editar lanzamiento:', lanzamientoId);
-    // TODO: Implementar edición
+    openEditModalFor(lanzamientoId);
   };
   
   const handleEliminar = (lanzamientoId: string) => {
-    console.log('Eliminar lanzamiento:', lanzamientoId);
-    // TODO: Implementar eliminación
+    confirmDelete(lanzamientoId);
   };
+
+  // --- Estados para edición ---
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editTipoId, setEditTipoId] = useState<number | null>(null);
+  const [editResultadoId, setEditResultadoId] = useState<number | null>(null);
+  const [editVelocidad, setEditVelocidad] = useState<number | null>(null);
+
+  // Helper para generar el id interno igual que en el map
+  const genIdFrom = (l: LanzamientoGuardado) => `${l.pitcherId}-${l.timestamp.toString()}-${l.zona}`;
+
+  const openEditModalFor = (lanzamientoId: string) => {
+    // Encontrar el lanzamiento en el estado global
+  const s = scout.getState(partidoId);
+  const found = s?.lanzamientos.find((l: LanzamientoGuardado) => genIdFrom(l) === lanzamientoId);
+    if (!found) return;
+    setEditingId(lanzamientoId);
+    setEditTipoId(found.tipoId ?? null);
+    setEditResultadoId(found.resultadoId ?? null);
+    setEditVelocidad(found.velocidad ?? null);
+    setIsEditModalOpen(true);
+  };
+
+  const saveEdit = () => {
+    if (!editingId) return;
+    const s = scout.getState(partidoId);
+    if (!s) return;
+    const updated = s.lanzamientos.map((l: LanzamientoGuardado) => {
+      if (genIdFrom(l) === editingId) {
+        return {
+          ...l,
+          tipoId: editTipoId ?? null,
+          resultadoId: editResultadoId ?? null,
+          velocidad: editVelocidad ?? null,
+        } as LanzamientoGuardado;
+      }
+      return l;
+    });
+    // Persistir en el contexto
+    // conservamos pitchersEnPartido
+    const newState = { lanzamientos: updated, pitchersEnPartido: s.pitchersEnPartido };
+    scout.setStateForPartido(partidoId, newState);
+    setIsEditModalOpen(false);
+    setEditingId(null);
+  };
+
+  const confirmDelete = (lanzamientoId: string) => {
+    if (!confirm('¿Eliminar este lanzamiento? Esta acción no se puede deshacer (solo localmente).')) return;
+  const s = scout.getState(partidoId);
+  if (!s) return;
+  const filtered = s.lanzamientos.filter((l: LanzamientoGuardado) => genIdFrom(l) !== lanzamientoId);
+    const newState = { lanzamientos: filtered, pitchersEnPartido: s.pitchersEnPartido };
+    scout.setStateForPartido(partidoId, newState);
+  };
+
 
   return (
     <main className="min-h-full w-full max-w-full overflow-x-hidden bg-gradient-to-br from-[#90D1F2] to-[#012F8A] px-6 py-6 sm:px-10 sm:py-8">
@@ -270,6 +323,85 @@ export default function PitcherDetallePage({ params }: PitcherDetalleProp) {
                   Cerrar
                 </button>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal para editar lanzamiento */}
+        {isEditModalOpen && editingId && (
+          <div
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+            onClick={() => setIsEditModalOpen(false)}
+          >
+            <div
+              className="bg-white rounded-lg p-6 max-w-md w-full mx-4"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-xl font-bold">Editar Lanzamiento</h3>
+                <button
+                  onClick={() => setIsEditModalOpen(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Tipo</label>
+                  <select
+                    value={editTipoId ?? ''}
+                    onChange={(e) => setEditTipoId(e.target.value ? Number(e.target.value) : null)}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm"
+                  >
+                    <option value="">Seleccionar tipo</option>
+                    {tipos.data?.map(t => (
+                      <option key={t.id} value={t.id}>{t.nombre}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Resultado</label>
+                  <select
+                    value={editResultadoId ?? ''}
+                    onChange={(e) => setEditResultadoId(e.target.value ? Number(e.target.value) : null)}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm"
+                  >
+                    <option value="">Seleccionar resultado</option>
+                    {resultados.data?.map(r => (
+                      <option key={r.id} value={r.id}>{r.nombre}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Velocidad (km/h)</label>
+                  <input
+                    type="number"
+                    value={editVelocidad ?? ''}
+                    onChange={(e) => setEditVelocidad(e.target.valueAsNumber || null)}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm"
+                  />
+                </div>
+
+                <div className="flex justify-end gap-3 pt-2">
+                  <button
+                    onClick={() => setIsEditModalOpen(false)}
+                    className="px-4 py-2 bg-gray-100 rounded hover:bg-gray-200"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={saveEdit}
+                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                  >
+                    Guardar
+                  </button>
+                </div>
+              </div>
+
             </div>
           </div>
         )}
