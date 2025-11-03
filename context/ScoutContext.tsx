@@ -1,10 +1,19 @@
 "use client";
 import React, { createContext, useContext, useMemo, useState } from 'react';
-import type { LanzamientoGuardado, PitcherEnPartido } from '@/types/scout';
+import type { LanzamientoGuardado, PitcherEnPartido, ActivePitcher } from '@/types/scout';
 
 export type PartidoScoutState = {
   lanzamientos: LanzamientoGuardado[];
   pitchersEnPartido: PitcherEnPartido[];
+  // Contadores y estado de partido (opcional, se usan para persistir la UI)
+  inning?: number;
+  bolas?: number;
+  strikes?: number;
+  outs?: number;
+  ladoInning?: 'abre' | 'cierra';
+  activePitcher?: ActivePitcher;
+  pitcherActivoLocalId?: string;
+  pitcherActivoVisitanteId?: string;
 };
 
 type Store = Record<string, PartidoScoutState>; // key = partidoId

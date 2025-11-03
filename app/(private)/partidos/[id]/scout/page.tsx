@@ -110,8 +110,17 @@ export default function ScoutPage({ params }: { params: Promise<{ id: string }> 
   useEffect(() => {
     const prev = scout.getState(id);
     if (prev) {
-      setPitchersEnPartido(prev.pitchersEnPartido);
-      setLanzamientos(prev.lanzamientos);
+      setPitchersEnPartido(prev.pitchersEnPartido ?? []);
+      setLanzamientos(prev.lanzamientos ?? []);
+      // Restaurar contadores si existen
+      if (typeof prev.inning === 'number') setInning(prev.inning);
+      if (typeof prev.bolas === 'number') setBolas(prev.bolas);
+      if (typeof prev.strikes === 'number') setStrikes(prev.strikes);
+      if (typeof prev.outs === 'number') setOuts(prev.outs);
+      if (prev.ladoInning) setLadoInning(prev.ladoInning);
+      if (prev.activePitcher) setActivePitcher(prev.activePitcher);
+      if (prev.pitcherActivoLocalId) setPitcherActivoLocalId(prev.pitcherActivoLocalId);
+      if (prev.pitcherActivoVisitanteId) setPitcherActivoVisitanteId(prev.pitcherActivoVisitanteId);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
@@ -119,28 +128,26 @@ export default function ScoutPage({ params }: { params: Promise<{ id: string }> 
   // Importante: no incluimos `scout` en dependencias para evitar recrear el efecto
   // en cada actualización del contexto y producir un bucle infinito.
   useEffect(() => {
-    if (pitchersEnPartido.length === 0) return;
-    const currentState = scout.getState(id);
-    const prevPitchers = currentState?.pitchersEnPartido ?? [];
+    // Persistimos el estado completo del partido (lanzamientos, pitchers y contadores)
+    // Evitamos persistir cuando no hay pitchers (estado vacío inicial)
+    if (pitchersEnPartido.length === 0 && (scout.getState(id)?.pitchersEnPartido ?? []).length === 0) return;
 
-    // Evitar escrituras innecesarias si no hay cambios efectivos
-    const isSame =
-      prevPitchers.length === pitchersEnPartido.length &&
-      prevPitchers.every((p, i) =>
-        p.id === pitchersEnPartido[i].id &&
-        p.tipo === pitchersEnPartido[i].tipo &&
-        p.entroEnInning === pitchersEnPartido[i].entroEnInning &&
-        p.salioEnInning === pitchersEnPartido[i].salioEnInning
-      );
+    const newState = {
+      lanzamientos,
+      pitchersEnPartido,
+      inning,
+      bolas,
+      strikes,
+      outs,
+      ladoInning,
+      activePitcher,
+      pitcherActivoLocalId,
+      pitcherActivoVisitanteId,
+    };
 
-    if (!isSame) {
-      scout.setStateForPartido(id, {
-        lanzamientos: currentState?.lanzamientos ?? [],
-        pitchersEnPartido,
-      });
-    }
+    scout.setStateForPartido(id, newState);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, pitchersEnPartido]);
+  }, [id, pitchersEnPartido, lanzamientos, inning, bolas, strikes, outs, ladoInning, activePitcher, pitcherActivoLocalId, pitcherActivoVisitanteId]);
   
   // --- Estados para el modal de cambiar pitcher ---
   const [isModalCambiarPitcherOpen, setIsModalCambiarPitcherOpen] = useState(false);
