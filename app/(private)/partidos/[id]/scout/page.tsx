@@ -20,32 +20,12 @@ import RegistrarLanzamientoForm, {
 // --- Importamos los hooks ---
 import { useLookups } from '@/hooks/useLookups';
 import { usePartido } from '@/hooks/usePartidos';
+import { useScout } from '@/context/ScoutContext';
+import type { ActivePitcher, LanzamientoGuardado, PitcherEnPartido } from '@/types/scout';
 
 // --- Importamos los componentes ---
 import PitcherCard from './PitcherCard';
 import CambiarPitcherModal from '@/app/(private)/partidos/CambiarPitcherModal';
-
-type ActivePitcher = 'local' | 'visitante';
-
-// --- NUEVO: Tipo para los lanzamientos guardados ---
-interface LanzamientoGuardado extends LanzamientoData {
-  zona: number; // Índice de la zona de strike (0-24)
-  pitcher: ActivePitcher; // Quién lanzó ('local' o 'visitante')
-  timestamp: Date; // Cuándo se registró
-  inning: number; // En qué inning se registró
-  ladoInning: 'abre' | 'cierra'; // Si fue abriendo o cerrando el inning
-  pitcherId: string; // ID del pitcher que lanzó (para diferenciar relevos)
-}
-
-// --- NUEVO: Tipo para registrar pitchers que han lanzado ---
-interface PitcherEnPartido {
-  id: string; // ID temporal (luego será de la BD)
-  nombre: string;
-  equipo: string;
-  tipo: ActivePitcher; // 'local' o 'visitante'
-  entroEnInning: number; // En qué inning entró a lanzar
-  salioEnInning?: number; // En qué inning salió (undefined si sigue activo)
-}
 
 export default function ScoutPage({ params }: { params: Promise<{ id: string }> }) {
   
@@ -123,13 +103,49 @@ export default function ScoutPage({ params }: { params: Promise<{ id: string }> 
   // Este array irá creciendo cada vez que se registre un lanzamiento
   const [lanzamientos, setLanzamientos] = useState<LanzamientoGuardado[]>([]);
   
+  // --- Sincronización con el contexto global de Scout ---
+  const scout = useScout();
+  // Cargar si existe previamente
+  useEffect(() => {
+    const prev = scout.getState(id);
+    if (prev) {
+      setPitchersEnPartido(prev.pitchersEnPartido);
+      setLanzamientos(prev.lanzamientos);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
+  // Guardar cuando cambie pitchersEnPartido (no lanzamientos, porque esos se agregan con addLanzamiento)
+  // Importante: no incluimos `scout` en dependencias para evitar recrear el efecto
+  // en cada actualización del contexto y producir un bucle infinito.
+  useEffect(() => {
+    if (pitchersEnPartido.length === 0) return;
+    const currentState = scout.getState(id);
+    const prevPitchers = currentState?.pitchersEnPartido ?? [];
+
+    // Evitar escrituras innecesarias si no hay cambios efectivos
+    const isSame =
+      prevPitchers.length === pitchersEnPartido.length &&
+      prevPitchers.every((p, i) =>
+        p.id === pitchersEnPartido[i].id &&
+        p.tipo === pitchersEnPartido[i].tipo &&
+        p.entroEnInning === pitchersEnPartido[i].entroEnInning &&
+        p.salioEnInning === pitchersEnPartido[i].salioEnInning
+      );
+
+    if (!isSame) {
+      scout.setStateForPartido(id, {
+        lanzamientos: currentState?.lanzamientos ?? [],
+        pitchersEnPartido,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, pitchersEnPartido]);
+  
   // --- Estados para el modal de cambiar pitcher ---
   const [isModalCambiarPitcherOpen, setIsModalCambiarPitcherOpen] = useState(false);
   const [tipoPitcherACambiar, setTipoPitcherACambiar] = useState<ActivePitcher>('local');
 
-  // (Datos falsos)
-  const fakeLocalPitcher = { nombre: 'Laura Fernández', equipo: 'Leones' };
-  const fakeVisitantePitcher = { nombre: 'Juan Pérez', equipo: 'Tigres' };
+  // (Datos falsos) - Eliminados; ahora usamos datos reales del partido
   
   // --- Obtener el pitcher activo actual de cada lado ---
   const pitcherLocalActivo = pitchersEnPartido.find(p => p.id === pitcherActivoLocalId);
@@ -364,11 +380,14 @@ export default function ScoutPage({ params }: { params: Promise<{ id: string }> 
       pitcherId: pitcherActual.id, // ID del pitcher que lanzó
     };
 
-    // Agregamos el nuevo lanzamiento al array
-    // (Usamos la función de actualización para garantizar que tengamos el estado más reciente)
+    // Agregamos el nuevo lanzamiento al array local
     setLanzamientos((prevLanzamientos) => [...prevLanzamientos, nuevoLanzamiento]);
+    
+    // Agregamos al contexto global
+    scout.addLanzamiento(id, nuevoLanzamiento);
 
     console.log('✅ Lanzamiento guardado en el array:', nuevoLanzamiento);
+    console.log('✅ Lanzamiento agregado al contexto global');
 
     handleCloseModal(); // Cerramos el modal después de guardar
   };
@@ -422,8 +441,8 @@ export default function ScoutPage({ params }: { params: Promise<{ id: string }> 
               onChange={handleInningChange}
               footerText={
                 ladoInning === 'abre' 
-                  ? `${fakeLocalPitcher.equipo} abre` 
-                  : `${fakeVisitantePitcher.equipo} cierra`
+                  ? `${partido.equipoLocal.nombre} abre` 
+                  : `${partido.equipoVisitante.nombre} cierra`
               }
             />
             <ScoutCountCard 

@@ -1,9 +1,12 @@
 // En: app/(private)/partidos/[id]/pitcher/[pitcherId]/page.tsx
 'use client';
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import StrikeZoneGrid from '@/app/components/StrikeZoneGrid';
+import { useScout } from '@/context/ScoutContext';
+import type { LanzamientoGuardado } from '@/types/scout';
+import { useLookups } from '@/hooks/useLookups';
 
 // Tipo para los lanzamientos (temporal, luego vendrá de la API)
 interface Lanzamiento {
@@ -27,19 +30,54 @@ interface PitcherDetalleProp {
 export default function PitcherDetallePage({ params }: PitcherDetalleProp) {
   const router = useRouter();
   const { id: partidoId, pitcherId } = React.use(params);
+  const { getState } = useScout();
+  const { tipos, resultados } = useLookups();
   
   // Estado para el modal de visualización de zona
   const [zonaSeleccionada, setZonaSeleccionada] = useState<number | null>(null);
   const [isModalZonaOpen, setIsModalZonaOpen] = useState(false);
   
-  // TODO: Obtener datos del pitcher desde el contexto o localStorage
-  // Por ahora usamos datos de ejemplo
-  const pitcherNombre = "Pitcher Ejemplo";
-  const equipoNombre = "Equipo Local";
-  
-  // TODO: Obtener lanzamientos desde el contexto o localStorage
-  // Por ahora datos de ejemplo vacíos
-  const lanzamientos: Lanzamiento[] = [];
+  // Obtener estado del partido desde el contexto
+  const state = getState(partidoId);
+  const pitcher = state?.pitchersEnPartido.find(p => p.id === String(pitcherId));
+  const pitcherNombre = pitcher?.nombre ?? 'Pitcher';
+  const equipoNombre = pitcher?.equipo ?? '';
+
+  console.log('🎯 PitcherDetallePage:', { 
+    partidoId, 
+    pitcherId, 
+    state, 
+    pitcher,
+    totalLanzamientos: state?.lanzamientos.length ?? 0,
+    lanzamientosDelPitcher: state?.lanzamientos.filter(l => l.pitcherId === String(pitcherId)).length ?? 0
+  });
+
+  // Filtrar lanzamientos del pitcher
+  const lanzamientos: Lanzamiento[] = useMemo(() => {
+    const lista = (state?.lanzamientos ?? []).filter(l => l.pitcherId === String(pitcherId));
+    // Resolver nombres de lookups
+    const nameTipo = (id: number | null) => {
+      if (!id || !tipos.data) return '';
+      return tipos.data.find(t => t.id === id)?.nombre ?? '';
+    };
+    const nameResultado = (id: number | null) => {
+      if (!id || !resultados.data) return '';
+      return resultados.data.find(r => r.id === id)?.nombre ?? '';
+    };
+    return lista.map((l: LanzamientoGuardado) => ({
+      id: `${l.pitcherId}-${l.timestamp.toString()}-${l.zona}`,
+      inning: l.inning,
+      ladoInning: l.ladoInning,
+      tipoId: l.tipoId ?? null,
+      tipoNombre: nameTipo(l.tipoId ?? null),
+      resultadoId: l.resultadoId ?? null,
+      resultadoNombre: nameResultado(l.resultadoId ?? null),
+      velocidad: l.velocidad ?? null,
+      zona: l.zona,
+  comentario: null,
+      timestamp: l.timestamp,
+    }));
+  }, [state?.lanzamientos, pitcherId, tipos.data, resultados.data]);
   
   // Agrupar lanzamientos por inning
   const lanzamientosPorInning = lanzamientos.reduce((acc, lanzamiento) => {
@@ -54,7 +92,7 @@ export default function PitcherDetallePage({ params }: PitcherDetalleProp) {
   // Obtener innings únicos ordenados
   const innings = Object.keys(lanzamientosPorInning).sort((a, b) => {
     const [inningA, ladoA] = a.split('-');
-    const [inningB, ladoB] = b.split('-');
+    const [inningB] = b.split('-');
     if (inningA !== inningB) return Number(inningA) - Number(inningB);
     return ladoA === 'abre' ? -1 : 1;
   });
