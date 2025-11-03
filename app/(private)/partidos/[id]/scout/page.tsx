@@ -22,6 +22,7 @@ import { useLookups } from '@/hooks/useLookups';
 import { usePartido } from '@/hooks/usePartidos';
 import { useScout } from '@/context/ScoutContext';
 import type { ActivePitcher, LanzamientoGuardado, PitcherEnPartido } from '@/types/scout';
+import { lanzamientosApi, type CreateLanzamientoDto } from '@/lib/api';
 
 // --- Importamos los componentes ---
 import PitcherCard from './PitcherCard';
@@ -358,7 +359,7 @@ export default function ScoutPage({ params }: { params: Promise<{ id: string }> 
   /**
    * Se llama desde RegistrarLanzamientoForm cuando se guarda.
    */
-  const handleFormSubmit = (data: LanzamientoData) => {
+  const handleFormSubmit = async (data: LanzamientoData) => {
     console.log('--- ¡NUEVO LANZAMIENTO REGISTRADO! ---');
     console.log('Datos del Formulario:', data);
     console.log('Pitcher Activo:', activePitcher);
@@ -388,6 +389,23 @@ export default function ScoutPage({ params }: { params: Promise<{ id: string }> 
 
     console.log('✅ Lanzamiento guardado en el array:', nuevoLanzamiento);
     console.log('✅ Lanzamiento agregado al contexto global');
+
+    // Persistir en backend (no bloquea UI si falla)
+    try {
+      const payload: CreateLanzamientoDto = {
+        tipoId: data.tipoId!,
+        resultadoId: data.resultadoId!,
+        velocidad: data.velocidad ?? null,
+        zona: selectedZone ?? 0,
+        inning,
+        ladoInning,
+        pitcherId: Number(pitcherActual.id),
+      };
+      await lanzamientosApi.create(id, payload);
+      console.log('💾 Lanzamiento persistido en backend');
+    } catch (err) {
+      console.warn('No se pudo persistir el lanzamiento. Se mantiene en memoria.', err);
+    }
 
     handleCloseModal(); // Cerramos el modal después de guardar
   };

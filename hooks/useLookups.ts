@@ -21,14 +21,9 @@ export function useLookups() {
   const tipos = useQuery({
     queryKey: TIPOS_KEY,
     queryFn: () => api.get<LookupItem[]>('/lookup/tipos-lanzamiento'),
-    
-    // --- Optimización ---
-    // Estas listas casi nunca cambian.
-    // 'staleTime: Infinity' le dice a React Query:
-    // "Carga esto 1 vez, y NUNCA lo vuelvas a pedir"
-    // (hasta que el usuario cierre y vuelva a abrir la app).
-    staleTime: Infinity,
-    gcTime: Infinity,
+    // Aseguramos que después de un reset/seed, vuelva a pedir datos
+    refetchOnMount: 'always',
+    staleTime: 10 * 60 * 1000, // 10 minutos
   });
 
   // --- OBTENER Resultados de Lanzamiento ---
@@ -36,10 +31,8 @@ export function useLookups() {
   const resultados = useQuery({
     queryKey: RESULTADOS_KEY,
     queryFn: () => api.get<LookupItem[]>('/lookup/resultados-lanzamiento'),
-    
-    // Misma optimización
-    staleTime: Infinity,
-    gcTime: Infinity,
+    refetchOnMount: 'always',
+    staleTime: 10 * 60 * 1000,
   });
 
   return { tipos, resultados };
