@@ -510,7 +510,7 @@ export default function ScoutPage({ params }: { params: Promise<{ id: string }> 
             </div>
 
             {/* --- NUEVO 4: PASAMOS LA PROP 'onZoneClick' --- */}
-            <StrikeZoneGrid onZoneClick={handleZoneClick} />
+            <StrikeZoneGrid onZoneClick={handleZoneClick} highlightedZone={selectedZone} />
           </section>
 
           {/* --- CARDS DE PITCHERS --- */}
@@ -611,7 +611,14 @@ export default function ScoutPage({ params }: { params: Promise<{ id: string }> 
           onClose={handleCloseModal}
           title="Detalles del Lanzamiento"
         >
+          {/*
+            Forzamos el remount del formulario usando 'key' ligado a
+            selectedZone. Así, cada vez que abrimos el modal con una
+            zona diferente el form se remonta y limpia sus estados
+            internos (evita comportamientos residuales).
+          */}
           <RegistrarLanzamientoForm
+            key={selectedZone ?? 'no-zone'}
             onSubmit={handleFormSubmit}
             onCancel={handleCloseModal}
           />
