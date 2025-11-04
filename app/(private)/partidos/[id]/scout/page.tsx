@@ -375,37 +375,19 @@ export default function ScoutPage({ params }: { params: Promise<{ id: string }> 
     console.log('Datos del Formulario:', data);
     console.log('Pitcher Activo:', activePitcher);
     console.log('Zona Seleccionada:', selectedZone);
-    
-    // --- PROCESAR LA LÓGICA DEL BÉISBOL ---
-    procesarResultado(data.resultadoId);
-    
-    // --- GUARDAR EN LA "CAJA" (ARRAY) ---
-    // Creamos un objeto completo con TODOS los datos del lanzamiento
+
+    // Validación extra de seguridad (además del formulario)
+    if (!data.tipoId || !data.resultadoId) {
+      alert('Seleccioná Tipo de Efecto y Resultado para guardar el lanzamiento.');
+      return;
+    }
+
+    // Persistir primero en backend para evitar inconsistencias
     const pitcherActual = getPitcherActivo();
-    const nuevoLanzamiento: LanzamientoGuardado = {
-      ...data, // tipo, resultado, velocidad, comentario
-      zona: selectedZone ?? 0, // La zona donde se clickeó
-      pitcher: activePitcher, // Quién lanzó (local o visitante)
-      timestamp: new Date(), // Cuándo se registró
-      inning: inning, // En qué inning
-      ladoInning: ladoInning, // Si estaba abriendo o cerrando
-      pitcherId: pitcherActual.id, // ID del pitcher que lanzó
-    };
-
-    // Agregamos el nuevo lanzamiento al array local
-    setLanzamientos((prevLanzamientos) => [...prevLanzamientos, nuevoLanzamiento]);
-    
-    // Agregamos al contexto global
-    scout.addLanzamiento(id, nuevoLanzamiento);
-
-    console.log('✅ Lanzamiento guardado en el array:', nuevoLanzamiento);
-    console.log('✅ Lanzamiento agregado al contexto global');
-
-    // Persistir en backend (no bloquea UI si falla)
     try {
       const payload: CreateLanzamientoDto = {
-        tipoId: data.tipoId!,
-        resultadoId: data.resultadoId!,
+        tipoId: data.tipoId,
+        resultadoId: data.resultadoId,
         velocidad: data.velocidad ?? null,
         zona: selectedZone ?? 0,
         inning,
@@ -414,11 +396,29 @@ export default function ScoutPage({ params }: { params: Promise<{ id: string }> 
       };
       await createLanzamiento.mutateAsync(payload);
       console.log('💾 Lanzamiento persistido en backend');
-    } catch (err) {
-      console.warn('No se pudo persistir el lanzamiento. Se mantiene en memoria.', err);
-    }
 
-    handleCloseModal(); // Cerramos el modal después de guardar
+      // --- GUARDAR EN LA "CAJA" (ARRAY) UNA VEZ CONFIRMADO ---
+      const nuevoLanzamiento: LanzamientoGuardado = {
+        ...data,
+        zona: selectedZone ?? 0,
+        pitcher: activePitcher,
+        timestamp: new Date(),
+        inning,
+        ladoInning,
+        pitcherId: pitcherActual.id,
+      };
+
+      setLanzamientos((prev) => [...prev, nuevoLanzamiento]);
+      scout.addLanzamiento(id, nuevoLanzamiento);
+      console.log('✅ Lanzamiento guardado en el array y contexto:', nuevoLanzamiento);
+
+      // --- PROCESAR LA LÓGICA DEL BÉISBOL ---
+      procesarResultado(data.resultadoId);
+
+      handleCloseModal();
+    } catch (err) {
+      console.warn('No se pudo persistir el lanzamiento. Se cancela el guardado local.', err);
+    }
   };
 
   return (
