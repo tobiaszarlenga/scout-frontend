@@ -33,8 +33,6 @@ export default function ScoutPage({ params }: { params: Promise<{ id: string }> 
   
   // --- Unwrap params (Next.js 15+) ---
   const { id } = React.use(params);
-  
-  // --- Router para navegación ---
   const router = useRouter();
   
   // --- Cargar datos del partido desde la API ---
@@ -43,10 +41,8 @@ export default function ScoutPage({ params }: { params: Promise<{ id: string }> 
   // --- Cargamos los lookups (tipos y resultados) ---
   const { tipos, resultados } = useLookups();
   
-  // --- Hook para persistir lanzamientos en backend ---
-  const { create: createLanzamiento } = useLanzamientos(id);
-
-  // --- Estado del Pitcher (ya lo teníamos) ---
+  // --- Hook para lanzamientos (listar/crear) ---
+  const { list: lanzamientosRemotos, create: createLanzamiento } = useLanzamientos(id);
   const [activePitcher, setActivePitcher] = useState<ActivePitcher>('local');
   
   // --- Lista de pitchers que han lanzado en el partido ---
@@ -59,7 +55,10 @@ export default function ScoutPage({ params }: { params: Promise<{ id: string }> 
   // --- Inicializar pitchers cuando carguen los datos del partido ---
   useEffect(() => {
     if (!partido) return;
-    
+    // Si ya restauramos desde localStorage/context, no sobrescribimos
+    if (pitchersEnPartido.length > 0) return;
+    if (pitcherActivoLocalId || pitcherActivoVisitanteId) return;
+
     const pitcherLocalInicial: PitcherEnPartido = {
       id: String(partido.pitcherLocal.id),
       nombre: `${partido.pitcherLocal.nombre} ${partido.pitcherLocal.apellido}`,
@@ -67,7 +66,6 @@ export default function ScoutPage({ params }: { params: Promise<{ id: string }> 
       tipo: 'local',
       entroEnInning: 1,
     };
-    
     const pitcherVisitanteInicial: PitcherEnPartido = {
       id: String(partido.pitcherVisitante.id),
       nombre: `${partido.pitcherVisitante.nombre} ${partido.pitcherVisitante.apellido}`,
@@ -75,11 +73,30 @@ export default function ScoutPage({ params }: { params: Promise<{ id: string }> 
       tipo: 'visitante',
       entroEnInning: 1,
     };
-    
     setPitchersEnPartido([pitcherLocalInicial, pitcherVisitanteInicial]);
     setPitcherActivoLocalId(String(partido.pitcherLocal.id));
     setPitcherActivoVisitanteId(String(partido.pitcherVisitante.id));
-  }, [partido]);
+  }, [partido, pitchersEnPartido.length, pitcherActivoLocalId, pitcherActivoVisitanteId]);
+
+  // --- Cargar lanzamientos persistidos desde el backend ---
+  const xyToZona = (x: number, y: number) => y * 5 + x;
+  useEffect(() => {
+    if (!lanzamientosRemotos.data || !partido) return;
+    const isLocalPitcherId = (pid: number) =>
+      partido.equipoLocal.pitchers.some((p) => p.id === pid);
+    const mapped: LanzamientoGuardado[] = lanzamientosRemotos.data.map((l) => ({
+      velocidad: l.velocidad ?? null,
+      tipoId: l.tipoId ?? null,
+      resultadoId: l.resultadoId ?? null,
+      zona: xyToZona(l.x, l.y),
+      pitcher: isLocalPitcherId(l.pitcherId) ? 'local' : 'visitante',
+      timestamp: new Date(l.creadoEn),
+      inning: l.inning,
+      ladoInning: l.ladoInning as 'abre' | 'cierra',
+      pitcherId: String(l.pitcherId),
+    }));
+    setLanzamientos(mapped);
+  }, [lanzamientosRemotos.data, partido]);
   
   // --- Helper para obtener el pitcher activo actual ---
   const getPitcherActivo = (): PitcherEnPartido => {
@@ -100,6 +117,47 @@ export default function ScoutPage({ params }: { params: Promise<{ id: string }> 
   
   // --- NUEVO 2: ESTADOS PARA EL MODAL ---
   // 'isModalOpen' controla si el modal se ve o no.
+  // --- Persistencia ligera en localStorage de contadores/activos ---
+  const LS_KEY = `scoutState:${id}`;
+  const [initialLoaded, setInitialLoaded] = useState(false);
+  useEffect(() => {
+    try {
+      const raw = typeof window !== 'undefined' ? localStorage.getItem(LS_KEY) : null;
+      if (raw) {
+        const s = JSON.parse(raw);
+        if (typeof s.inning === 'number') setInning(s.inning);
+        if (typeof s.bolas === 'number') setBolas(s.bolas);
+        if (typeof s.strikes === 'number') setStrikes(s.strikes);
+        if (typeof s.outs === 'number') setOuts(s.outs);
+        if (s.ladoInning === 'abre' || s.ladoInning === 'cierra') setLadoInning(s.ladoInning);
+        if (s.activePitcher === 'local' || s.activePitcher === 'visitante') setActivePitcher(s.activePitcher);
+        if (typeof s.pitcherActivoLocalId === 'string') setPitcherActivoLocalId(s.pitcherActivoLocalId);
+        if (typeof s.pitcherActivoVisitanteId === 'string') setPitcherActivoVisitanteId(s.pitcherActivoVisitanteId);
+        if (Array.isArray(s.pitchersEnPartido) && s.pitchersEnPartido.length > 0) setPitchersEnPartido(s.pitchersEnPartido);
+      }
+    } catch {}
+    finally {
+      setInitialLoaded(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
+  useEffect(() => {
+    if (!initialLoaded) return; // Evita sobreescribir antes de la primera carga
+    const snapshot = {
+      inning,
+      bolas,
+      strikes,
+      outs,
+      ladoInning,
+      activePitcher,
+      pitcherActivoLocalId,
+      pitcherActivoVisitanteId,
+      pitchersEnPartido,
+    };
+    try {
+      if (typeof window !== 'undefined') localStorage.setItem(LS_KEY, JSON.stringify(snapshot));
+    } catch {}
+  }, [LS_KEY, initialLoaded, inning, bolas, strikes, outs, ladoInning, activePitcher, pitcherActivoLocalId, pitcherActivoVisitanteId, pitchersEnPartido]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   // 'selectedZone' guarda el número (0-24) de la zona clickeada.
   const [selectedZone, setSelectedZone] = useState<number | null>(null);
