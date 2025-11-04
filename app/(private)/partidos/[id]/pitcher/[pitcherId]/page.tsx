@@ -4,13 +4,14 @@
 import React, { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import StrikeZoneGrid from '@/app/components/StrikeZoneGrid';
-import { useScout } from '@/context/ScoutContext';
-import type { LanzamientoGuardado } from '@/types/scout';
+import { useLanzamientos } from '@/hooks/useLanzamientos';
 import { useLookups } from '@/hooks/useLookups';
+import { usePartido } from '@/hooks/usePartidos';
+import type { LanzamientoDTO } from '@/lib/api';
 
-// Tipo para los lanzamientos (temporal, luego vendrá de la API)
+// Tipo para los lanzamientos procesados para la UI
 interface Lanzamiento {
-  id: string;
+  id: number; // Ahora es el ID de BD
   inning: number;
   ladoInning: 'abre' | 'cierra';
   tipoId: number | null;
@@ -20,7 +21,8 @@ interface Lanzamiento {
   velocidad: number | null;
   zona: number;
   comentario: string | null;
-  timestamp: Date;
+  x: number;
+  y: number;
 }
 
 interface PitcherDetalleProp {
@@ -30,31 +32,25 @@ interface PitcherDetalleProp {
 export default function PitcherDetallePage({ params }: PitcherDetalleProp) {
   const router = useRouter();
   const { id: partidoId, pitcherId } = React.use(params);
-  const scout = useScout();
+  const { data: partido } = usePartido(partidoId);
+  const { list: lanzamientosQuery, remove, update } = useLanzamientos(partidoId);
   const { tipos, resultados } = useLookups();
   
   // Estado para el modal de visualización de zona
   const [zonaSeleccionada, setZonaSeleccionada] = useState<number | null>(null);
   const [isModalZonaOpen, setIsModalZonaOpen] = useState(false);
   
-  // Obtener estado del partido desde el contexto
-  const state = scout.getState(partidoId);
-  const pitcher = state?.pitchersEnPartido.find(p => p.id === String(pitcherId));
-  const pitcherNombre = pitcher?.nombre ?? 'Pitcher';
-  const equipoNombre = pitcher?.equipo ?? '';
+  // Convertir zona x,y a índice 0-24
+  const xyToZona = (x: number, y: number): number => {
+    return y * 5 + x;
+  };
 
-  console.log('🎯 PitcherDetallePage:', { 
-    partidoId, 
-    pitcherId, 
-    state, 
-    pitcher,
-    totalLanzamientos: state?.lanzamientos.length ?? 0,
-    lanzamientosDelPitcher: state?.lanzamientos.filter(l => l.pitcherId === String(pitcherId)).length ?? 0
-  });
-
-  // Filtrar lanzamientos del pitcher
+  // Filtrar lanzamientos del pitcher y procesar
   const lanzamientos: Lanzamiento[] = useMemo(() => {
-    const lista = (state?.lanzamientos ?? []).filter(l => l.pitcherId === String(pitcherId));
+    if (!lanzamientosQuery.data) return [];
+    
+    const lista = lanzamientosQuery.data.filter(l => l.pitcherId === Number(pitcherId));
+    
     // Resolver nombres de lookups
     const nameTipo = (id: number | null) => {
       if (!id || !tipos.data) return '';
@@ -64,20 +60,60 @@ export default function PitcherDetallePage({ params }: PitcherDetalleProp) {
       if (!id || !resultados.data) return '';
       return resultados.data.find(r => r.id === id)?.nombre ?? '';
     };
-    return lista.map((l: LanzamientoGuardado) => ({
-      id: `${l.pitcherId}-${l.timestamp.toString()}-${l.zona}`,
+    
+    return lista.map((l: LanzamientoDTO) => ({
+      id: l.id,
       inning: l.inning,
-      ladoInning: l.ladoInning,
-      tipoId: l.tipoId ?? null,
-      tipoNombre: nameTipo(l.tipoId ?? null),
-      resultadoId: l.resultadoId ?? null,
-      resultadoNombre: nameResultado(l.resultadoId ?? null),
-      velocidad: l.velocidad ?? null,
-      zona: l.zona,
-  comentario: null,
-      timestamp: l.timestamp,
+      ladoInning: l.ladoInning as 'abre' | 'cierra',
+      tipoId: l.tipoId,
+      tipoNombre: nameTipo(l.tipoId),
+      resultadoId: l.resultadoId,
+      resultadoNombre: nameResultado(l.resultadoId),
+      velocidad: l.velocidad,
+      zona: xyToZona(l.x, l.y),
+      comentario: l.comentario,
+      x: l.x,
+      y: l.y,
     }));
-  }, [state?.lanzamientos, pitcherId, tipos.data, resultados.data]);
+  }, [lanzamientosQuery.data, pitcherId, tipos.data, resultados.data]);
+  
+  // Obtener info del pitcher desde los datos del partido
+  const pitcherInfo = useMemo(() => {
+    if (!partido) return null;
+    
+    // Buscar en los pitchers iniciales
+    if (partido.pitcherLocal.id === Number(pitcherId)) {
+      return {
+        nombre: `${partido.pitcherLocal.nombre} ${partido.pitcherLocal.apellido}`,
+        equipo: partido.equipoLocal.nombre,
+      };
+    }
+    if (partido.pitcherVisitante.id === Number(pitcherId)) {
+      return {
+        nombre: `${partido.pitcherVisitante.nombre} ${partido.pitcherVisitante.apellido}`,
+        equipo: partido.equipoVisitante.nombre,
+      };
+    }
+    
+    // Buscar en todos los pitchers de ambos equipos
+    const allPitchers = [
+      ...partido.equipoLocal.pitchers.map(p => ({ ...p, equipo: partido.equipoLocal.nombre })),
+      ...partido.equipoVisitante.pitchers.map(p => ({ ...p, equipo: partido.equipoVisitante.nombre })),
+    ];
+    
+    const found = allPitchers.find(p => p.id === Number(pitcherId));
+    if (found) {
+      return {
+        nombre: `${found.nombre} ${found.apellido}`,
+        equipo: found.equipo,
+      };
+    }
+    
+    return null;
+  }, [partido, pitcherId]);
+  
+  const pitcherNombre = pitcherInfo?.nombre ?? `Pitcher #${pitcherId}`;
+  const equipoNombre = pitcherInfo?.equipo ?? '';
   
   // Agrupar lanzamientos por inning
   const lanzamientosPorInning = lanzamientos.reduce((acc, lanzamiento) => {
@@ -102,66 +138,56 @@ export default function PitcherDetallePage({ params }: PitcherDetalleProp) {
     setIsModalZonaOpen(true);
   };
   
-  const handleEditar = (lanzamientoId: string) => {
+  const handleEditar = (lanzamientoId: number) => {
     openEditModalFor(lanzamientoId);
   };
   
-  const handleEliminar = (lanzamientoId: string) => {
-    confirmDelete(lanzamientoId);
+  const handleEliminar = async (lanzamientoId: number) => {
+    if (!confirm('¿Eliminar este lanzamiento? Esta acción no se puede deshacer.')) return;
+    try {
+      await remove.mutateAsync(lanzamientoId);
+      console.log('✅ Lanzamiento eliminado');
+    } catch (err) {
+      console.error('Error al eliminar lanzamiento:', err);
+      alert('No se pudo eliminar el lanzamiento. Intenta de nuevo.');
+    }
   };
 
   // --- Estados para edición ---
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<number | null>(null);
   const [editTipoId, setEditTipoId] = useState<number | null>(null);
   const [editResultadoId, setEditResultadoId] = useState<number | null>(null);
   const [editVelocidad, setEditVelocidad] = useState<number | null>(null);
 
-  // Helper para generar el id interno igual que en el map
-  const genIdFrom = (l: LanzamientoGuardado) => `${l.pitcherId}-${l.timestamp.toString()}-${l.zona}`;
-
-  const openEditModalFor = (lanzamientoId: string) => {
-    // Encontrar el lanzamiento en el estado global
-  const s = scout.getState(partidoId);
-  const found = s?.lanzamientos.find((l: LanzamientoGuardado) => genIdFrom(l) === lanzamientoId);
+  const openEditModalFor = (lanzamientoId: number) => {
+    const found = lanzamientos.find(l => l.id === lanzamientoId);
     if (!found) return;
     setEditingId(lanzamientoId);
-    setEditTipoId(found.tipoId ?? null);
-    setEditResultadoId(found.resultadoId ?? null);
-    setEditVelocidad(found.velocidad ?? null);
+    setEditTipoId(found.tipoId);
+    setEditResultadoId(found.resultadoId);
+    setEditVelocidad(found.velocidad);
     setIsEditModalOpen(true);
   };
 
-  const saveEdit = () => {
+  const saveEdit = async () => {
     if (!editingId) return;
-    const s = scout.getState(partidoId);
-    if (!s) return;
-    const updated = s.lanzamientos.map((l: LanzamientoGuardado) => {
-      if (genIdFrom(l) === editingId) {
-        return {
-          ...l,
-          tipoId: editTipoId ?? null,
-          resultadoId: editResultadoId ?? null,
-          velocidad: editVelocidad ?? null,
-        } as LanzamientoGuardado;
-      }
-      return l;
-    });
-    // Persistir en el contexto
-    // conservamos pitchersEnPartido
-    const newState = { lanzamientos: updated, pitchersEnPartido: s.pitchersEnPartido };
-    scout.setStateForPartido(partidoId, newState);
-    setIsEditModalOpen(false);
-    setEditingId(null);
-  };
-
-  const confirmDelete = (lanzamientoId: string) => {
-    if (!confirm('¿Eliminar este lanzamiento? Esta acción no se puede deshacer (solo localmente).')) return;
-  const s = scout.getState(partidoId);
-  if (!s) return;
-  const filtered = s.lanzamientos.filter((l: LanzamientoGuardado) => genIdFrom(l) !== lanzamientoId);
-    const newState = { lanzamientos: filtered, pitchersEnPartido: s.pitchersEnPartido };
-    scout.setStateForPartido(partidoId, newState);
+    try {
+      await update.mutateAsync({
+        id: editingId,
+        data: {
+          tipoId: editTipoId ?? undefined,
+          resultadoId: editResultadoId ?? undefined,
+          velocidad: editVelocidad ?? undefined,
+        },
+      });
+      console.log('✅ Lanzamiento actualizado');
+      setIsEditModalOpen(false);
+      setEditingId(null);
+    } catch (err) {
+      console.error('Error al actualizar lanzamiento:', err);
+      alert('No se pudo actualizar el lanzamiento. Intenta de nuevo.');
+    }
   };
 
 

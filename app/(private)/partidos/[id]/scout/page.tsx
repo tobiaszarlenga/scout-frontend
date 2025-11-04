@@ -20,9 +20,10 @@ import RegistrarLanzamientoForm, {
 // --- Importamos los hooks ---
 import { useLookups } from '@/hooks/useLookups';
 import { usePartido } from '@/hooks/usePartidos';
+import { useLanzamientos } from '@/hooks/useLanzamientos';
 import { useScout } from '@/context/ScoutContext';
 import type { ActivePitcher, LanzamientoGuardado, PitcherEnPartido } from '@/types/scout';
-import { lanzamientosApi, type CreateLanzamientoDto } from '@/lib/api';
+import type { CreateLanzamientoDto } from '@/lib/api';
 
 // --- Importamos los componentes ---
 import PitcherCard from './PitcherCard';
@@ -41,6 +42,9 @@ export default function ScoutPage({ params }: { params: Promise<{ id: string }> 
   
   // --- Cargamos los lookups (tipos y resultados) ---
   const { tipos, resultados } = useLookups();
+  
+  // --- Hook para persistir lanzamientos en backend ---
+  const { create: createLanzamiento } = useLanzamientos(id);
 
   // --- Estado del Pitcher (ya lo teníamos) ---
   const [activePitcher, setActivePitcher] = useState<ActivePitcher>('local');
@@ -408,7 +412,7 @@ export default function ScoutPage({ params }: { params: Promise<{ id: string }> 
         ladoInning,
         pitcherId: Number(pitcherActual.id),
       };
-      await lanzamientosApi.create(id, payload);
+      await createLanzamiento.mutateAsync(payload);
       console.log('💾 Lanzamiento persistido en backend');
     } catch (err) {
       console.warn('No se pudo persistir el lanzamiento. Se mantiene en memoria.', err);
