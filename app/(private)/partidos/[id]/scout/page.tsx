@@ -19,7 +19,7 @@ import RegistrarLanzamientoForm, {
 
 // --- Importamos los hooks ---
 import { useLookups } from '@/hooks/useLookups';
-import { usePartido } from '@/hooks/usePartidos';
+import { usePartido, usePartidos } from '@/hooks/usePartidos';
 import { useLanzamientos } from '@/hooks/useLanzamientos';
 import { useScout } from '@/context/ScoutContext';
 import type { ActivePitcher, LanzamientoGuardado, PitcherEnPartido } from '@/types/scout';
@@ -168,6 +168,7 @@ export default function ScoutPage({ params }: { params: Promise<{ id: string }> 
   
   // --- Sincronización con el contexto global de Scout ---
   const scout = useScout();
+  const { finalizar } = usePartidos();
   // Cargar si existe previamente
   useEffect(() => {
     const prev = scout.getState(id);
@@ -479,6 +480,26 @@ export default function ScoutPage({ params }: { params: Promise<{ id: string }> 
     }
   };
 
+  // Volver a la lista de partidos
+  const handleVolver = () => {
+    router.push('/partidos');
+  };
+
+  // Finalizar partido: marcar en backend y limpiar contexto local
+  const handleFinalizarPartido = async () => {
+    const ok = window.confirm('¿Deseas finalizar este partido? Esta acción lo moverá a Partidos Finalizados.');
+    if (!ok) return;
+
+    try {
+  await finalizar.mutateAsync(Number(id));
+      scout.clearPartido(id);
+      router.push('/partidos');
+    } catch (err) {
+      console.error('Error finalizando partido', err);
+      alert('No se pudo finalizar el partido. Intenta de nuevo.');
+    }
+  };
+
   return (
     // 1. Tu layout principal (fondo degradado)
     <main className="min-h-full w-full max-w-full overflow-x-hidden bg-gradient-to-br from-[#90D1F2] to-[#012F8A] px-6 py-6 sm:px-10 sm:py-8">
@@ -487,7 +508,7 @@ export default function ScoutPage({ params }: { params: Promise<{ id: string }> 
         {/* 2. Cabecera (Scouting en Vivo) */}
         <header className="flex items-center justify-between pb-8">
           <div>
-            <button className="text-sm text-gray-200 hover:text-white">
+            <button onClick={handleVolver} className="text-sm text-gray-200 hover:text-white">
               &larr; Volver a Partidos
             </button>
             <h1
@@ -497,8 +518,12 @@ export default function ScoutPage({ params }: { params: Promise<{ id: string }> 
               Scouting en Vivo
             </h1>
           </div>
-          <button className="bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 transition-colors">
-            Finalizar Partido
+          <button
+            onClick={handleFinalizarPartido}
+            disabled={finalizar.status === 'pending'}
+            className="bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 transition-colors disabled:opacity-60"
+          >
+              {finalizar.status === 'pending' ? 'Finalizando...' : 'Finalizar Partido'}
           </button>
         </header>
 

@@ -14,8 +14,8 @@ export default function PartidosFinalizados({ partidos }: Props) {
   const router = useRouter();
 
   const handleVerReporte = (partidoId: number) => {
-    console.log(`Ver reporte ${partidoId}`);
-    // router.push(`/reportes/${partidoId}`);
+    // Navegar a la página de reporte
+    router.push(`/reportes/${partidoId}`);
   };
 
   if (partidos.length === 0) {

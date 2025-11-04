@@ -37,7 +37,13 @@ export function usePartidos() {
     onSuccess: () => qc.invalidateQueries({ queryKey: KEY }),
   });
 
-  return { list, create };
+  // --- FINALIZAR un partido ---
+  const finalizar = useMutation({
+    mutationFn: (partidoId: number) => api.put(`/partidos/${partidoId}/finalizar`, {}),
+    onSuccess: () => qc.invalidateQueries({ queryKey: KEY }),
+  });
+
+  return { list, create, finalizar };
 }
 
 // --- Hook para obtener un partido específico ---
