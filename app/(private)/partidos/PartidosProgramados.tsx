@@ -5,6 +5,7 @@ import React from 'react';
 import type { PartidoConDetalles } from 'types/partido';
 // --- CAMBIO 1: Importamos Link ---
 import Link from 'next/link'; 
+import { useScout } from '@/context/ScoutContext';
 // (Ya no necesitamos useRouter)
 import { format } from 'date-fns';
 
@@ -13,6 +14,7 @@ interface Props {
 }
 
 export default function PartidosProgramados({ partidos }: Props) {
+  const scout = useScout();
   
   // --- CAMBIO 2: Ya no necesitamos la función handleEmpezar ---
   // const handleEmpezar = (partidoId: number) => {
@@ -67,7 +69,7 @@ export default function PartidosProgramados({ partidos }: Props) {
                     href={`/partidos/${partido.id}/scout`}
                     className="bg-gray-800 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-900 transition-colors"
                   >
-                    Empezar
+                    {scout.getState(String(partido.id)) ? 'Continuar' : 'Empezar'}
                   </Link>
                 </td>
 
