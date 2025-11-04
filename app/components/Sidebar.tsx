@@ -6,9 +6,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Home, Calendar, Users, UserCircle, FileText, X,
-  LogOut // 1. Importamos el ícono de LogOut
+  LogOut
 } from "lucide-react";
-import { useAuth } from "@/context/AuthContext"; // y el hook de autenticación
+import { useAuth } from "@/context/AuthContext";
 
 const nav = [
   { href: "/", label: "Inicio", icon: Home },
@@ -23,21 +23,25 @@ export default function Sidebar({
   onClose,
 }: { open?: boolean; onClose?: () => void }) {
   const pathname = usePathname();
-  const { logout } = useAuth(); // 2. Obtenemos la función de logout desde el hook
+  const { logout } = useAuth();
 
   const content = (
-    // Envolvemos todo en un flex-col para poder usar mt-auto
-    <aside className="flex h-full w-64 flex-col bg-white p-4 shadow-sm border-r border-slate-200">
-      {/* Header del sidebar: siempre visible; el botón X solo en mobile */}
+    // CAMBIO: Fondo azul oscuro. Quitamos sombra y cambiamos borde.
+    <aside className="flex h-full w-64 flex-col bg-blue-800 p-4 border-r border-blue-600">
+      
+      {/* Header del sidebar: textos a blanco/azul claro */}
       <div className="mb-4 flex items-center justify-between">
         <div>
-          <div className="text-xl font-bold">SoftScout</div>
-          <div className="text-sm text-slate-500">Scouting System</div>
+          {/* CAMBIO: Texto a blanco */}
+          <div className="text-xl font-bold text-white">SoftScout</div>
+          {/* CAMBIO: Texto a azul claro */}
+          <div className="text-sm text-blue-300">Scouting System</div>
         </div>
         <button
           aria-label="Cerrar menú"
           onClick={onClose}
-          className="rounded-lg p-2 hover:bg-slate-100 lg:hidden"
+          // CAMBIO: Color de icono y hover
+          className="rounded-lg p-2 text-blue-400 hover:bg-blue-800 lg:hidden"
         >
           <X size={20} />
         </button>
@@ -54,12 +58,14 @@ export default function Sidebar({
               href={href}
               className={[
                 "flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition",
+                // CAMBIO: Estilo ACTIVO para fondo oscuro
                 active
-                  ? "bg-slate-100 text-slate-900 font-medium"
-                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
+                  ? "bg-blue-700 text-white font-medium" 
+                // CAMBIO: Estilo INACTIVO para fondo oscuro
+                  : "text-blue-200 hover:bg-blue-700 hover:text-white",
               ].join(" ")}
               aria-current={active ? "page" : undefined}
-              onClick={onClose} // en mobile cierra el menú al navegar
+              onClick={onClose}
             >
               <Icon size={18} />
               <span>{label}</span>
@@ -68,16 +74,18 @@ export default function Sidebar({
         })}
       </nav>
 
-      {/* 3. Contenedor del footer que se empuja hacia abajo */}
+      {/* Footer del sidebar */}
       <div className="mt-auto">
         <button
           onClick={logout}
-          className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-200 hover:text-red"
+          // CAMBIO: Estilo "peligro" para fondo oscuro
+          className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-red-400 transition hover:bg-red-900 hover:text-red-300"
         >
           <LogOut size={18} />
           <span className="font-medium">Cerrar Sesión</span>
         </button>
-        <div className="mt-4 text-xs text-center text-slate-400">SoftScout v1.0</div>
+        {/* CAMBIO: Color de texto de versión */}
+        <div className="mt-4 text-xs text-center text-blue-400">SoftScout v1.0</div>
       </div>
     </aside>
   );
@@ -95,14 +103,14 @@ export default function Sidebar({
           open ? "translate-x-0" : "-translate-x-full",
         ].join(" ")}
       >
-        {/* Overlay clickeable */}
         <div
           onClick={onClose}
           className="absolute inset-0 bg-black/40"
           role="button"
           aria-label="Cerrar overlay"
         />
-        <div className="relative h-full w-72">{content}</div>
+        {/* CAMBIO: Aumentado de w-72 para que coincida con w-64 + padding */}
+        <div className="relative h-full w-64">{content}</div>
       </div>
     </>
   );
