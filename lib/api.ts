@@ -40,3 +40,42 @@ export const pitcherApi = {
 
 // Podrías tener otros objetos similares aquí, por ejemplo:
 // export const equipoApi = { ... };
+
+// Lanzamientos API
+export interface CreateLanzamientoDto {
+  tipoId: number;
+  resultadoId: number;
+  velocidad?: number | null;
+  comentario?: string | null;
+  zona?: number; // índice 0..24, el backend lo convertirá a x,y
+  x?: number;
+  y?: number;
+  inning: number;
+  ladoInning: 'abre' | 'cierra';
+  pitcherId: number;
+}
+
+export interface LanzamientoDTO {
+  id: number;
+  partidoId: number;
+  tipoId: number;
+  resultadoId: number;
+  velocidad: number | null;
+  comentario: string | null;
+  x: number;
+  y: number;
+  inning: number;
+  ladoInning: 'abre' | 'cierra';
+  pitcherId: number;
+  creadoEn: string;
+}
+
+export const lanzamientosApi = {
+  listByPartido: (partidoId: string | number) =>
+    api.get<LanzamientoDTO[]>(`/partidos/${partidoId}/lanzamientos`),
+  create: (partidoId: string | number, data: CreateLanzamientoDto) =>
+    api.post<LanzamientoDTO>(`/partidos/${partidoId}/lanzamientos`, data),
+  update: (id: number, data: Partial<CreateLanzamientoDto>) =>
+    api.put<LanzamientoDTO>(`/lanzamientos/${id}`, data),
+  delete: (id: number) => api.delete(`/lanzamientos/${id}`),
+};

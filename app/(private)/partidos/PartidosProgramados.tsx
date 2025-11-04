@@ -1,23 +1,24 @@
+// En: app/(private)/partidos/PartidosProgramados.tsx
 'use client';
 
 import React from 'react';
 import type { PartidoConDetalles } from 'types/partido';
-import { useRouter } from 'next/navigation';
-// ¡Asegúrate de tener date-fns instalado! (npm install date-fns)
+// --- CAMBIO 1: Importamos Link ---
+import Link from 'next/link'; 
+// (Ya no necesitamos useRouter)
 import { format } from 'date-fns';
 
 interface Props {
-  // Esto ya está perfecto
   partidos: PartidoConDetalles[];
 }
 
 export default function PartidosProgramados({ partidos }: Props) {
-  const router = useRouter();
-
-  const handleEmpezar = (partidoId: number) => {
-    console.log(`Empezar partido ${partidoId}`);
-    // router.push(`/partidos/${partidoId}/scout`);
-  };
+  
+  // --- CAMBIO 2: Ya no necesitamos la función handleEmpezar ---
+  // const handleEmpezar = (partidoId: number) => {
+  //   console.log(`Empezar partido ${partidoId}`);
+  
+  // };
 
   if (partidos.length === 0) {
     return (
@@ -31,6 +32,7 @@ export default function PartidosProgramados({ partidos }: Props) {
     <div className="overflow-x-auto">
       <table className="w-full text-left min-w-[700px]">
         <thead>
+          {/* ... (tu <thead> no cambia) ... */}
           <tr className="border-b text-gray-600">
             <th className="py-2 px-4 font-medium">Fecha</th>
             <th className="py-2 px-4 font-medium">Horario</th>
@@ -42,19 +44,14 @@ export default function PartidosProgramados({ partidos }: Props) {
         </thead>
         <tbody>
           {partidos.map((partido) => {
-            // Creamos el objeto Date una sola vez para usarlo en ambos campos
             const fechaHora = new Date(partido.fecha);
 
             return (
               <tr key={partido.id} className="border-b hover:bg-gray-50 text-gray-800">
-                {/* --- SOLUCIÓN 1 --- */}
-                {/* Convertimos el string a Date ANTES de formatear */}
+                
+                {/* ... (las otras celdas <td> no cambian) ... */}
                 <td className="py-3 px-4">{format(fechaHora, 'dd-MM-yyyy')}</td>
-                
-                {/* --- SOLUCIÓN 2 --- */}
-                {/* Extraemos la hora (HH:mm) del mismo objeto Date */}
                 <td className="py-3 px-4">{format(fechaHora, 'HH:mm')}</td>
-                
                 <td className="py-3 px-4">
                   {partido.equipoLocal.nombre} vs {partido.equipoVisitante.nombre}
                 </td>
@@ -63,14 +60,17 @@ export default function PartidosProgramados({ partidos }: Props) {
                   {partido.pitcherVisitante.nombre} {partido.pitcherVisitante.apellido}
                 </td>
                 <td className="py-3 px-4">{partido.campo}</td>
+                
+                {/* --- CAMBIO 3: Reemplazamos <button> por <Link> --- */}
                 <td className="py-3 px-4">
-                  <button
-                    onClick={() => handleEmpezar(partido.id)}
-                    className="bg-gray-800 text-white px-4 py-2 rounded-lg text-sm"
+                  <Link
+                    href={`/partidos/${partido.id}/scout`}
+                    className="bg-gray-800 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-900 transition-colors"
                   >
                     Empezar
-                  </button>
+                  </Link>
                 </td>
+
               </tr>
             );
           })}

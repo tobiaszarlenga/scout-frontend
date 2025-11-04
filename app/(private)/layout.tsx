@@ -6,6 +6,7 @@ import { Menu } from "lucide-react";
 import AuthGuard from "@/app/components/AuthGuard";
 import Sidebar from "@/app/components/Sidebar";
 import { Toaster } from "react-hot-toast"; // 1. Importa el componente Toaster
+import { ScoutProvider } from "@/context/ScoutContext";
 
 export default function PrivateLayout({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
@@ -38,5 +39,9 @@ export default function PrivateLayout({ children }: { children: React.ReactNode 
     </div>
   );
 
-  return <AuthGuard>{Shell}</AuthGuard>;
+  return (
+    <AuthGuard>
+      <ScoutProvider>{Shell}</ScoutProvider>
+    </AuthGuard>
+  );
 }

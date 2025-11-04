@@ -2,11 +2,12 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from 'lib/api';
-// ¡Importamos los 3 tipos de tu archivo!
+// ¡Importamos los tipos!
 import type {
   Partido,
   CreatePartidoInput,
   PartidoConDetalles,
+  PartidoParaScout,
 } from 'types/partido';
 
 // Llave para la caché de React Query
@@ -36,7 +37,14 @@ export function usePartidos() {
     onSuccess: () => qc.invalidateQueries({ queryKey: KEY }),
   });
 
-  // (Aquí añadiremos 'update' y 'remove' en el futuro)
-
   return { list, create };
+}
+
+// --- Hook para obtener un partido específico ---
+export function usePartido(id: string | number) {
+  return useQuery({
+    queryKey: [...KEY, 'detail', String(id)],
+    queryFn: () => api.get<PartidoParaScout>(`/partidos/${id}`),
+    enabled: !!id, // Solo ejecuta si hay un ID válido
+  });
 }
