@@ -13,6 +13,12 @@ import {
   UsersIcon, UserGroupIcon, CalendarIcon 
 } from '@heroicons/react/24/solid';
 
+// Tipo para los datos del gráfico de torta
+type PieChartData = {
+  name: string;
+  value: number;
+};
+
 // Colores para el gráfico de torta
 const PIE_COLORS: { [key: string]: string } = {
   'PROGRAMADO': '#3B82F6',
@@ -109,19 +115,29 @@ export default function InicioPage() {
         {/* --- SECCIÓN 2: Gráficos --- */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 mb-6">
           
-          {/* Gráfico de Torta */}
           <div className="rounded-xl bg-white/90 p-6 shadow-xl backdrop-blur-sm">
             <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
               <ChartPieIcon className="h-6 w-6 mr-2 text-gray-600" />
-              Estado de tus Partidos
+              Estado de Partidos
             </h3>
-            {graficoTorta.length > 0 ? (
+            {graficoTorta && graficoTorta.length > 0 ? (
               <div style={{ width: '100%', height: 300 }}>
                 <ResponsiveContainer>
                   <PieChart>
-                    <Pie data={graficoTorta as any[]} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} label>
+                    <Pie
+                      data={graficoTorta as PieChartData[]}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={100}
+                      label
+                    >
                       {graficoTorta.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={PIE_COLORS[entry.name.toUpperCase()] || '#8884d8'} />
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={PIE_COLORS[entry.name.toUpperCase()] || '#8884d8'}
+                        />
                       ))}
                     </Pie>
                     <Tooltip />
@@ -130,11 +146,11 @@ export default function InicioPage() {
                 </ResponsiveContainer>
               </div>
             ) : (
-              <p className="text-gray-500 text-center h-[300px] flex items-center justify-center">No hay datos de partidos para mostrar.</p>
+              <p className="text-gray-500 text-center h-[300px] flex items-center justify-center">
+                No hay datos de partidos para mostrar.
+              </p>
             )}
           </div>
-          
-          {/* Gráfico de Barras */}
           <div className="rounded-xl bg-white/90 p-6 shadow-xl backdrop-blur-sm">
             <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
               <ChartBarIcon className="h-6 w-6 mr-2 text-gray-600" />
