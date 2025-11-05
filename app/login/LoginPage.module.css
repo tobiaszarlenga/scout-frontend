@@ -1,151 +1,147 @@
-/* app/login/LoginPage.module.css (ACTUALIZADO CON TEMA SOFTBALL) */
+/* ======================
+   LOGIN - SoftScout Dark Edition v2
+   ====================== */
 
 .mainContainer {
-    margin:0;
-    padding:0;
-    font-family: Arial, sans-serif;
-    /* CAMBIO: Gradiente con tonos marrones */
-    background: linear-gradient(150deg, #6ca1e7, #122d85);
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(150deg, #1F2F40, #15202B);
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .formulario {
-    width: 400px;
-    background: white;
-    border-radius: 10px;
-    padding: 0 40px 30px 40px;
-    box-sizing: border-box;
+  width: 400px;
+  background: #22313F;
+  border-radius: 12px;
+  padding: 0 40px 30px 40px;
+  box-sizing: border-box;
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
+  color: #DDE2E5;
 }
 
 .formulario h1 {
-    text-align: center;
-    padding: 25px 0 10px 0; /* un poco más de espacio arriba */
-    font-size: 24px;        /* más grande */
-    font-weight: bold;      /* en negrita */
-    color: #012F8A;         /* opcional: color acorde al tema */
-    border-bottom: none;    /* quita la línea plateada */
+  text-align: center;
+  padding: 25px 0 10px 0;
+  font-size: 26px;
+  font-weight: 800;
+  color: #DDE2E5;
+  border-bottom: none;
 }
 
-
-
 form .username {
-    position: relative;
-    border-bottom: 2px solid #adadad;
-    margin : 30px 0;
+  position: relative;
+  border-bottom: 2px solid #394956;
+  margin: 30px 0;
 }
 
 .username input {
-    width: 100%;
-    padding: 0 5px;
-    height: 40px;
-    font-size: 16px;
-    border: none;
-    outline: none;
-    background: none;
+  width: 100%;
+  padding: 0 5px;
+  height: 40px;
+  font-size: 16px;
+  border: none;
+  outline: none;
+  background: none;
+  color: #DDE2E5;
 }
 
-/* Ocultamos el placeholder visual (usamos " " para habilitar :placeholder-shown) */
 .username input::placeholder {
-    color: transparent;
+  color: transparent;
 }
 
 .username label {
-    position: absolute;
-    top: 50%;
-    left: 5px;
-    color: #adadad;
-    transform: translateY(-50%);
-    font-size: 16px;
-    pointer-events: none;
-    transition: .5s;
+  position: absolute;
+  top: 50%;
+  left: 5px;
+  color: #AAB4BD;
+  transform: translateY(-50%);
+  font-size: 16px;
+  pointer-events: none;
+  transition: 0.5s;
 }
 
 .username span::before {
-    content: '';
-    position: absolute;
-    top: 40px;
-    left: 0;
-    width: 0%;
-    height: 2px;
-    /* CAMBIO: Color de la línea al enfocar */
-    background: #012F8A; 
-    transition: .5s;
+  content: '';
+  position: absolute;
+  top: 40px;
+  left: 0;
+  width: 0%;
+  height: 2px;
+  background: #E04E0E;
+  transition: 0.5s;
 }
 
 .username input:focus ~ label,
-/* Sube el label cuando hay texto (aunque aún no sea válido) */
-.username input:not(:placeholder-shown) ~ label,
-/* Sube el label cuando el navegador autocompleta */
-.username input:-webkit-autofill ~ label {
-    top: -5px;
-    /* CAMBIO: Color del label al enfocar */
-    color: #012F8A;
+.username input:not(:placeholder-shown) ~ label {
+  top: -5px;
+  color: #E04E0E;
 }
 
 .username input:focus ~ span::before,
 .username input:valid ~ span::before {
-    width: 100%;
+  width: 100%;
 }
 
 .recordar {
-    margin: -5px 0 20px 5px;
-    color: #606060;
-    cursor: pointer;
-    font-size: 14px;
+  margin: -5px 0 20px 5px;
+  color: #B5BEC5;
+  cursor: pointer;
+  font-size: 14px;
 }
 
 .recordar:hover {
-    text-decoration: underline;
+  color: #E04E0E;
+  text-decoration: underline;
 }
 
 .submitBtn {
-    width: 100%;
-    height: 50px;
-    border: 1px solid;
-    /* CAMBIO: Color del botón a marrón oscuro */
-    background: #012F8A;
-    border-radius: 25px;
-    color: white;
-    font-size: 18px;
-    font-weight: 700;
-    cursor: pointer;
-    outline:none;
-    transition: .5s;
+  width: 100%;
+  height: 50px;
+  border: none;
+  background: #E04E0E;
+  border-radius: 15px;
+  color: #DDE2E5;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  outline: none;
+  transition: 0.3s;
 }
 
 .submitBtn:hover {
-    /* CAMBIO: Color del botón al pasar el mouse */
-    background: #90aff2;
+  background: #c7430d;
+  transform: translateY(-1px);
 }
 
 .submitBtn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .registrarse {
-    margin:30px 0 0 0;
-    text-align: center;
-    font-size: 16px;
-    color: black;
+  margin: 30px 0 0 0;
+  text-align: center;
+  font-size: 16px;
+  color: #DDE2E5;
 }
 
 .registrarse a {
-    /* CAMBIO: Color del enlace a marrón */
-    color: #012F8A;
-    text-decoration: none;
+  color: #E04E0E;
+  text-decoration: none;
+  font-weight: 700;
 }
 
 .registrarse a:hover {
-    text-decoration: underline;
+  text-decoration: underline;
 }
 
 .errorMessage {
-    color: #D32F2F;
-    text-align: center;
-    margin-bottom: 20px;
-    font-size: 14px;
+  color: #ff7b7b;
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 14px;
 }

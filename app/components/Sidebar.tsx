@@ -1,12 +1,15 @@
-// app/(private)/components/Sidebar.tsx
-
-'use client';
+"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  Home, Calendar, Users, UserCircle, FileText, X,
-  LogOut
+  Home,
+  Calendar,
+  Users,
+  UserCircle,
+  FileText,
+  X,
+  LogOut,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
@@ -18,55 +21,86 @@ const nav = [
   { href: "/reportes", label: "Reportes", icon: FileText },
 ];
 
+// 🎨 Paleta SoftScout
+const COLORS = {
+  bgFrom: "#1F2F40",
+  bgTo: "#15202B",
+  card: "#22313F",
+  text: "#DDE2E5",
+  accent: "#E04E0E",
+  edit: "#3B82F6",
+};
+
 export default function Sidebar({
   open,
   onClose,
-}: { open?: boolean; onClose?: () => void }) {
+}: {
+  open?: boolean;
+  onClose?: () => void;
+}) {
   const pathname = usePathname();
   const { logout } = useAuth();
 
   const content = (
-    // CAMBIO: Fondo azul oscuro. Quitamos sombra y cambiamos borde.
-    <aside className="flex h-full w-64 flex-col bg-blue-800 p-4 border-r border-blue-600">
-      
-      {/* Header del sidebar: textos a blanco/azul claro */}
-      <div className="mb-4 flex items-center justify-between">
+    // ⬇️ altura completa de la ventana para evitar "cortes" al fondo
+    <aside
+      className="flex h-screen w-64 flex-col border-r p-4"
+      style={{
+        background: `linear-gradient(180deg, ${COLORS.bgFrom}, ${COLORS.bgTo})`,
+        borderColor: "#263646",
+      }}
+    >
+      {/* Header */}
+      <div className="mb-6 flex items-center justify-between">
         <div>
-          {/* CAMBIO: Texto a blanco */}
-          <div className="text-xl font-bold text-white">SoftScout</div>
-          {/* CAMBIO: Texto a azul claro */}
-          <div className="text-sm text-blue-300">Scouting System</div>
+          <div className="text-xl font-bold" style={{ color: COLORS.text }}>
+            SoftScout
+          </div>
         </div>
         <button
           aria-label="Cerrar menú"
           onClick={onClose}
-          // CAMBIO: Color de icono y hover
-          className="rounded-lg p-2 text-blue-400 hover:bg-blue-800 lg:hidden"
+          className="rounded-lg p-2 text-gray-400 hover:bg-[#22313F] lg:hidden"
         >
           <X size={20} />
         </button>
       </div>
 
-      <nav className="space-y-1">
+      {/* NAV LINKS — Este contenedor sí tiene scroll si hace falta */}
+      <nav className="space-y-1 flex-1 overflow-y-auto">
         {nav.map(({ href, label, icon: Icon }) => {
-          const active = href === "/"
-            ? pathname === "/"
-            : pathname.startsWith(href);
+          const active =
+            href === "/" ? pathname === "/" : pathname.startsWith(href);
           return (
             <Link
               key={href}
               href={href}
               className={[
-                "flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition",
-                // CAMBIO: Estilo ACTIVO para fondo oscuro
-                active
-                  ? "bg-blue-700 text-white font-medium" 
-                // CAMBIO: Estilo INACTIVO para fondo oscuro
-                  : "text-blue-200 hover:bg-blue-700 hover:text-white",
+                "group relative flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition-all duration-200 hover:bg-[#22313F]",
+                active ? "font-semibold" : "",
               ].join(" ")}
+              style={{
+                backgroundColor: active ? "rgba(34,49,63,0.65)" : "transparent",
+                color: COLORS.text,
+              }}
               aria-current={active ? "page" : undefined}
               onClick={onClose}
             >
+              {/* barrita curva animada: blanco en hover, naranja activo */}
+              <span
+                className={[
+                  "pointer-events-none absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1.5 rounded-r-full transition-all duration-300",
+                  active ? "opacity-100" : "opacity-0",
+                ].join(" ")}
+                style={{ backgroundColor: COLORS.accent }}
+              />
+              {!active && (
+                <span
+                  className="pointer-events-none absolute left-0 top-1/2 -translate-y-1/2 h-0 w-1.5 rounded-r-full opacity-0 transition-all duration-300 group-hover:h-8 group-hover:opacity-100"
+                  style={{ backgroundColor: "#FFFFFF" }}
+                />
+              )}
+
               <Icon size={18} />
               <span>{label}</span>
             </Link>
@@ -74,26 +108,24 @@ export default function Sidebar({
         })}
       </nav>
 
-      {/* Footer del sidebar */}
-      <div className="mt-auto">
+      {/* FOOTER — siempre visible (fuera del área con scroll) */}
+      <footer className="pt-4 border-t border-[#2c3d4a]">
         <button
           onClick={logout}
-          // CAMBIO: Estilo "peligro" para fondo oscuro
           className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-red-400 transition hover:bg-red-900 hover:text-red-300"
         >
           <LogOut size={18} />
           <span className="font-medium">Cerrar Sesión</span>
         </button>
-        {/* CAMBIO: Color de texto de versión */}
-        <div className="mt-4 text-xs text-center text-blue-400">SoftScout v1.0</div>
-      </div>
+      </footer>
     </aside>
   );
 
   return (
     <>
-      {/* Desktop: fijo y sticky */}
-      <div className="hidden lg:block sticky top-0 min-h-dvh">{content}</div>
+      {/* Desktop: sidebar fijo + spacer para no superponer el contenido */}
+      <div className="hidden lg:block fixed inset-y-0 left-0 z-30">{content}</div>
+      <div className="hidden lg:block w-64 shrink-0" aria-hidden />
 
       {/* Mobile: off-canvas */}
       <div
@@ -109,7 +141,6 @@ export default function Sidebar({
           role="button"
           aria-label="Cerrar overlay"
         />
-        {/* CAMBIO: Aumentado de w-72 para que coincida con w-64 + padding */}
         <div className="relative h-full w-64">{content}</div>
       </div>
     </>
