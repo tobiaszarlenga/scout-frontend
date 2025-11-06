@@ -1,89 +1,124 @@
-// scout-frontend/app/(private)/partidos/page.tsx
-'use client';
+"use client";
 
-import React from 'react';
-import PartidosProgramados from './PartidosProgramados';
-import PartidosFinalizados from './PartidosFinalizados';
-import NewPartidoModal from './NewPartidoModal';
-import { usePartidos } from 'hooks/usePartidos';
+import React from "react";
+import PartidosProgramados from "./PartidosProgramados";
+import PartidosFinalizados from "./PartidosFinalizados";
+import NewPartidoModal from "./NewPartidoModal";
+import { usePartidos } from "hooks/usePartidos";
 
-// 🎨 Paleta (coincide con el dashboard)
-const COLORS = {
-  bgFrom: '#1F2F40',
-  bgTo:   '#15202B',
-  card:   '#22313F',
-  text:   '#DDE2E5',
-  accent: '#E04E0E',
+/** Tema coherente con Inicio */
+const THEME = {
+  bgFrom: "#0d1117",
+  bgTo: "#111927",
+  surfaceAlt: "#1b2434",
+  border: "rgba(255,255,255,0.06)",
+  text: "#e2e8f0",
+  muted: "#9aa7b1",
 };
+
+const Card: React.FC<React.PropsWithChildren<{ style?: React.CSSProperties }>> = ({ children, style }) => (
+  <div
+    style={{
+      background: THEME.surfaceAlt,
+      border: `1px solid ${THEME.border}`,
+      borderRadius: 4,
+      padding: "28px 24px",
+      boxShadow: "0 1px 4px rgba(0,0,0,0.25)",
+      transition: "all 0.25s ease",
+      ...style,
+    }}
+    className="hover:shadow-[0_2px_8px_rgba(0,0,0,0.3)] hover:scale-[1.01]"
+  >
+    {children}
+  </div>
+);
+
+const Separator = () => (
+  <div style={{ margin: "24px 0 48px", height: 1, width: "100%", background: THEME.border }} />
+);
 
 export default function PartidosPage() {
   const { list } = usePartidos();
-
-  const programados = list.data?.filter((p) => p.estado === 'PROGRAMADO') ?? [];
-  const finalizados = list.data?.filter((p) => p.estado === 'FINALIZADO') ?? [];
+  const programados = list.data?.filter((p) => p.estado === "PROGRAMADO") ?? [];
+  const finalizados = list.data?.filter((p) => p.estado === "FINALIZADO") ?? [];
 
   return (
     <main
-      className="min-h-full w-full max-w-full overflow-x-hidden px-6 py-6 sm:px-10 sm:py-8"
-      style={{ background: `linear-gradient(150deg, ${COLORS.bgFrom}, ${COLORS.bgTo})` }}
+      style={{
+        minHeight: "100vh",
+        background: `linear-gradient(160deg, ${THEME.bgFrom}, ${THEME.bgTo})`,
+        padding: "40px",
+      }}
     >
       <div className="mx-auto w-full max-w-6xl">
         {/* Header */}
-        <header className="flex items-center justify-between pb-8">
+        <header
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: 32,
+            borderBottom: `1px solid ${THEME.border}`,
+            paddingBottom: 8,
+          }}
+        >
           <div>
-            <h1
-              className="text-4xl font-bold"
-              style={{ color: COLORS.text, textShadow: '2px 2px 4px rgba(0,0,0,0.3)' }}
-            >
+            <h1 style={{ color: THEME.text, fontSize: 28, fontWeight: 600, letterSpacing: -0.3 }}>
               Partidos
             </h1>
-            <p className="mt-1" style={{ color: '#AAB4BD' }}>
-              Gestiona y monitorea los partidos de softball
+            <p style={{ color: THEME.muted, fontSize: 14, marginTop: 4 }}>
+              Gestiona y monitorea tus partidos de softball
             </p>
           </div>
-          {/* El modal mantiene su propio estilo; si adentro hay botones, idealmente usar COLORS.accent */}
           <NewPartidoModal />
         </header>
 
         {/* Partidos Programados */}
-        <div
-          className="p-6 rounded-lg shadow-xl mb-8"
-          style={{ backgroundColor: COLORS.card }}
-        >
-          <h2 className="text-xl font-semibold mb-4" style={{ color: COLORS.text }}>
+        <Card>
+          <h2
+            style={{
+              color: THEME.text,
+              fontSize: 18,
+              fontWeight: 600,
+              marginBottom: 16,
+              borderBottom: `1px solid ${THEME.border}`,
+              paddingBottom: 8,
+            }}
+          >
             Partidos Programados
           </h2>
 
-          {list.isPending && <p style={{ color: '#AAB4BD' }}>Cargando partidos...</p>}
-
+          {list.isPending && <p style={{ color: THEME.muted }}>Cargando partidos...</p>}
           {list.isError && (
-            <p className="font-semibold" style={{ color: '#ff7b7b' }}>
-              Error al cargar partidos: {list.error.message}
-            </p>
+            <p style={{ color: "#f87171" }}>Error al cargar partidos: {list.error.message}</p>
           )}
-
           {list.isSuccess && <PartidosProgramados partidos={programados} />}
-        </div>
+        </Card>
+
+        {/* Separación clara entre secciones */}
+        <Separator />
 
         {/* Partidos Finalizados */}
-        <div
-          className="p-6 rounded-lg shadow-xl"
-          style={{ backgroundColor: COLORS.card }}
-        >
-          <h2 className="text-xl font-semibold mb-4" style={{ color: COLORS.text }}>
+        <Card>
+          <h2
+            style={{
+              color: THEME.text,
+              fontSize: 18,
+              fontWeight: 600,
+              marginBottom: 16,
+              borderBottom: `1px solid ${THEME.border}`,
+              paddingBottom: 8,
+            }}
+          >
             Partidos Finalizados
           </h2>
 
-          {list.isPending && <p style={{ color: '#AAB4BD' }}>Cargando partidos...</p>}
-
+          {list.isPending && <p style={{ color: THEME.muted }}>Cargando partidos...</p>}
           {list.isError && (
-            <p className="font-semibold" style={{ color: '#ff7b7b' }}>
-              Error al cargar partidos: {list.error.message}
-            </p>
+            <p style={{ color: "#f87171" }}>Error al cargar partidos: {list.error.message}</p>
           )}
-
           {list.isSuccess && <PartidosFinalizados partidos={finalizados} />}
-        </div>
+        </Card>
       </div>
     </main>
   );
