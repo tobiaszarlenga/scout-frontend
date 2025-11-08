@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  /* Palette provided by user */
+  /* Default tokens (dark theme by default). We also provide explicit light/dark scopes below. */
   --color-sidebar: #1F2E3F; /* sidebar */
   --color-bg: #0D1118;     /* main background for all pages */
   --color-card: #1B2434;   /* cards, modals, surfaces */
@@ -11,7 +11,37 @@
   --color-accent2: #3FA4B7;/* secondary accent */
   --color-text: #E2E8F0;   /* primary text color */
 
+  /* RGB tokens for using alpha via rgba(var(--...-rgb), a) */
+  --color-accent-rgb: 255,122,26; /* rgb of #FF7A1A */
+  --color-accent2-rgb: 63,164,183; /* rgb of #3FA4B7 */
+
   /* Derived tokens */
+  --color-border: rgba(255,255,255,0.06);
+}
+
+/* Light theme (optional). Activate by setting data-theme="light" on <html> or <body>. */
+[data-theme="light"] {
+  --color-sidebar: #F8FAFC;
+  --color-bg: #F6F8FA;
+  --color-card: #FFFFFF;
+  --color-accent: #FF7A1A; /* keep accent */
+  --color-accent2: #3FA4B7;
+  --color-text: #0F172A; /* darker text for light bg */
+  --color-accent-rgb: 255,122,26;
+  --color-accent2-rgb: 63,164,183;
+  --color-border: rgba(2,6,23,0.06);
+}
+
+/* Dark theme explicit scope (same as default but explicit) */
+[data-theme="dark"] {
+  --color-sidebar: #1F2E3F;
+  --color-bg: #0D1118;
+  --color-card: #1B2434;
+  --color-accent: #FF7A1A;
+  --color-accent2: #3FA4B7;
+  --color-text: #E2E8F0;
+  --color-accent-rgb: 255,122,26;
+  --color-accent2-rgb: 63,164,183;
   --color-border: rgba(255,255,255,0.06);
 }
 

@@ -12,6 +12,7 @@ import {
   LogOut,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import ThemeToggle from "./ThemeToggle";
 
 const nav = [
   { href: "/", label: "Inicio", icon: Home },
@@ -57,13 +58,16 @@ export default function Sidebar({
             SoftScout
           </div>
         </div>
-        <button
-          aria-label="Cerrar menú"
-          onClick={onClose}
-          className="rounded-lg p-2 text-gray-400 hover:bg-[var(--color-card)] lg:hidden"
-        >
-          <X size={20} />
-        </button>
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <button
+            aria-label="Cerrar menú"
+            onClick={onClose}
+            className="rounded-lg p-2 text-gray-400 hover:bg-[var(--color-card)] lg:hidden"
+          >
+            <X size={20} />
+          </button>
+        </div>
       </div>
 
       {/* NAV LINKS — Este contenedor sí tiene scroll si hace falta */}
