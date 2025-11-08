@@ -2,6 +2,8 @@
 "use client";
 
 import { useState } from "react";
+import Modal from '@/app/components/Modal';
+import Button from '@/app/components/Button';
 import { useForm, SubmitHandler } from "react-hook-form";
 import { usePitchers } from "@/hooks/usePitchers";
 import { useEquipos } from "@/hooks/useEquipos";
@@ -43,26 +45,34 @@ export default function NewPitcherModal() {
 
   return (
     <>
-      <button
-        onClick={() => setIsOpen(true)}
-        className="flex items-center gap-2 rounded-full bg-white px-5 py-2 font-bold text-[#012F8A] shadow-lg transition-transform duration-300 hover:-translate-y-1"
+      <Button onClick={() => setIsOpen(true)} variant="secondary" className="flex items-center gap-2 rounded-full">
+        <PlusIcon className="h-5 w-5 text-accent" />
+        <span className="text-accent font-bold">Nuevo Pitcher</span>
+      </Button>
+
+      <Modal
+        open={isOpen}
+        onClose={closeModal}
+        title={
+          <div className="flex items-center gap-3">
+            <UserPlusIcon className="h-6 w-6 text-apptext" />
+            <span>Añadir Nuevo Pitcher</span>
+          </div>
+        }
+        size="md"
+        footer={
+          <div className="flex justify-end gap-3">
+            <Button type="button" variant="secondary" onClick={closeModal}>
+              Cancelar
+            </Button>
+            <Button type="submit" form="new-pitcher-form" variant="primary" className="bg-blue-500 hover:bg-blue-700" disabled={createPitcher.isPending}>
+              {createPitcher.isPending ? 'Guardando...' : 'Guardar'}
+            </Button>
+          </div>
+        }
       >
-        <PlusIcon className="h-5 w-5" />
-        Nuevo Pitcher
-      </button>
-
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="w-full max-w-md rounded-xl bg-white shadow-xl overflow-hidden">
-            
-            {/* CAMBIO: Cabezal del modal actualizado a AZUL */}
-            <div className="flex items-center gap-3 bg-blue-500 p-4 text-white">
-              <UserPlusIcon className="h-7 w-7" />
-              <h2 className="text-xl font-bold">Añadir Nuevo Pitcher</h2>
-            </div>
-
-            <form onSubmit={handleSubmit(onSubmit)}>
-              <div className="p-6 space-y-4">
+        <form id="new-pitcher-form" onSubmit={handleSubmit(onSubmit)}>
+          <div className="p-4 sm:p-6 space-y-4">
                 {/* Campo Nombre */}
                 <div>
                   <label htmlFor="nombre" className="block text-sm font-medium text-gray-700">Nombre</label>
@@ -131,30 +141,9 @@ export default function NewPitcherModal() {
                   </select>
                   {errors.equipoId && <p className="mt-1 text-xs text-red-500">{errors.equipoId.message}</p>}
                 </div>
-              </div>
-
-              {/* Pie de página (Sin cambios) */}
-              <div className="flex justify-end space-x-3 bg-gray-50 p-4">
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  className="rounded-lg px-4 py-2 font-semibold text-gray-700 hover:bg-gray-300"
-                >
-                  Cancelar
-                </button>
-                {/* Botón Guardar se mantiene VERDE por contraste */}
-                <button
-                  type="submit"
-                  disabled={createPitcher.isPending}
-                  className="rounded-lg bg-blue-500 px-4 py-2 font-semibold text-white hover:bg-blue-800 disabled:opacity-50"
-                >
-                  {createPitcher.isPending ? "Guardando..." : "Guardar"}
-                </button>
-              </div>
-            </form>
           </div>
-        </div>
-      )}
+        </form>
+      </Modal>
     </>
   );
 }

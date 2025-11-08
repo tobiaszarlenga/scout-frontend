@@ -3,6 +3,7 @@
 
 import type { Equipo } from "@/types/equipo";
 import EquipoForm from "./EquipoForm";
+import Modal from '@/app/components/Modal';
 
 // 1. Interfaz de Props corregida
 // - Añadimos 'open' que es la propiedad que realmente se usa para abrir/cerrar.
@@ -21,18 +22,11 @@ export default function EditEquipoModal({
   onSave,
 }: EditEquipoModalProps) {
   // Si el modal no está abierto o no hay un equipo para editar, no mostramos nada.
-  if (!open || !equipo) {
-    return null;
-  }
+  if (!open || !equipo) return null;
 
-  // 2. Reemplazamos el <modal> por una estructura de divs con Tailwind para crear el modal.
   return (
-    // Fondo oscuro semi-transparente
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      {/* Contenedor del modal */}
-      <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
-        <h2 className="mb-4 text-lg font-semibold">Editar Equipo</h2>
-
+    <Modal open={open} onClose={onClose} title={`Editar Equipo`} size="md">
+      <div className="p-2 sm:p-4">
         <EquipoForm
           initial={equipo}
           onCancel={onClose}
@@ -47,6 +41,6 @@ export default function EditEquipoModal({
           }}
         />
       </div>
-    </div>
+    </Modal>
   );
 }

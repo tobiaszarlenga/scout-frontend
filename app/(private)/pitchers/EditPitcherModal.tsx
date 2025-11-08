@@ -2,6 +2,8 @@
 "use client";
 
 import { useEffect } from "react";
+import Modal from '@/app/components/Modal';
+import Button from '@/app/components/Button';
 import { useForm, SubmitHandler } from "react-hook-form";
 import { usePitchers } from "@/hooks/usePitchers";
 import { useEquipos } from "@/hooks/useEquipos";
@@ -70,21 +72,23 @@ export default function EditPitcherModal({ pitcher, onClose }: EditPitcherModalP
     return null;
   }
 
-  // --- CAMBIO 3: Usamos el JSX de NewPitcherModal ---
-  // (Reemplazamos 'isOpen' por la comprobación de 'pitcher')
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="w-full max-w-md rounded-xl bg-white shadow-xl overflow-hidden">
-        
-        {/* Cabezal AZUL (igual que New, pero con ícono y texto de Editar) */}
-        <div className="flex items-center gap-3 bg-blue-500 p-4 text-white">
-          <PencilIcon className="h-7 w-7" />
-          <h2 className="text-xl font-bold">Editar Pitcher</h2>
+    <Modal
+      open={!!pitcher}
+      onClose={onClose}
+      title={<div className="flex items-center gap-3"><PencilIcon className="h-6 w-6 text-apptext"/> <span>Editar Pitcher</span></div>}
+      size="md"
+      footer={
+        <div className="flex justify-end gap-3">
+          <Button type="button" variant="secondary" onClick={onClose}>Cancelar</Button>
+          <Button type="submit" form="edit-pitcher-form" variant="primary" className="bg-blue-500 hover:bg-blue-700" disabled={updatePitcher.isPending}>
+            {updatePitcher.isPending ? 'Actualizando...' : 'Actualizar'}
+          </Button>
         </div>
-
-        <form onSubmit={handleSubmit(onSubmit)}>
-          {/* Cuerpo del formulario (con padding y fondo gris) */}
-          <div className="p-6 space-y-4"> {/* Eliminamos bg-gray-50 de aquí para que sea blanco */}
+      }
+    >
+      <form id="edit-pitcher-form" onSubmit={handleSubmit(onSubmit)}>
+        <div className="p-4 sm:p-6 space-y-4"> {/* Eliminamos bg-gray-50 de aquí para que sea blanco */}
 
             {/* Campo Nombre (Full-width) */}
             <div>
@@ -155,26 +159,7 @@ export default function EditPitcherModal({ pitcher, onClose }: EditPitcherModalP
               {errors.equipoId && <p className="mt-1 text-xs text-red-500">{errors.equipoId.message}</p>}
             </div>
           </div>
-
-          {/* Pie de página (con fondo gris y botones) */}
-          <div className="flex justify-end space-x-3 bg-gray-50 p-4">
-            <button
-              type="button"
-              onClick={onClose} // Usamos la prop 'onClose'
-              className="rounded-lg px-4 py-2 font-semibold text-gray-700 hover:bg-gray-300"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              disabled={updatePitcher.isPending}
-              className="rounded-lg bg-blue-500 px-4 py-2 font-semibold text-white hover:bg-blue-800 disabled:opacity-50"
-            >
-              {updatePitcher.isPending ? "Actualizando..." : "Actualizar"}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+      </form>
+    </Modal>
   );
 }
