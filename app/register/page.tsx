@@ -39,7 +39,7 @@ export default function RegisterPage() {
       } else {
         setError(data.error || 'Ocurrió un error en el registro.');
       }
-    } catch (err) {
+    } catch {
       setError('No se pudo conectar con el servidor.');
     }
   };

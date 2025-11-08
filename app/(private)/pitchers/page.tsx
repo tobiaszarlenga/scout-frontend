@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import Image from 'next/image';
 import { usePitchers } from "@/hooks/usePitchers";
 import type { Pitcher } from "@/types/pitcher";
 import NewPitcherModal from "./NewPitcherModal";
@@ -18,20 +19,27 @@ const COLORS = {
 };
 
 function Avatar({ src, alt }: { src?: string | null; alt: string }) {
-  if (src) {
+  const [imgError, setImgError] = useState(false);
+
+  if (src && !imgError) {
     return (
-      <img
-        src={src}
-        alt={alt}
-        className="mx-auto mb-4 h-24 w-24 rounded-full border-4 object-cover shadow-md"
+      <div
+        className="mx-auto mb-4 h-24 w-24 rounded-full border-4 overflow-hidden shadow-md"
         style={{
           borderColor: 'var(--color-card)',
           backgroundColor: COLORS.accent,
         }}
-        onError={(e) => {
-          (e.currentTarget as HTMLImageElement).style.display = "none";
-        }}
-      />
+      >
+        <Image
+          src={src}
+          alt={alt}
+          width={96}
+          height={96}
+          className="rounded-full object-cover"
+          onError={() => setImgError(true)}
+          unoptimized
+        />
+      </div>
     );
   }
 

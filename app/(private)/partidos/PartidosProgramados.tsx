@@ -24,7 +24,7 @@ export default function PartidosProgramados({ partidos }: Props) {
 
   if (partidos.length === 0) {
     return (
-      <p className="text-center py-4" style={{ color: '#AAB4BD' }}>
+      <p className="text-center py-4 text-apptext opacity-80">
         No hay partidos programados
       </p>
     );

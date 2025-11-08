@@ -1,6 +1,7 @@
 // hooks/usePitchers.ts
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { pitcherApi, CreatePitcherDto } from '@/lib/api'; // Ajusta la ruta si es necesario
+import { pitcherApi } from '@/lib/api';
+import type { CreatePitcherDto } from '@/types/pitcher';
 
 export const usePitchers = () => {
   const queryClient = useQueryClient();
