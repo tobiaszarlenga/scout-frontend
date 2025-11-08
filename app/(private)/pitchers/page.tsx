@@ -52,29 +52,10 @@ function Avatar({ src, alt }: { src?: string | null; alt: string }) {
 export default function PitchersPage() {
   const { list, remove } = usePitchers();
   const [pitcherAEditar, setPitcherAEditar] = useState<Pitcher | null>(null);
-
-  if (list.isLoading) {
-    return (
-      <div
-        className="flex h-screen items-center justify-center"
-        style={{
-          background: `linear-gradient(180deg, ${COLORS.bgFrom}, ${COLORS.bgTo})`,
-        }}
-      >
-        <p className="text-2xl font-bold" style={{ color: COLORS.text }}>
-          Cargando pitchers...
-        </p>
-      </div>
-    );
-  }
-
-  if (list.isError) return <p>Error: {(list.error as Error).message}</p>;
-
-  const pitchers = list.data ?? [];
+  const pitchers = useMemo(() => list.data ?? [], [list.data]);
 
   const pitchersPorEquipo = useMemo(() => {
-    if (!pitchers) return {};
-    return pitchers.reduce((acc, pitcher) => {
+    return (pitchers || []).reduce((acc, pitcher) => {
       const equipoKey = pitcher.equipo?.nombre ?? "Sin equipo";
       if (!acc[equipoKey]) acc[equipoKey] = [];
       acc[equipoKey].push(pitcher);
@@ -82,19 +63,22 @@ export default function PitchersPage() {
     }, {} as Record<string, Pitcher[]>);
   }, [pitchers]);
 
+  if (list.isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-bg">
+        <p className="text-2xl font-bold text-apptext">Cargando pitchers...</p>
+      </div>
+    );
+  }
+
+  if (list.isError) return <p>Error: {(list.error as Error).message}</p>;
+
   return (
-    <main
-      className="min-h-full w-full max-w-full overflow-x-hidden px-6 py-6 pb-10 font-sans sm:px-10 sm:py-8"
-      style={{
-        background: `linear-gradient(180deg, ${COLORS.bgFrom}, ${COLORS.bgTo})`,
-      }}
-    >
+    <main className="min-h-full w-full max-w-full overflow-x-hidden px-6 py-6 pb-10 font-sans sm:px-10 sm:py-8 bg-bg text-apptext">
       <div className="mx-auto w-full max-w-6xl">
         {/* HEADER */}
         <header className="flex items-center justify-between pb-8">
-          <h1 className="text-4xl font-bold" style={{ color: COLORS.text }}>
-            Pitchers
-          </h1>
+          <h1 className="text-4xl font-bold text-apptext">Pitchers</h1>
           <NewPitcherModal />
         </header>
 
@@ -102,10 +86,7 @@ export default function PitchersPage() {
           <div className="flex flex-col gap-10">
             {Object.keys(pitchersPorEquipo).map((nombreEquipo) => (
               <section key={nombreEquipo}>
-                <h2
-                  className="mb-4 text-2xl font-bold capitalize"
-                  style={{ color: COLORS.text }}
-                >
+                <h2 className="mb-4 text-2xl font-bold capitalize text-apptext">
                   {nombreEquipo}
                 </h2>
 
@@ -113,12 +94,8 @@ export default function PitchersPage() {
                   {pitchersPorEquipo[nombreEquipo].map((p) => (
                     <div
                       key={p.id}
-                      className="group relative flex flex-col rounded-2xl p-6 text-center shadow-lg transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl"
-                      style={{
-                        backgroundColor: COLORS.card,
-                        color: COLORS.text,
-                        boxShadow: "0 2px 10px rgba(0,0,0,0.3)",
-                      }}
+                      className="group relative flex flex-col rounded-2xl p-6 text-center shadow-lg transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl bg-card text-apptext"
+                    
                     >
                       <Avatar
                         // src={p.fotoUrl ?? p.foto_url}

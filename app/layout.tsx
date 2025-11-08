@@ -2,6 +2,7 @@
 import "./globals.css";
 import { Proveedores } from "./proveedores";
 import { AuthProvider } from "../context/AuthContext";
+import { ThemeProvider } from "@/context/ThemeContext";
 
 export const metadata = {
   title: "SoftScout",
@@ -17,7 +18,9 @@ export default function RootLayout({
     <html lang="es" suppressHydrationWarning>
       <body suppressHydrationWarning>
         <Proveedores>
-          <AuthProvider>{children}</AuthProvider>
+          <ThemeProvider>
+            <AuthProvider>{children}</AuthProvider>
+          </ThemeProvider>
         </Proveedores>
       </body>
     </html>

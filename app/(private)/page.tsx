@@ -14,55 +14,37 @@ import {
   UsersIcon, UserGroupIcon, CalendarIcon
 } from "@heroicons/react/24/solid";
 
-/* ===== Tema (referencias a variables CSS globales) ===== */
-const THEME = {
-  bgFrom: "var(--color-bg)",
-  bgTo: "var(--color-bg)",
-  surface: "var(--color-card)",
-  surfaceAlt: "var(--color-card)",
-  border: "var(--color-border)",
-  text: "var(--color-text)",
-  muted: "#9aa7b1",
-  accent: "var(--color-accent)",
-  accent2: "var(--color-accent2)",
-  radius: 6,
-};
+/* ===== Theme tokens (we use Tailwind classes / CSS variables) ===== */
 
 /* ===== Helpers ===== */
-const Card = ({ children, style }: React.PropsWithChildren<{style?: React.CSSProperties}>) => (
+const Card = ({ children, className = "", style }: React.PropsWithChildren<{ className?: string; style?: React.CSSProperties }>) => (
   <div
-    style={{
-      background: THEME.surface,
-      border: `1px solid ${THEME.border}`,
-      borderRadius: THEME.radius,
-      padding: 16,
-      transition: "all 0.25s ease",
-      ...style,
-    }}
-    className="hover:scale-[1.02] hover:shadow-lg"
+    className={["rounded-md p-4 transition-all hover:scale-[1.02] hover:shadow-lg bg-card border border-appborder", className].join(" ")}
+    style={style}
   >
     {children}
   </div>
 );
 
 const SectionHeader = ({ icon, title }: { icon: React.ReactNode; title: string }) => (
-  <div style={{ marginBottom: 12 }}>
-    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-      <span style={{ color: THEME.accent }}>{icon}</span>
-      <h3 style={{ color: THEME.text, fontSize: 15, fontWeight: 600 }}>{title}</h3>
+  <div className="mb-3">
+    <div className="flex items-center gap-2 mb-2">
+      <span className="text-accent">{icon}</span>
+      <h3 className="text-sm font-semibold text-apptext">{title}</h3>
     </div>
-    <div style={{ height: 1, background: THEME.border }} />
+    <div className="h-px bg-appborder" />
   </div>
 );
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const DarkTooltip = ({ active, payload, label }: any) =>
   !active || !payload?.length ? null : (
     <div style={{
       background: "#0b0f16",
-      border: `1px solid ${THEME.border}`,
+      border: `1px solid var(--color-border)`,
       padding: "8px 10px",
       borderRadius: 6,
-      color: THEME.text,
+      color: 'var(--color-text)',
       fontSize: 12
     }}>
       <div style={{ opacity: 0.8, marginBottom: 4 }}>{label}</div>
@@ -77,57 +59,49 @@ type BarPoint = { name: string; pitchers: number };
 export default function InicioPage() {
   const { query } = useDashboard();
 
-  if (query.isLoading) return <p style={{ color: THEME.text, padding: 24 }}>Cargando…</p>;
-  if (query.isError)   return <p style={{ color: "#fca5a5", padding: 24 }}>Error: {(query.error as Error).message}</p>;
-  if (!query.data)     return <p style={{ color: THEME.text, padding: 24 }}>Sin datos.</p>;
+  if (query.isLoading) return <p className="p-6 text-apptext">Cargando…</p>;
+  if (query.isError)   return <p className="p-6 text-red-300">Error: {(query.error as Error).message}</p>;
+  if (!query.data)     return <p className="p-6 text-apptext">Sin datos.</p>;
 
   const { kpis, graficoTorta, graficoBarras, proximosPartidos } = query.data;
   const pieData = (graficoTorta ?? []) as PiePoint[];
   const barData = (graficoBarras ?? []) as BarPoint[];
 
   return (
-    <main style={{
-      minHeight: "100vh",
-      background: `linear-gradient(160deg, ${THEME.bgFrom}, ${THEME.bgTo})`,
-      padding: "24px"
-    }}>
+    <main className="min-h-screen bg-bg text-apptext p-6">
       <div className="mx-auto w-full max-w-7xl">
         {/* Título */}
-        <header style={{ marginBottom: 16, borderBottom: `1px solid ${THEME.border}`, paddingBottom: 8 }}>
-          <h1 style={{ color: THEME.text, fontSize: 26, fontWeight: 600 }}>Inicio</h1>
+        <header className="mb-4 border-b border-appborder pb-2">
+          <h1 className="text-2xl font-semibold text-apptext">Inicio</h1>
         </header>
 
         {/* KPIs */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3" style={{ marginBottom: 20 }}>
+  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 mb-5">
           {[
             { href: "/equipos",  label: "Mis Equipos",  icon: <UsersIcon className="h-5 w-5" />,      value: kpis.equipos },
             { href: "/pitchers", label: "Mis Pitchers", icon: <UserGroupIcon className="h-5 w-5" />,  value: kpis.pitchers },
             { href: "/partidos", label: "Mis Partidos", icon: <CalendarIcon className="h-5 w-5" />,   value: kpis.partidos },
           ].map((it) => (
             <Link key={it.href} href={it.href}>
-              <Card style={{ background: THEME.surfaceAlt }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                  <span style={{ color: THEME.muted, fontSize: 14 }}>{it.label}</span>
-                  <span style={{ color: THEME.accent }}>{it.icon}</span>
-                </div>
-                <div style={{ color: THEME.text, fontSize: 36, fontWeight: 600, marginTop: 8, lineHeight: 1.1 }}>
-                  {it.value}
-                </div>
-              </Card>
+              <Card className="bg-card">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted">{it.label}</span>
+                    <span className="text-accent">{it.icon}</span>
+                  </div>
+                  <div className="text-4xl font-semibold text-apptext mt-2 leading-tight">
+                    {it.value}
+                  </div>
+                </Card>
             </Link>
           ))}
         </div>
 
         {/* Resumen */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-          <div style={{ color: THEME.muted, fontSize: 14 }}>Resumen general</div>
-          <div style={{ display: "flex", gap: 8 }}>
-            <button style={{ borderRadius: THEME.radius, padding: "6px 12px", fontSize: 13, background: THEME.surfaceAlt, border: `1px solid ${THEME.border}`, color: THEME.text }}>
-              Últimos 7 días
-            </button>
-            <button style={{ borderRadius: THEME.radius, padding: "6px 12px", fontSize: 13, background: "transparent", border: `1px solid ${THEME.border}`, color: THEME.muted }}>
-              Últimos 30 días
-            </button>
+        <div className="flex items-center justify-between mb-3">
+          <div className="text-sm text-muted">Resumen general</div>
+          <div className="flex gap-2">
+            <button className="px-3 py-1 rounded border border-appborder bg-card text-apptext text-sm">Últimos 7 días</button>
+            <button className="px-3 py-1 rounded border border-appborder text-muted text-sm">Últimos 30 días</button>
           </div>
         </div>
 
@@ -142,25 +116,19 @@ export default function InicioPage() {
                   <PieChart>
                     <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={50} outerRadius={90}>
                       {pieData.map((e, i) => (
-                        <Cell key={i} fill={e.name?.toUpperCase() === "FINALIZADO" ? THEME.accent2 : THEME.accent} />
+                        <Cell key={i} fill={e.name?.toUpperCase() === "FINALIZADO" ? 'var(--color-accent2)' : 'var(--color-accent)'} />
                       ))}
                     </Pie>
                     <Tooltip content={<DarkTooltip />} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
-            ) : (
-              <p style={{ color: THEME.muted, textAlign: "center", height: 300, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                No hay datos de partidos para mostrar.
-              </p>
+              ) : (
+              <p className="text-muted flex items-center justify-center h-72">No hay datos de partidos para mostrar.</p>
             )}
-            <div style={{ display: "flex", gap: 12, marginTop: 8, color: THEME.muted, fontSize: 12 }}>
-              <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
-                <span style={{ width: 8, height: 8, borderRadius: 999, background: THEME.accent }} /> Programado
-              </span>
-              <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
-                <span style={{ width: 8, height: 8, borderRadius: 999, background: THEME.accent2 }} /> Finalizado
-              </span>
+            <div className="flex gap-3 mt-2 text-sm text-muted">
+              <span className="inline-flex items-center gap-2"><span className="w-2 h-2 rounded-full" style={{ background: 'var(--color-accent)' }} /> Programado</span>
+              <span className="inline-flex items-center gap-2"><span className="w-2 h-2 rounded-full" style={{ background: 'var(--color-accent2)' }} /> Finalizado</span>
             </div>
           </Card>
 
@@ -177,26 +145,23 @@ export default function InicioPage() {
                     barGap={12}
                     barCategoryGap="22%"
                   >
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.06)" />
-                    <XAxis dataKey="name" axisLine={false} tickLine={false} tickMargin={8} tick={{ fill: THEME.muted, fontSize: 12 }} />
-                    <YAxis allowDecimals={false} axisLine={false} tickLine={false} tick={{ fill: THEME.muted, fontSize: 12 }} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border)" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tickMargin={8} tick={{ fill: 'rgba(226,232,240,0.65)', fontSize: 12 }} />
+                <YAxis allowDecimals={false} axisLine={false} tickLine={false} tick={{ fill: 'rgba(226,232,240,0.65)', fontSize: 12 }} />
                     <Tooltip content={<DarkTooltip />} />
                     <Bar
                       dataKey="pitchers"
                       name="Pitchers"
-                      fill={THEME.accent}
+                      fill={'var(--color-accent)'}
                       radius={[6, 6, 0, 0]}
-                      /* === Animación hover === */
                       activeBar={{ fill: "#ffa24c", opacity: 0.9 }}
                       animationDuration={400}
                     />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
-            ) : (
-              <p style={{ color: THEME.muted, textAlign: "center", height: 300, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                No tienes equipos o pitchers para mostrar.
-              </p>
+              ) : (
+              <p className="text-muted flex items-center justify-center h-72">No tienes equipos o pitchers para mostrar.</p>
             )}
           </Card>
         </div>
@@ -205,25 +170,16 @@ export default function InicioPage() {
         <Card>
           <SectionHeader icon={<CalendarDaysIcon className="h-5 w-5" />} title="Tus Próximos Partidos Programados" />
           {proximosPartidos.length ? (
-            <ul style={{ borderTop: `1px solid ${THEME.border}` }}>
-              {proximosPartidos.map((p: any, idx: number) => (
-                <li key={p.id} style={{
-                  display: "flex", alignItems: "center", justifyContent: "space-between",
-                  padding: "10px 0", borderBottom: idx === proximosPartidos.length - 1 ? "none" : `1px solid ${THEME.border}`
-                }}>
-                  <span style={{ color: THEME.text, fontSize: 15, fontWeight: 500 }}>
-                    {p.equipoLocal} <span style={{ color: THEME.muted }}>vs</span> {p.equipoVisitante}
-                  </span>
-                  <span style={{ color: THEME.muted, fontSize: 13 }}>
-                    {format(new Date(p.fecha), "dd/MM HH:mm", { locale: es })}
-                  </span>
+            <ul className="border-t" style={{ borderColor: 'var(--color-border)' }}>
+              {proximosPartidos.map((p, idx) => (
+                <li key={p.id} className="flex items-center justify-between py-2" style={{ borderBottom: idx === proximosPartidos.length - 1 ? 'none' : undefined }}>
+                  <span className="text-apptext text-base font-medium">{p.equipoLocal} <span className="text-muted">vs</span> {p.equipoVisitante}</span>
+                  <span className="text-muted text-sm">{format(new Date(p.fecha), "dd/MM HH:mm", { locale: es })}</span>
                 </li>
               ))}
             </ul>
           ) : (
-            <p style={{ color: THEME.muted, textAlign: "center", padding: "20px 0" }}>
-              No tienes partidos programados.
-            </p>
+            <p className="text-muted text-center py-5">No tienes partidos programados.</p>
           )}
         </Card>
       </div>
