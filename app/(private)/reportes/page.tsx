@@ -9,12 +9,12 @@ import { lanzamientosApi } from "@/lib/api";
 import Link from "next/link";
 
 const COLORS = {
-  bgFrom: "#1F2F40",
-  bgTo: "#15202B",
-  card: "#22313F",
-  text: "#DDE2E5",
-  accent: "#E04E0E",
-  edit: "#3B82F6",
+  bgFrom: 'var(--color-sidebar)',
+  bgTo: 'var(--color-sidebar)',
+  card: 'var(--color-card)',
+  text: 'var(--color-text)',
+  accent: 'var(--color-accent)',
+  edit: '#3B82F6',
 };
 
 type Mode = "recent" | "match" | "pitcher" | "team";

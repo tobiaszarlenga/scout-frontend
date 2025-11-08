@@ -6,12 +6,12 @@ import type { PartidoConDetalles } from 'types/partido';
 import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
 
-// 🎨 Paleta SoftScout Dark Edition v2 (igual que Programados)
+// 🎨 Paleta SoftScout (usa variables globales)
 const COLORS = {
-  rowBg: '#22313F',
-  rowHover: '#2C3E50',
-  text: '#DDE2E5',
-  accent: '#E04E0E', // Naranja principal
+  rowBg: 'var(--color-card)',
+  rowHover: 'var(--color-card)',
+  text: 'var(--color-text)',
+  accent: 'var(--color-accent)', // Naranja principal
 };
 
 interface Props {
@@ -37,7 +37,7 @@ export default function PartidosFinalizados({ partidos }: Props) {
     <div className="overflow-x-auto mt-6 rounded-lg">
       <table className="w-full text-left min-w-[700px] border-collapse">
         <thead>
-          <tr style={{ backgroundColor: '#1B2836', color: COLORS.text }}>
+          <tr style={{ backgroundColor: 'var(--color-card)', color: COLORS.text }}>
             <th className="py-2 px-4 font-medium">Fecha</th>
             <th className="py-2 px-4 font-medium">Equipos</th>
             <th className="py-2 px-4 font-medium">Pitchers</th>

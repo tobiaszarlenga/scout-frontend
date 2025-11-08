@@ -99,8 +99,8 @@ export default function ReportePage({ params }: { params: Promise<{ id: string }
     <main
       className="min-h-full w-full max-w-full px-6 py-6 sm:px-10 sm:py-8"
       style={{
-        background: "linear-gradient(135deg, #1F2F40, #15202B)",
-        color: "#DDE2E5",
+        background: `linear-gradient(135deg, var(--color-sidebar), var(--color-sidebar))`,
+        color: `var(--color-text)`,
       }}
     >
       <div className="mx-auto w-full max-w-6xl">
@@ -109,15 +109,15 @@ export default function ReportePage({ params }: { params: Promise<{ id: string }
             <button
               onClick={() => router.push("/partidos")}
               className="text-sm hover:opacity-80"
-              style={{ color: "#DDE2E5" }}
+              style={{ color: "var(--color-text)" }}
             >
               &larr; Volver a Partidos
             </button>
-            <h1 className="text-3xl md:text-4xl font-bold" style={{ color: "#DDE2E5" }}>
+            <h1 className="text-3xl md:text-4xl font-bold" style={{ color: "var(--color-text)" }}>
               Reporte del Partido
             </h1>
             {partido && (
-              <p style={{ color: "#DDE2E5" }}>
+              <p style={{ color: "var(--color-text)" }}>
                 {partido.equipoLocal.nombre} vs {partido.equipoVisitante.nombre} —{" "}
                 {format(new Date(partido.fecha), "dd-MM-yyyy HH:mm")}
               </p>
@@ -125,24 +125,24 @@ export default function ReportePage({ params }: { params: Promise<{ id: string }
           </div>
         </header>
 
-        <div className="p-6 rounded-lg shadow-xl" style={{ backgroundColor: "#22313F" }}>
-          <h2 className="text-xl font-semibold mb-4" style={{ color: "#DDE2E5" }}>
+        <div className="p-6 rounded-lg shadow-xl" style={{ backgroundColor: "var(--color-card)" }}>
+          <h2 className="text-xl font-semibold mb-4" style={{ color: "var(--color-text)" }}>
             Resumen
           </h2>
 
           {loadingPartido && <p>Cargando...</p>}
           {!loadingPartido && (
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-              <div className="p-4 border rounded" style={{ borderColor: "#3b4b58" }}>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+              <div className="p-4 border rounded" style={{ borderColor: "var(--color-border)" }}>
                 <div className="text-sm opacity-80">Total Lanzamientos</div>
                 <div className="text-2xl font-bold">{total}</div>
               </div>
-              <div className="p-4 border rounded" style={{ borderColor: "#3b4b58" }}>
+              <div className="p-4 border rounded" style={{ borderColor: "var(--color-border)" }}>
                 <div className="text-sm opacity-80">Promedio Velocidad</div>
                 <div className="text-2xl font-bold">{avgVelocity ? `${avgVelocity.toFixed(1)}` : "N/A"}</div>
                 <div className="text-sm opacity-60">(promedio de lanzamientos con velocidad)</div>
               </div>
-              <div className="p-4 border rounded" style={{ borderColor: "#3b4b58" }}>
+              <div className="p-4 border rounded" style={{ borderColor: "var(--color-border)" }}>
                 <div className="text-sm opacity-80">Por Resultado</div>
                 <div className="mt-2">
                   {Object.entries(byResultado).map(([k, v]) => (
@@ -152,7 +152,7 @@ export default function ReportePage({ params }: { params: Promise<{ id: string }
                   ))}
                 </div>
               </div>
-              <div className="p-4 border rounded" style={{ borderColor: "#3b4b58" }}>
+              <div className="p-4 border rounded" style={{ borderColor: "var(--color-border)" }}>
                 <div className="text-sm opacity-80">Por Pitcher</div>
                 <div className="mt-2">
                   {Object.entries(byPitcher).map(([k, v]) => (
@@ -166,15 +166,15 @@ export default function ReportePage({ params }: { params: Promise<{ id: string }
           )}
 
           {/* ===== Tabla con header sticky + scroll + paginación ===== */}
-          <h3 className="text-lg font-semibold mt-4 mb-2" style={{ color: "#E04E0E" }}>
+          <h3 className="text-lg font-semibold mt-4 mb-2" style={{ color: "var(--color-accent)" }}>
             Lanzamientos
           </h3>
 
           <div className="overflow-x-auto">
-            <div className="rounded" style={{ maxHeight: 480, overflowY: "auto", border: "1px solid #3b4b58" }}>
+            <div className="rounded" style={{ maxHeight: 480, overflowY: "auto", border: "1px solid var(--color-border)" }}>
               <table className="w-full text-left min-w-[700px]">
-                <thead className="sticky top-0 z-10" style={{ backgroundColor: "#22313F", color: "#DDE2E5" }}>
-                  <tr className="border-b" style={{ borderColor: "#3b4b58" }}>
+                <thead className="sticky top-0 z-10" style={{ backgroundColor: "var(--color-card)", color: "var(--color-text)" }}>
+                  <tr className="border-b" style={{ borderColor: "var(--color-border)" }}>
                     <th className="py-2 px-4">Inning</th>
                     <th className="py-2 px-4">Lado</th>
                     <th className="py-2 px-4">Pitcher</th>
@@ -187,7 +187,7 @@ export default function ReportePage({ params }: { params: Promise<{ id: string }
                 </thead>
                 <tbody>
                   {pageData.map((l) => (
-                    <tr key={l.id} className="border-b hover:opacity-90" style={{ borderColor: "#3b4b58", color: "#DDE2E5" }}>
+                    <tr key={l.id} className="border-b hover:opacity-90" style={{ borderColor: "var(--color-border)", color: "var(--color-text)" }}>
                       <td className="py-2 px-4">{l.inning}</td>
                       <td className="py-2 px-4">{l.ladoInning}</td>
                       <td className="py-2 px-4 text-sm">
@@ -219,7 +219,7 @@ export default function ReportePage({ params }: { params: Promise<{ id: string }
                   onClick={goPrev}
                   disabled={page === 1}
                   className="px-3 py-1 rounded disabled:opacity-40"
-                  style={{ backgroundColor: "#22313F", color: "#DDE2E5", border: "1px solid #3b4b58" }}
+                  style={{ backgroundColor: "var(--color-card)", color: "var(--color-text)", border: "1px solid var(--color-border)" }}
                 >
                   ← Anterior
                 </button>
@@ -227,7 +227,7 @@ export default function ReportePage({ params }: { params: Promise<{ id: string }
                   onClick={goNext}
                   disabled={page === totalPages}
                   className="px-3 py-1 rounded disabled:opacity-40"
-                  style={{ backgroundColor: "#22313F", color: "#DDE2E5", border: "1px solid #3b4b58" }}
+                  style={{ backgroundColor: "var(--color-card)", color: "var(--color-text)", border: "1px solid var(--color-border)" }}
                 >
                   Siguiente →
                 </button>
@@ -242,7 +242,7 @@ export default function ReportePage({ params }: { params: Promise<{ id: string }
                   value={pageSize}
                   onChange={(e) => setPageSize(Number(e.target.value))}
                   className="px-2 py-1 rounded"
-                  style={{ backgroundColor: "#22313F", color: "#DDE2E5", border: "1px solid #3b4b58", cursor: "pointer" }}
+                  style={{ backgroundColor: "var(--color-card)", color: "var(--color-text)", border: "1px solid var(--color-border)", cursor: "pointer" }}
                 >
                   {[10, 25, 50, 100].map((n) => (
                     <option key={n} value={n}>
@@ -256,23 +256,23 @@ export default function ReportePage({ params }: { params: Promise<{ id: string }
           </div>
 
           {/* Heatmap */}
-          <h3 className="text-lg font-semibold mt-6 mb-2" style={{ color: "#E04E0E" }}>
+          <h3 className="text-lg font-semibold mt-6 mb-2" style={{ color: "var(--color-accent)" }}>
             Heatmap de Zona (5x5)
           </h3>
           <div className="w-full flex flex-col md:flex-row gap-4">
-            <div className="p-4 border rounded" style={{ backgroundColor: "#22313F", borderColor: "#3b4b58" }}>
+            <div className="p-4 border rounded" style={{ backgroundColor: "var(--color-card)", borderColor: "var(--color-border)" }}>
               <div className="grid grid-cols-5 gap-1 w-[250px]">
                 {Array.from({ length: 5 }).map((_, row) =>
                   Array.from({ length: 5 }).map((__, col) => {
                     const idx = row * 5 + col;
                     const count = zoneCounts[idx] || 0;
                     const intensity = Math.min(1, count / maxZone);
-                    const bg = `rgba(224,78,14,${0.1 + 0.85 * intensity})`;
+                    const bg = `rgba(255,122,26,${0.1 + 0.85 * intensity})`;
                     return (
                       <div
                         key={`${row}-${col}`}
                         className="h-12 w-12 flex items-center justify-center text-sm font-medium rounded"
-                        style={{ background: bg, color: "#DDE2E5" }}
+                        style={{ background: bg, color: "var(--color-text)" }}
                       >
                         {count}
                       </div>
@@ -281,14 +281,14 @@ export default function ReportePage({ params }: { params: Promise<{ id: string }
                 )}
               </div>
             </div>
-            <div className="p-4 border rounded flex-1" style={{ backgroundColor: "#22313F", borderColor: "#3b4b58" }}>
-              <div className="text-sm mb-2" style={{ color: "#DDE2E5" }}>
+            <div className="p-4 border rounded flex-1" style={{ backgroundColor: "var(--color-card)", borderColor: "var(--color-border)" }}>
+              <div className="text-sm mb-2" style={{ color: "var(--color-text)" }}>
                 Interpretación
               </div>
-              <div className="text-sm" style={{ color: "#DDE2E5" }}>
+              <div className="text-sm" style={{ color: "var(--color-text)" }}>
                 Mayor número = más lanzamientos en esa zona. La intensidad visual es relativa al mayor recuento en el partido.
               </div>
-              <div className="mt-4 text-sm" style={{ color: "#DDE2E5" }}>
+              <div className="mt-4 text-sm" style={{ color: "var(--color-text)" }}>
                 Máximo en una celda: <strong>{Math.max(...zoneCounts)}</strong>
               </div>
             </div>

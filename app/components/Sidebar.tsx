@@ -21,13 +21,13 @@ const nav = [
   { href: "/reportes", label: "Reportes", icon: FileText },
 ];
 
-// 🎨 Paleta SoftScout
+// 🎨 Paleta SoftScout (referencias a variables globales)
 const COLORS = {
-  bgFrom: "#1F2F40",
-  bgTo: "#15202B",
-  card: "#22313F",
-  text: "#DDE2E5",
-  accent: "#E04E0E",
+  bgFrom: "var(--color-sidebar)",
+  bgTo: "var(--color-sidebar)",
+  card: "var(--color-card)",
+  text: "var(--color-text)",
+  accent: "var(--color-accent)",
   edit: "#3B82F6",
 };
 
@@ -47,7 +47,7 @@ export default function Sidebar({
       className="flex h-screen w-64 flex-col border-r p-4"
       style={{
         background: `linear-gradient(180deg, ${COLORS.bgFrom}, ${COLORS.bgTo})`,
-        borderColor: "#263646",
+        borderColor: "var(--color-card)",
       }}
     >
       {/* Header */}
@@ -60,7 +60,7 @@ export default function Sidebar({
         <button
           aria-label="Cerrar menú"
           onClick={onClose}
-          className="rounded-lg p-2 text-gray-400 hover:bg-[#22313F] lg:hidden"
+          className="rounded-lg p-2 text-gray-400 hover:bg-[var(--color-card)] lg:hidden"
         >
           <X size={20} />
         </button>
@@ -76,10 +76,10 @@ export default function Sidebar({
               key={href}
               href={href}
               className={[
-                "group relative flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition-all duration-200 hover:bg-[#22313F]",
+                "group relative flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition-all duration-200 hover:bg-[var(--color-card)]",
                 active ? "font-semibold" : "",
               ].join(" ")}
-              style={{
+                style={{
                 backgroundColor: active ? "rgba(34,49,63,0.65)" : "transparent",
                 color: COLORS.text,
               }}

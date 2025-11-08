@@ -6,7 +6,7 @@
   margin: 0;
   padding: 0;
   font-family: Arial, sans-serif;
-  background: linear-gradient(150deg, #1F2F40, #15202B);
+  background: linear-gradient(150deg, var(--color-sidebar), var(--color-sidebar));
   height: 100vh;
   display: flex;
   align-items: center;
@@ -15,12 +15,12 @@
 
 .formulario {
   width: 400px;
-  background: #22313F;
+  background: var(--color-card);
   border-radius: 12px;
   padding: 0 40px 30px 40px;
   box-sizing: border-box;
   box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
-  color: #DDE2E5;
+  color: var(--color-text);
 }
 
 .formulario h1 {
@@ -28,13 +28,13 @@
   padding: 25px 0 10px 0;
   font-size: 26px;
   font-weight: 800;
-  color: #DDE2E5;
+  color: var(--color-text);
   border-bottom: none;
 }
 
 form .username {
   position: relative;
-  border-bottom: 2px solid #394956;
+  border-bottom: 2px solid var(--color-border);
   margin: 30px 0;
 }
 
@@ -46,7 +46,7 @@ form .username {
   border: none;
   outline: none;
   background: none;
-  color: #DDE2E5;
+  color: var(--color-text);
 }
 
 .username input::placeholder {
@@ -57,7 +57,7 @@ form .username {
   position: absolute;
   top: 50%;
   left: 5px;
-  color: #AAB4BD;
+  color: rgba(226,232,240,0.7);
   transform: translateY(-50%);
   font-size: 16px;
   pointer-events: none;
@@ -71,14 +71,14 @@ form .username {
   left: 0;
   width: 0%;
   height: 2px;
-  background: #E04E0E;
+  background: var(--color-accent);
   transition: 0.5s;
 }
 
 .username input:focus ~ label,
 .username input:not(:placeholder-shown) ~ label {
   top: -5px;
-  color: #E04E0E;
+  color: var(--color-accent);
 }
 
 .username input:focus ~ span::before,
@@ -94,7 +94,7 @@ form .username {
 }
 
 .recordar:hover {
-  color: #E04E0E;
+  color: var(--color-accent);
   text-decoration: underline;
 }
 
@@ -102,9 +102,9 @@ form .username {
   width: 100%;
   height: 50px;
   border: none;
-  background: #E04E0E;
+  background: var(--color-accent);
   border-radius: 15px;
-  color: #DDE2E5;
+  color: var(--color-text);
   font-size: 18px;
   font-weight: 700;
   cursor: pointer;
@@ -126,11 +126,11 @@ form .username {
   margin: 30px 0 0 0;
   text-align: center;
   font-size: 16px;
-  color: #DDE2E5;
+  color: var(--color-text);
 }
 
 .registrarse a {
-  color: #E04E0E;
+  color: var(--color-accent);
   text-decoration: none;
   font-weight: 700;
 }

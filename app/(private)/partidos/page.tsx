@@ -6,13 +6,13 @@ import PartidosFinalizados from "./PartidosFinalizados";
 import NewPartidoModal from "./NewPartidoModal";
 import { usePartidos } from "hooks/usePartidos";
 
-/** Tema coherente con Inicio */
+/** Tema coherente con Inicio (usa variables globales) */
 const THEME = {
-  bgFrom: "#0d1117",
-  bgTo: "#111927",
-  surfaceAlt: "#1b2434",
-  border: "rgba(255,255,255,0.06)",
-  text: "#e2e8f0",
+  bgFrom: "var(--color-bg)",
+  bgTo: "var(--color-bg)",
+  surfaceAlt: "var(--color-card)",
+  border: "var(--color-border)",
+  text: "var(--color-text)",
   muted: "#9aa7b1",
 };
 

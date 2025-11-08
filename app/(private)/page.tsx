@@ -14,17 +14,17 @@ import {
   UsersIcon, UserGroupIcon, CalendarIcon
 } from "@heroicons/react/24/solid";
 
-/* ===== Tema ===== */
+/* ===== Tema (referencias a variables CSS globales) ===== */
 const THEME = {
-  bgFrom: "#0d1117",
-  bgTo: "#111927",
-  surface: "#161e2e",
-  surfaceAlt: "#1b2434",
-  border: "rgba(255,255,255,0.08)",
-  text: "#e2e8f0",
+  bgFrom: "var(--color-bg)",
+  bgTo: "var(--color-bg)",
+  surface: "var(--color-card)",
+  surfaceAlt: "var(--color-card)",
+  border: "var(--color-border)",
+  text: "var(--color-text)",
   muted: "#9aa7b1",
-  accent: "#ff7a1a",
-  accent2: "#3FA4B7",
+  accent: "var(--color-accent)",
+  accent2: "var(--color-accent2)",
   radius: 6,
 };
 

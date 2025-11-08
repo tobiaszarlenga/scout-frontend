@@ -7,12 +7,12 @@ import Link from 'next/link';
 import { useScout } from '@/context/ScoutContext';
 import { format } from 'date-fns';
 
-// 🎨 Paleta SoftScout Dark Edition v2
+// 🎨 Paleta SoftScout (usa variables globales)
 const COLORS = {
-  rowBg: '#22313F',
-  rowHover: '#2C3E50',
-  text: '#DDE2E5',
-  accent: '#E04E0E',
+  rowBg: 'var(--color-card)',
+  rowHover: 'var(--color-card)',
+  text: 'var(--color-text)',
+  accent: 'var(--color-accent)',
 };
 
 interface Props {
@@ -34,7 +34,7 @@ export default function PartidosProgramados({ partidos }: Props) {
     <div className="overflow-x-auto rounded-lg">
       <table className="w-full text-left min-w-[700px] border-collapse">
         <thead>
-          <tr style={{ backgroundColor: '#1B2836', color: COLORS.text }}>
+          <tr style={{ backgroundColor: 'var(--color-card)', color: COLORS.text }}>
             <th className="py-2 px-4 font-medium">Fecha</th>
             <th className="py-2 px-4 font-medium">Horario</th>
             <th className="py-2 px-4 font-medium">Equipos</th>

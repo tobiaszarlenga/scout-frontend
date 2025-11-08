@@ -7,14 +7,14 @@ import NewPitcherModal from "./NewPitcherModal";
 import EditPitcherModal from "./EditPitcherModal";
 import { PencilIcon, TrashIcon, UserIcon } from "@heroicons/react/24/solid";
 
-// 🎨 Paleta del dashboard
+// 🎨 Paleta del dashboard (usa variables globales)
 const COLORS = {
-  bgFrom: "#1F2F40",
-  bgTo: "#15202B",
-  card: "#22313F",
-  text: "#DDE2E5",
-  accent: "#E04E0E",
-  edit: "#3B82F6", // azul celeste
+  bgFrom: 'var(--color-sidebar)',
+  bgTo: 'var(--color-sidebar)',
+  card: 'var(--color-card)',
+  text: 'var(--color-text)',
+  accent: 'var(--color-accent)',
+  edit: '#3B82F6', // azul celeste
 };
 
 function Avatar({ src, alt }: { src?: string | null; alt: string }) {
@@ -25,7 +25,7 @@ function Avatar({ src, alt }: { src?: string | null; alt: string }) {
         alt={alt}
         className="mx-auto mb-4 h-24 w-24 rounded-full border-4 object-cover shadow-md"
         style={{
-          borderColor: COLORS.bgTo,
+          borderColor: 'var(--color-card)',
           backgroundColor: COLORS.accent,
         }}
         onError={(e) => {
@@ -40,11 +40,11 @@ function Avatar({ src, alt }: { src?: string | null; alt: string }) {
     <div
       className="mx-auto mb-4 flex h-24 w-24 items-center justify-center rounded-full border-4 shadow-md"
       style={{
-        borderColor: COLORS.bgTo,
+        borderColor: 'var(--color-card)',
         backgroundColor: COLORS.accent,
       }}
     >
-      <UserIcon className="h-12 w-12" style={{ color: COLORS.bgTo }} />
+      <UserIcon className="h-12 w-12" style={{ color: 'var(--color-card)' }} />
     </div>
   );
 }
@@ -128,12 +128,12 @@ export default function PitchersPage() {
                       <h3 className="text-2xl font-bold">
                         {p.nombre} {p.apellido}
                       </h3>
-                      <p className="text-md" style={{ color: "#AAB3BA" }}>
+                      <p className="text-md" style={{ color: "var(--color-text)" }}>
                         {p.equipo?.nombre ?? "Sin equipo"}
                       </p>
                       <p
                         className="mt-2 text-sm font-semibold"
-                        style={{ color: "#94A3B8" }}
+                        style={{ color: "rgba(226,232,240,0.9)" }}
                       >
                         #{p.numero_camiseta}
                       </p>
@@ -173,7 +173,7 @@ export default function PitchersPage() {
         ) : (
           <div
             className="flex h-64 items-center justify-center rounded-xl"
-            style={{ backgroundColor: `${COLORS.card}CC` }}
+            style={{ backgroundColor: `var(--color-card)` }}
           >
             <p className="text-xl" style={{ color: COLORS.text }}>
               No hay pitchers registrados todavía.

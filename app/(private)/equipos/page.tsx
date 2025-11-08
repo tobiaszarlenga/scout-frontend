@@ -8,14 +8,14 @@ import type { Equipo } from "@/types/equipo";
 import { toast } from "react-hot-toast";
 import { PencilIcon, TrashIcon, UsersIcon } from "@heroicons/react/24/solid";
 
-// 🎨 Paleta unificada (igual que en el dashboard)
+// 🎨 Paleta unificada (usa variables globales)
 const COLORS = {
-  bgFrom: "#1F2F40",
-  bgTo: "#15202B",
-  card: "#22313F",
-  text: "#DDE2E5",
-  accent: "#E04E0E",
-  edit: "#3B82F6", // Azul celeste para el botón Editar
+  bgFrom: 'var(--color-sidebar)',
+  bgTo: 'var(--color-sidebar)',
+  card: 'var(--color-card)',
+  text: 'var(--color-text)',
+  accent: 'var(--color-accent)',
+  edit: '#3B82F6', // Azul celeste para el botón Editar
 };
 
 export default function EquiposPage() {
@@ -87,7 +87,7 @@ export default function EquiposPage() {
                   className="flex h-12 w-12 items-center justify-center rounded-full"
                   style={{ backgroundColor: COLORS.accent }}
                 >
-                  <UsersIcon className="h-6 w-6" style={{ color: COLORS.bgTo }} />
+                  <UsersIcon className="h-6 w-6" style={{ color: 'var(--color-card)' }} />
                 </div>
                 <div>
                   <h2
@@ -96,7 +96,7 @@ export default function EquiposPage() {
                   >
                     {e.nombre}
                   </h2>
-                  <p className="text-sm" style={{ color: "#A0A8AD" }}>
+                  <p className="text-sm" style={{ color: "var(--color-text)" }}>
                     {e.ciudad || "Sin ciudad"}
                   </p>
                 </div>
@@ -110,9 +110,9 @@ export default function EquiposPage() {
                   >
                     {e._count?.pitchers ?? 0}
                   </div>
-                  <div
+                    <div
                     className="text-xs uppercase tracking-wide"
-                    style={{ color: "#A0A8AD" }}
+                    style={{ color: "var(--color-text)" }}
                   >
                     Pitchers
                   </div>
