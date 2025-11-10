@@ -241,7 +241,7 @@ export default function NuevoPartidoForm({
         <Button type="button" variant="secondary" onClick={onCancel} disabled={submitting}>
           Cancelar
         </Button>
-        <Button type="submit" variant="primary" className="bg-green-600 hover:bg-green-700" disabled={submitting}>
+        <Button type="submit" variant="primary"  disabled={submitting}>
           {submitting ? 'Creando...' : 'Crear Partido'}
         </Button>
       </div>

@@ -2,6 +2,8 @@
 "use client";
 
 import { useState } from "react";
+import Button from "@/app/components/Button";
+
 
 // El tipo de datos que este formulario maneja y devuelve
 type EquipoFormData = {
@@ -92,13 +94,10 @@ export default function EquipoForm({ initial, onSubmit, onCancel }: Props) {
         >
           Cancelar
         </button>
-        <button
-          type="submit"
-          className="rounded-md bg-green-600 px-3 py-2 text-white hover:bg-green-700 disabled:opacity-50"
-          disabled={submitting}
-        >
-          {submitting ? "Guardando..." : "Guardar"}
-        </button>
+        <Button type="submit" variant="primary" disabled={submitting}>
+  {submitting ? "Guardando..." : "Guardar"}
+</Button>
+
       </div>
 
       <p className="text-xs text-gray-500">* El nombre debe ser único.</p>
