@@ -63,7 +63,7 @@ export default function Sidebar({
           <button
             aria-label="Cerrar menú"
             onClick={onClose}
-            className="rounded-lg p-2 text-gray-400 hover:bg-[var(--color-card)] lg:hidden"
+            className="rounded-lg p-2 text-[rgba(var(--color-text-rgb),0.6)] hover:bg-[var(--color-card)] lg:hidden"
           >
             <X size={20} />
           </button>

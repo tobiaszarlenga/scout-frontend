@@ -57,7 +57,7 @@ form .username {
   position: absolute;
   top: 50%;
   left: 5px;
-  color: rgba(226,232,240,0.7);
+  color: var(--color-muted);
   transform: translateY(-50%);
   font-size: 16px;
   pointer-events: none;
@@ -88,7 +88,7 @@ form .username {
 
 .recordar {
   margin: -5px 0 20px 5px;
-  color: #B5BEC5;
+  color: var(--color-muted);
   cursor: pointer;
   font-size: 14px;
 }

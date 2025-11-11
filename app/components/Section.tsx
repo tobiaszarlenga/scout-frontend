@@ -6,8 +6,8 @@ export default function Section({
   return (
     <section className="space-y-3">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
-        {description && <p className="text-slate-500 text-sm">{description}</p>}
+        <h1 className="text-2xl font-semibold tracking-tight text-apptext">{title}</h1>
+        {description && <p className="text-[rgba(var(--color-text-rgb),0.6)] text-sm">{description}</p>}
       </div>
       {children}
     </section>

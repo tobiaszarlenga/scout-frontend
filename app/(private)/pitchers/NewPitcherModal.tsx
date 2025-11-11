@@ -11,10 +11,10 @@ import type { CreatePitcherDto } from "@/types/pitcher";
 import { toast } from "react-hot-toast";
 import { PlusIcon, UserPlusIcon } from "@heroicons/react/24/solid";
 
-// CAMBIO: Colores de focus actualizados a AZUL
+// CAMBIO: Colores de focus actualizados a AZUL con theme-aware tokens
 const inputStyle =
-  "mt-1 block w-full rounded-md border-gray-300 shadow-sm " +
-  "bg-gray-100 " +
+  "mt-1 block w-full rounded-md border-appborder shadow-sm " +
+  "bg-[rgba(var(--color-text-rgb),0.03)] text-apptext " +
   "focus:border-blue-500 focus:ring-2 focus:ring-blue-300"; // <-- CAMBIO a AZUL
 
 export default function NewPitcherModal() {
@@ -75,7 +75,7 @@ export default function NewPitcherModal() {
           <div className="p-4 sm:p-6 space-y-4">
                 {/* Campo Nombre */}
                 <div>
-                  <label htmlFor="nombre" className="block text-sm font-medium text-gray-700">Nombre</label>
+                  <label htmlFor="nombre" className="block text-sm font-medium text-apptext">Nombre</label>
                   <input
                     id="nombre"
                     type="text"
@@ -87,7 +87,7 @@ export default function NewPitcherModal() {
 
                 {/* Campo Apellido */}
                 <div>
-                  <label htmlFor="apellido" className="block text-sm font-medium text-gray-700">Apellido</label>
+                  <label htmlFor="apellido" className="block text-sm font-medium text-apptext">Apellido</label>
                   <input
                     id="apellido"
                     type="text"
@@ -100,7 +100,7 @@ export default function NewPitcherModal() {
                 {/* Edad y Número */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="edad" className="block text-sm font-medium text-gray-700">Edad</label>
+                    <label htmlFor="edad" className="block text-sm font-medium text-apptext">Edad</label>
                     <input
                       id="edad"
                       type="number"
@@ -110,7 +110,7 @@ export default function NewPitcherModal() {
                     {errors.edad && <p className="mt-1 text-xs text-red-500">{errors.edad.message}</p>}
                   </div>
                   <div>
-                    <label htmlFor="numero_camiseta" className="block text-sm font-medium text-gray-700">Número</label>
+                    <label htmlFor="numero_camiseta" className="block text-sm font-medium text-apptext">Número</label>
                     <input
                       id="numero_camiseta"
                       type="number"
@@ -123,7 +123,7 @@ export default function NewPitcherModal() {
 
                 {/* Selector de Equipo */}
                 <div>
-                  <label htmlFor="equipoId" className="block text-sm font-medium text-gray-700">Equipo</label>
+                  <label htmlFor="equipoId" className="block text-sm font-medium text-apptext">Equipo</label>
                   <select
                     id="equipoId"
                     {...register("equipoId", { required: "Debe seleccionar un equipo", valueAsNumber: true })}

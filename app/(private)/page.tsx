@@ -19,7 +19,7 @@ import {
 /* ===== Helpers ===== */
 const Card = ({ children, className = "", style }: React.PropsWithChildren<{ className?: string; style?: React.CSSProperties }>) => (
   <div
-    className={["rounded-md p-4 transition-all hover:scale-[1.02] hover:shadow-lg bg-card border border-appborder", className].join(" ")}
+    className={["rounded-md p-4 transition-all duration-200 hover:shadow-lg bg-card border border-appborder hover:border-[rgba(var(--color-text-rgb),0.15)]", className].join(" ")}
     style={style}
   >
     {children}
@@ -100,8 +100,8 @@ export default function InicioPage() {
         <div className="flex items-center justify-between mb-3">
           <div className="text-sm text-muted">Resumen general</div>
           <div className="flex gap-2">
-            <button className="px-3 py-1 rounded border border-appborder bg-card text-apptext text-sm">Últimos 7 días</button>
-            <button className="px-3 py-1 rounded border border-appborder text-muted text-sm">Últimos 30 días</button>
+            <button className="px-3 py-1 rounded border border-appborder bg-card text-apptext text-sm transition-colors hover:bg-[rgba(var(--color-text-rgb),0.08)]">Últimos 7 días</button>
+            <button className="px-3 py-1 rounded border border-appborder text-muted text-sm transition-colors hover:bg-[rgba(var(--color-text-rgb),0.05)] hover:text-apptext">Últimos 30 días</button>
           </div>
         </div>
 
