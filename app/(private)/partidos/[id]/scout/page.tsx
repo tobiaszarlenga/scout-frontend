@@ -501,49 +501,50 @@ export default function ScoutPage({ params }: { params: Promise<{ id: string }> 
   };
 
   return (
-    // 1. Tu layout principal (fondo degradado)
-    <main className="min-h-full w-full max-w-full overflow-x-hidden bg-gradient-to-br from-[#90D1F2] to-[#012F8A] px-6 py-6 sm:px-10 sm:py-8">
+    // 1. Tu layout principal (usa variables globales para soportar theme)
+    <main
+      className="min-h-full w-full max-w-full overflow-x-hidden px-6 py-6 sm:px-10 sm:py-8"
+      style={{ background: `linear-gradient(160deg, var(--color-bg), var(--color-sidebar))`, color: 'var(--color-text)' }}
+    >
       <div className="mx-auto w-full max-w-6xl">
         
         {/* 2. Cabecera (Scouting en Vivo) */}
         <header className="flex items-center justify-between pb-8">
           <div>
-            <button onClick={handleVolver} className="text-sm text-gray-200 hover:text-white">
+            <button onClick={handleVolver} className="text-sm hover:opacity-80" style={{ color: 'var(--color-muted)' }}>
               &larr; Volver a Partidos
             </button>
-            <h1
-              className="text-3xl md:text-4xl font-bold text-white"
-              style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.3)' }}
-            >
+            <h1 className="text-3xl md:text-4xl font-bold" style={{ color: 'var(--color-text)', textShadow: '2px 2px 4px rgba(0,0,0,0.15)' }}>
               Scouting en Vivo
             </h1>
           </div>
           <button
             onClick={handleFinalizarPartido}
             disabled={finalizar.status === 'pending'}
-            className="bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 transition-colors disabled:opacity-60"
+            className="px-4 py-2 rounded-lg shadow transition-colors disabled:opacity-60"
+            style={{ backgroundColor: 'var(--color-accent)', color: 'var(--color-on-accent)' }}
           >
-              {finalizar.status === 'pending' ? 'Finalizando...' : 'Finalizar Partido'}
+            {finalizar.status === 'pending' ? 'Finalizando...' : 'Finalizar Partido'}
           </button>
         </header>
 
         {/* Estado de carga */}
         {loadingPartido && (
-          <div className="bg-white p-8 rounded-lg shadow-xl text-center">
-            <p className="text-gray-600">Cargando datos del partido...</p>
+          <div className="p-8 rounded-lg shadow-xl text-center" style={{ backgroundColor: 'var(--color-card)' }}>
+            <p style={{ color: 'var(--color-muted)' }}>Cargando datos del partido...</p>
           </div>
         )}
 
         {/* Error si no existe el partido */}
         {!loadingPartido && !partido && (
-          <div className="bg-white p-8 rounded-lg shadow-xl text-center">
-            <p className="text-red-600">No se pudo cargar el partido</p>
+          <div className="p-8 rounded-lg shadow-xl text-center" style={{ backgroundColor: 'var(--color-card)' }}>
+            <p style={{ color: 'var(--color-accent)' }}>No se pudo cargar el partido</p>
           </div>
         )}
 
         {/* 3. TARJETA BLANCA DE CONTENIDO */}
-        {partido && (
-        <div className="bg-white p-4 md:p-6 rounded-lg shadow-xl">
+  {partido && (
+  <div className="p-4 md:p-6 rounded-lg shadow-xl" style={{ backgroundColor: 'var(--color-card)' }}>
           
           {/* --- MARCADOR (INNING, CUENTA, OUTS) --- */}
           <section className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -588,14 +589,12 @@ export default function ScoutPage({ params }: { params: Promise<{ id: string }> 
           <section className="flex flex-col items-center mt-6">
             {/* Contador de lanzamientos registrados del pitcher activo */}
             <div className="mb-4 text-center">
-              <p className="text-lg font-semibold text-gray-700">
+              <p className="text-lg font-semibold" style={{ color: 'var(--color-text)' }}>
                 Lanzamientos Registrados ({activePitcher === 'local' ? (pitcherLocalActivo?.nombre ?? '-') : (pitcherVisitanteActivo?.nombre ?? '-')}): 
-                <span className="ml-2 text-2xl text-blue-600 font-bold">
-                  {lanzamientosDelPitcherActivo.length}
-                </span>
+                <span className="ml-2 text-2xl font-bold" style={{ color: 'var(--color-accent)' }}>{lanzamientosDelPitcherActivo.length}</span>
               </p>
               {ultimoLanzamiento && (
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm mt-1" style={{ color: 'var(--color-muted)' }}>
                   Último: {getTipoNombre(ultimoLanzamiento.tipoId)} - 
                   {getResultadoNombre(ultimoLanzamiento.resultadoId)} - 
                   Zona {ultimoLanzamiento.zona}
@@ -608,9 +607,9 @@ export default function ScoutPage({ params }: { params: Promise<{ id: string }> 
           </section>
 
           {/* --- CARDS DE PITCHERS --- */}
-          {lanzamientos.length > 0 && partido && (
-            <section className="mt-8">
-              <h2 className="text-xl font-bold text-gray-800 mb-4 text-center">
+                {lanzamientos.length > 0 && partido && (
+                <section className="mt-8">
+              <h2 className="text-xl font-bold mb-4 text-center" style={{ color: 'var(--color-text)' }}>
                 Historial de Lanzamientos por Pitcher
               </h2>
               
@@ -619,7 +618,7 @@ export default function ScoutPage({ params }: { params: Promise<{ id: string }> 
                 
                 {/* COLUMNA IZQUIERDA: PITCHERS LOCALES */}
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-700 mb-3 text-center uppercase tracking-wide">
+                  <h3 className="text-lg font-semibold mb-3 text-center uppercase tracking-wide" style={{ color: 'var(--color-text)' }}>
                     {partido.equipoLocal.nombre}
                   </h3>
                   <div className="space-y-3">
@@ -655,7 +654,7 @@ export default function ScoutPage({ params }: { params: Promise<{ id: string }> 
 
                 {/* COLUMNA DERECHA: PITCHERS VISITANTES */}
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-700 mb-3 text-center uppercase tracking-wide">
+                  <h3 className="text-lg font-semibold mb-3 text-center uppercase tracking-wide" style={{ color: 'var(--color-text)' }}>
                     {partido.equipoVisitante.nombre}
                   </h3>
                   <div className="space-y-3">

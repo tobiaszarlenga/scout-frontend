@@ -99,7 +99,7 @@ export default function ReportePage({ params }: { params: Promise<{ id: string }
     <main
       className="min-h-full w-full max-w-full px-6 py-6 sm:px-10 sm:py-8"
       style={{
-        background: `linear-gradient(135deg, var(--color-sidebar), var(--color-sidebar))`,
+        background: `linear-gradient(135deg, var(--color-bg), var(--color-bg))`,
         color: `var(--color-text)`,
       }}
     >
@@ -264,6 +264,10 @@ export default function ReportePage({ params }: { params: Promise<{ id: string }
               <div className="grid grid-cols-5 gap-1 w-[250px]">
                 {Array.from({ length: 5 }).map((_, row) =>
                   Array.from({ length: 5 }).map((__, col) => {
+                    // Softer overlay approach: interpolate a muted color, then render it
+                    // as a semi-transparent overlay on top of the card background so
+                    // low counts blend with the card and high counts become visible
+                    // without being blindingly saturated.
                     const idx = row * 5 + col;
                     const count = zoneCounts[idx] || 0;
                     const intensity = Math.min(1, count / maxZone);

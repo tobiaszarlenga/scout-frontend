@@ -8,6 +8,7 @@ import { useLanzamientos } from '@/hooks/useLanzamientos';
 import { useLookups } from '@/hooks/useLookups';
 import { usePartido } from '@/hooks/usePartidos';
 import type { LanzamientoDTO } from '@/lib/api';
+import { Eye, Edit, Trash2 } from 'lucide-react';
 
 // Tipo para los lanzamientos procesados para la UI
 interface Lanzamiento {
@@ -192,43 +193,47 @@ export default function PitcherDetallePage({ params }: PitcherDetalleProp) {
 
 
   return (
-    <main className="min-h-full w-full max-w-full overflow-x-hidden bg-gradient-to-br from-[#90D1F2] to-[#012F8A] px-6 py-6 sm:px-10 sm:py-8">
+    <main
+      className="min-h-full w-full max-w-full overflow-x-hidden px-6 py-6 sm:px-10 sm:py-8"
+      style={{ background: `linear-gradient(160deg, var(--color-bg), var(--color-sidebar))`, color: 'var(--color-text)' }}
+    >
       <div className="mx-auto w-full max-w-6xl">
         
         {/* Cabecera */}
         <header className="pb-8">
-          <button 
+          <button
             onClick={() => router.back()}
-            className="text-sm text-gray-200 hover:text-white mb-4"
+            className="text-sm hover:opacity-80 mb-4"
+            style={{ color: 'var(--color-muted)' }}
           >
             &larr; Volver al Scout
           </button>
-          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20">
-            <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
+          <div className="backdrop-blur-sm rounded-lg p-6" style={{ backgroundColor: 'var(--color-card)', border: '1px solid var(--color-border)' }}>
+            <h1 className="text-3xl md:text-4xl font-bold mb-2" style={{ color: 'var(--color-text)' }}>
               {pitcherNombre}
             </h1>
-            <p className="text-xl text-gray-200">
+            <p className="text-xl" style={{ color: 'var(--color-muted)' }}>
               {equipoNombre}
             </p>
-            <div className="mt-4 flex gap-4 text-white">
-              <div className="bg-white/20 px-4 py-2 rounded-lg">
-                <span className="text-sm opacity-80">Total Lanzamientos:</span>
-                <span className="ml-2 text-2xl font-bold">{lanzamientos.length}</span>
+            <div className="mt-4 flex gap-4" style={{ color: 'var(--color-text)' }}>
+              <div style={{ backgroundColor: `rgba(var(--color-text-rgb),0.06)`, padding: '0.5rem 1rem', borderRadius: '0.5rem' }}>
+                <span className="text-sm" style={{ color: 'var(--color-muted)' }}>Total Lanzamientos:</span>
+                <span className="ml-2 text-2xl font-bold" style={{ color: 'var(--color-text)' }}>{lanzamientos.length}</span>
               </div>
-              <div className="bg-white/20 px-4 py-2 rounded-lg">
-                <span className="text-sm opacity-80">Innings:</span>
-                <span className="ml-2 text-2xl font-bold">{innings.length}</span>
+              <div style={{ backgroundColor: `rgba(var(--color-text-rgb),0.06)`, padding: '0.5rem 1rem', borderRadius: '0.5rem' }}>
+                <span className="text-sm" style={{ color: 'var(--color-muted)' }}>Innings:</span>
+                <span className="ml-2 text-2xl font-bold" style={{ color: 'var(--color-text)' }}>{innings.length}</span>
               </div>
             </div>
           </div>
         </header>
 
         {/* Contenido Principal */}
-        <div className="bg-white rounded-lg shadow-xl p-6">
+  <div className="rounded-lg shadow-xl p-6" style={{ backgroundColor: 'var(--color-card)' }}>
           
-          {lanzamientos.length === 0 ? (
+            {lanzamientos.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-500 text-lg">
+              <p className="text-lg" style={{ color: 'var(--color-muted)' }}>
                 Este pitcher aún no ha registrado lanzamientos
               </p>
             </div>
@@ -239,15 +244,15 @@ export default function PitcherDetallePage({ params }: PitcherDetalleProp) {
                 const lanzamientosInning = lanzamientosPorInning[inningKey];
                 
                 return (
-                  <section key={inningKey} className="border-b pb-6 last:border-b-0">
-                    <h2 className="text-xl font-bold text-gray-800 mb-4">
+                  <section key={inningKey} className="border-b pb-6 last:border-b-0" style={{ borderColor: 'var(--color-border)' }}>
+                    <h2 className="text-xl font-bold mb-4" style={{ color: 'var(--color-text)' }}>
                       Inning {inning} ({lado === 'abre' ? 'Abre' : 'Cierra'})
                     </h2>
                     
                     {/* Tabla de lanzamientos */}
                     <div className="overflow-x-auto">
                       <table className="w-full text-sm">
-                        <thead className="bg-gray-100">
+                        <thead style={{ backgroundColor: 'rgba(var(--color-text-rgb),0.04)' }}>
                           <tr>
                             <th className="px-4 py-2 text-left">#</th>
                             <th className="px-4 py-2 text-left">Tipo</th>
@@ -259,52 +264,68 @@ export default function PitcherDetallePage({ params }: PitcherDetalleProp) {
                           </tr>
                         </thead>
                         <tbody>
-                          {lanzamientosInning.map((lanzamiento, index) => (
-                            <tr key={lanzamiento.id} className="border-b hover:bg-gray-50">
-                              <td className="px-4 py-3 font-medium">{index + 1}</td>
-                              <td className="px-4 py-3">{lanzamiento.tipoNombre || '-'}</td>
-                              <td className="px-4 py-3">
-                                <span className={`px-2 py-1 rounded text-xs font-semibold ${
-                                  lanzamiento.resultadoNombre === 'STRIKE' ? 'bg-red-100 text-red-800' :
-                                  lanzamiento.resultadoNombre === 'BOLA' ? 'bg-blue-100 text-blue-800' :
-                                  lanzamiento.resultadoNombre === 'HIT' ? 'bg-green-100 text-green-800' :
-                                  lanzamiento.resultadoNombre === 'OUT' ? 'bg-gray-100 text-gray-800' :
-                                  'bg-yellow-100 text-yellow-800'
-                                }`}>
-                                  {lanzamiento.resultadoNombre || '-'}
-                                </span>
-                              </td>
-                              <td className="px-4 py-3">
-                                {lanzamiento.velocidad ? `${lanzamiento.velocidad} km/h` : '-'}
-                              </td>
-                              <td className="px-4 py-3">{lanzamiento.zona}</td>
-                              <td className="px-4 py-3 max-w-xs truncate">
-                                {lanzamiento.comentario || '-'}
-                              </td>
-                              <td className="px-4 py-3">
-                                <div className="flex justify-center gap-2">
-                                  <button
-                                    onClick={() => handleVerZona(lanzamiento.zona)}
-                                    className="px-3 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600"
-                                  >
-                                    Ver
-                                  </button>
-                                  <button
-                                    onClick={() => handleEditar(lanzamiento.id)}
-                                    className="px-3 py-1 bg-yellow-500 text-white text-xs rounded hover:bg-yellow-600"
-                                  >
-                                    Editar
-                                  </button>
-                                  <button
-                                    onClick={() => handleEliminar(lanzamiento.id)}
-                                    className="px-3 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600"
-                                  >
-                                    Eliminar
-                                  </button>
-                                </div>
-                              </td>
-                            </tr>
-                          ))}
+                          {lanzamientosInning.map((lanzamiento, index) => {
+                            // badge colors using theme vars (fallback hex if needed)
+                            const badge = (() => {
+                              const name = (lanzamiento.resultadoNombre || '').toUpperCase();
+                                if (name === 'STRIKE') return { bg: `rgba(var(--color-danger-rgb),0.12)`, color: 'var(--color-danger)' };
+                                if (name === 'BOLA') return { bg: `rgba(var(--color-accent2-rgb),0.12)`, color: 'var(--color-accent2)' };
+                                if (name === 'HIT') return { bg: `rgba(var(--color-success-rgb),0.12)`, color: 'var(--color-success)' };
+                                if (name === 'OUT') return { bg: `rgba(var(--color-text-rgb),0.06)`, color: 'var(--color-muted)' };
+                                return { bg: `rgba(var(--color-accent-rgb),0.12)`, color: 'var(--color-accent)' };
+                            })();
+
+                            return (
+                              <tr key={lanzamiento.id} className="border-b" style={{ borderColor: 'var(--color-border)' }}>
+                                <td className="px-4 py-3 font-medium">{index + 1}</td>
+                                <td className="px-4 py-3">{lanzamiento.tipoNombre || '-'}</td>
+                                <td className="px-4 py-3">
+                                  <span className="px-2 py-1 rounded text-xs font-semibold" style={{ background: badge.bg, color: badge.color }}>
+                                    {lanzamiento.resultadoNombre || '-'}
+                                  </span>
+                                </td>
+                                <td className="px-4 py-3">{lanzamiento.velocidad ? `${lanzamiento.velocidad} km/h` : '-'}</td>
+                                <td className="px-4 py-3">{lanzamiento.zona}</td>
+                                <td className="px-4 py-3 max-w-xs truncate" style={{ color: 'var(--color-muted)' }}>{lanzamiento.comentario || '-'}</td>
+                                <td className="px-4 py-3">
+                                  <div className="flex justify-center gap-2">
+                                    <button
+                                      type="button"
+                                      onClick={() => handleVerZona(lanzamiento.zona)}
+                                      className="px-3 py-1 text-xs rounded flex items-center justify-center hover:opacity-90"
+                                      style={{ backgroundColor: 'var(--color-accent2)', color: 'var(--color-on-accent)' }}
+                                      aria-label={`Ver lanzamiento ${index + 1}`}
+                                      title="Ver"
+                                    >
+                                      <Eye size={14} />
+                                    </button>
+
+                                    <button
+                                      type="button"
+                                      onClick={() => handleEditar(lanzamiento.id)}
+                                      className="px-3 py-1 text-xs rounded flex items-center justify-center hover:opacity-90"
+                                      style={{ backgroundColor: 'var(--color-accent)', color: 'var(--color-on-accent)' }}
+                                      aria-label={`Editar lanzamiento ${index + 1}`}
+                                      title="Editar"
+                                    >
+                                      <Edit size={14} />
+                                    </button>
+
+                                    <button
+                                      type="button"
+                                      onClick={() => handleEliminar(lanzamiento.id)}
+                                      className="px-3 py-1 text-xs rounded flex items-center justify-center hover:opacity-90"
+                                      style={{ backgroundColor: '#ef4444', color: 'white' }}
+                                      aria-label={`Eliminar lanzamiento ${index + 1}`}
+                                      title="Eliminar"
+                                    >
+                                      <Trash2 size={14} />
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          })}
                         </tbody>
                       </table>
                     </div>
