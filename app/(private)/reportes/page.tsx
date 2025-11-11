@@ -8,15 +8,6 @@ import { useLanzamientos } from "@/hooks/useLanzamientos";
 import { lanzamientosApi } from "@/lib/api";
 import Link from "next/link";
 
-const COLORS = {
-  bgFrom: 'var(--color-sidebar)',
-  bgTo: 'var(--color-sidebar)',
-  card: 'var(--color-card)',
-  text: 'var(--color-text)',
-  accent: 'var(--color-accent)',
-  edit: '#3B82F6',
-};
-
 type Mode = "recent" | "match" | "pitcher" | "team";
 
 export default function ReportesPage() {
@@ -93,7 +84,7 @@ export default function ReportesPage() {
     >
       <path
         d="M6 9l6 6 6-6"
-        stroke={COLORS.text}
+        stroke="var(--color-text)"
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -105,13 +96,13 @@ export default function ReportesPage() {
     <main
       className="min-h-full w-full max-w-full overflow-x-hidden px-6 py-6 sm:px-10 sm:py-8"
       style={{
-        background: `linear-gradient(135deg, ${COLORS.bgFrom}, ${COLORS.bgTo})`,
-        color: COLORS.text,
+        backgroundColor: 'var(--color-bg)',
+        color: 'var(--color-text)',
       }}
     >
       <div className="mx-auto w-full max-w-6xl">
         <header className="flex items-center justify-between pb-6">
-          <h1 className="text-4xl font-bold" style={{ color: COLORS.text }}>
+          <h1 className="text-4xl font-bold" style={{ color: 'var(--color-text)' }}>
             Reportes
           </h1>
         </header>
@@ -120,9 +111,9 @@ export default function ReportesPage() {
           {/* Sidebar Filtros */}
           <aside
             className="col-span-1 p-4 rounded-2xl shadow-md"
-            style={{ backgroundColor: COLORS.card }}
+            style={{ backgroundColor: 'var(--color-card)' }}
           >
-            <h3 className="font-semibold mb-3" style={{ color: COLORS.text }}>
+            <h3 className="font-semibold mb-3" style={{ color: 'var(--color-text)' }}>
               Filtros
             </h3>
             <div className="space-y-2">
@@ -137,8 +128,8 @@ export default function ReportesPage() {
                   onClick={() => setMode(item.key as Mode)}
                   className="w-full text-left px-3 py-2 rounded-lg transition font-medium"
                   style={{
-                    backgroundColor: mode === item.key ? COLORS.accent : "transparent",
-                    color: mode === item.key ? "#fff" : COLORS.text,
+                    backgroundColor: mode === item.key ? 'var(--color-accent)' : "transparent",
+                    color: mode === item.key ? "#fff" : 'var(--color-text)',
                     cursor: "pointer",
                   }}
                 >
@@ -155,8 +146,8 @@ export default function ReportesPage() {
                   <select
                     className="w-full p-2 rounded-lg border border-gray-700 focus:outline-none pr-10"
                     style={{
-                      backgroundColor: COLORS.card,
-                      color: COLORS.text,
+                      backgroundColor: 'var(--color-card)',
+                      color: 'var(--color-text)',
                       appearance: "none",
                       cursor: "pointer",
                     }}
@@ -171,8 +162,8 @@ export default function ReportesPage() {
                         key={p.id}
                         value={p.id}
                         style={{
-                          backgroundColor: COLORS.card,
-                          color: COLORS.text,
+                          backgroundColor: 'var(--color-card)',
+                          color: 'var(--color-text)',
                           cursor: "pointer",
                         }}
                       >
@@ -193,8 +184,8 @@ export default function ReportesPage() {
                   <select
                     className="w-full p-2 rounded-lg border border-gray-700 focus:outline-none pr-10"
                     style={{
-                      backgroundColor: COLORS.card,
-                      color: COLORS.text,
+                      backgroundColor: 'var(--color-card)',
+                      color: 'var(--color-text)',
                       appearance: "none",
                       cursor: "pointer",
                     }}
@@ -209,8 +200,8 @@ export default function ReportesPage() {
                         key={pt.id}
                         value={pt.id}
                         style={{
-                          backgroundColor: COLORS.card,
-                          color: COLORS.text,
+                          backgroundColor: 'var(--color-card)',
+                          color: 'var(--color-text)',
                           cursor: "pointer",
                         }}
                       >
@@ -230,8 +221,8 @@ export default function ReportesPage() {
                   <select
                     className="w-full p-2 rounded-lg border border-gray-700 focus:outline-none pr-10"
                     style={{
-                      backgroundColor: COLORS.card,
-                      color: COLORS.text,
+                      backgroundColor: 'var(--color-card)',
+                      color: 'var(--color-text)',
                       appearance: "none",
                       cursor: "pointer",
                     }}
@@ -246,8 +237,8 @@ export default function ReportesPage() {
                         key={eq.id}
                         value={eq.id}
                         style={{
-                          backgroundColor: COLORS.card,
-                          color: COLORS.text,
+                          backgroundColor: 'var(--color-card)',
+                          color: 'var(--color-text)',
                           cursor: "pointer",
                         }}
                       >
@@ -265,7 +256,7 @@ export default function ReportesPage() {
           <section className="col-span-3">
             <div
               className="p-5 rounded-2xl shadow-md mb-4"
-              style={{ backgroundColor: COLORS.card }}
+              style={{ backgroundColor: 'var(--color-card)' }}
             >
               <h2 className="font-semibold text-lg mb-2">Resumen rápido</h2>
 
@@ -284,7 +275,7 @@ export default function ReportesPage() {
                     href={`/reportes/${recentMatch.id}`}
                     className="px-4 py-2 rounded-lg font-medium transition"
                     style={{
-                      backgroundColor: COLORS.accent,
+                      backgroundColor: 'var(--color-accent)',
                       color: "#fff",
                       cursor: "pointer",
                     }}
@@ -300,7 +291,7 @@ export default function ReportesPage() {
                   <Link
                     href={`/reportes/${selectedMatchId}`}
                     className="block mt-2"
-                    style={{ color: COLORS.accent, cursor: "pointer" }}
+                    style={{ color: 'var(--color-accent)', cursor: "pointer" }}
                   >
                     Abrir reporte detallado
                   </Link>
@@ -330,7 +321,7 @@ export default function ReportesPage() {
                         </div>
                         <Link
                           href={`/reportes/${m.id}`}
-                          style={{ color: COLORS.accent, cursor: "pointer" }}
+                          style={{ color: 'var(--color-accent)', cursor: "pointer" }}
                         >
                           Ver
                         </Link>
@@ -340,7 +331,7 @@ export default function ReportesPage() {
                   <button
                     className="mt-4 px-3 py-2 rounded-lg font-medium transition"
                     style={{
-                      backgroundColor: COLORS.accent,
+                      backgroundColor: 'var(--color-accent)',
                       color: "#fff",
                       cursor: "pointer",
                     }}
@@ -375,7 +366,7 @@ export default function ReportesPage() {
                         </div>
                         <Link
                           href={`/reportes/${m.id}`}
-                          style={{ color: COLORS.accent, cursor: "pointer" }}
+                          style={{ color: 'var(--color-accent)', cursor: "pointer" }}
                         >
                           Ver
                         </Link>
@@ -385,7 +376,7 @@ export default function ReportesPage() {
                   <button
                     className="mt-4 px-3 py-2 rounded-lg font-medium transition"
                     style={{
-                      backgroundColor: COLORS.accent,
+                      backgroundColor: 'var(--color-accent)',
                       color: "#fff",
                       cursor: "pointer",
                     }}

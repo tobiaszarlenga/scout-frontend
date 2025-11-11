@@ -8,16 +8,6 @@ import type { Equipo } from "@/types/equipo";
 import { toast } from "react-hot-toast";
 import { PencilIcon, TrashIcon, UsersIcon } from "@heroicons/react/24/solid";
 
-// 🎨 Paleta unificada (usa variables globales)
-const COLORS = {
-  bgFrom: 'var(--color-sidebar)',
-  bgTo: 'var(--color-sidebar)',
-  card: 'var(--color-card)',
-  text: 'var(--color-text)',
-  accent: 'var(--color-accent)',
-  edit: '#3B82F6', // Azul celeste para el botón Editar
-};
-
 export default function EquiposPage() {
   const { list, remove, update } = useEquipos();
   const [equipoAEditar, setEquipoAEditar] = useState<Equipo | null>(null);
@@ -44,7 +34,7 @@ export default function EquiposPage() {
       <div
         className="flex h-screen items-center justify-center"
         style={{
-          background: `linear-gradient(180deg, ${COLORS.bgFrom}, ${COLORS.bgTo})`,
+          backgroundColor: 'var(--color-sidebar)',
         }}
       >
         <p className="text-2xl font-bold text-slate-100">Cargando equipos…</p>
@@ -59,13 +49,13 @@ export default function EquiposPage() {
     <main
       className="min-h-full w-full max-w-full overflow-x-hidden px-6 py-8 font-sans"
       style={{
-        background: `linear-gradient(180deg, ${COLORS.bgFrom}, ${COLORS.bgTo})`,
+        backgroundColor: 'var(--color-bg)',
       }}
     >
       <div className="mx-auto w-full max-w-6xl">
         {/* HEADER */}
         <header className="flex items-center justify-between pb-8">
-          <h1 className="text-4xl font-bold" style={{ color: COLORS.text }}>
+          <h1 className="text-4xl font-bold" style={{ color: 'var(--color-text)' }}>
             Equipos
           </h1>
           <NewEquipoModal />
@@ -78,21 +68,21 @@ export default function EquiposPage() {
               key={e.id}
               className="group flex flex-col justify-between rounded-2xl p-4 shadow-lg ring-1 ring-white/5 transform transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl"
               style={{
-                backgroundColor: COLORS.card,
+                backgroundColor: 'var(--color-card)',
               }}
             >
               <div className="flex items-center gap-3">
                 {/* Ícono de equipo con fondo naranja */}
                 <div
                   className="flex h-12 w-12 items-center justify-center rounded-full"
-                  style={{ backgroundColor: COLORS.accent }}
+                  style={{ backgroundColor: 'var(--color-accent)' }}
                 >
                   <UsersIcon className="h-6 w-6" style={{ color: 'var(--color-card)' }} />
                 </div>
                 <div>
                   <h2
                     className="text-lg font-semibold"
-                    style={{ color: COLORS.text }}
+                    style={{ color: 'var(--color-text)' }}
                   >
                     {e.nombre}
                   </h2>
@@ -106,7 +96,7 @@ export default function EquiposPage() {
                 <div className="text-center">
                   <div
                     className="text-xl font-extrabold"
-                    style={{ color: COLORS.accent }}
+                    style={{ color: 'var(--color-accent)' }}
                   >
                     {e._count?.pitchers ?? 0}
                   </div>
@@ -123,7 +113,7 @@ export default function EquiposPage() {
                   <button
                     onClick={() => handleOpenEditModal(e)}
                     className="rounded-full p-2 text-white shadow-md transition hover:scale-110"
-                    style={{ backgroundColor: COLORS.edit }}
+                    style={{ backgroundColor: '#3B82F6' }}
                     title="Editar"
                   >
                     <PencilIcon className="h-5 w-5" />
@@ -151,7 +141,7 @@ export default function EquiposPage() {
           {equipos.length === 0 && (
             <div
               className="col-span-full rounded-2xl p-10 text-center ring-1 ring-white/5"
-              style={{ backgroundColor: COLORS.card, color: COLORS.text }}
+              style={{ backgroundColor: 'var(--color-card)', color: 'var(--color-text)' }}
             >
               No hay equipos registrados. ¡Crea el primero!
             </div>
