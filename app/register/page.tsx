@@ -37,6 +37,7 @@ export default function RegisterPage() {
     }
 
     try {
+      // 1. Registrar el usuario
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -46,7 +47,20 @@ export default function RegisterPage() {
       const data = await res.json();
 
       if (res.ok) {
-        await login(); // 🔹 Inicia sesión automáticamente
+        // 2. Hacer login automático con las credenciales del registro
+        const loginRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include', // Importante: incluir cookies
+          body: JSON.stringify({ email, password }),
+        });
+
+        if (loginRes.ok) {
+          // 3. Actualizar el estado del contexto y redirigir
+          await login();
+        } else {
+          setError('Registro exitoso, pero hubo un error al iniciar sesión. Por favor, inicia sesión manualmente.');
+        }
       } else {
         setError(data.error || 'Ocurrió un error en el registro.');
       }
