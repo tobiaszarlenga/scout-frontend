@@ -55,7 +55,7 @@ export default function Modal({
       <div
         role="dialog"
         aria-modal="true"
-        className={`relative z-10 w-full rounded-2xl border border-appborder bg-card p-6 shadow-xl text-apptext ${
+        className={`relative z-10 w-full rounded-2xl border p-6 shadow-xl ${
           size === 'sm'
             ? 'max-w-md'
             : size === 'md'
@@ -64,8 +64,12 @@ export default function Modal({
             ? 'max-w-4xl'
             : 'max-w-6xl'
         }`}
+        // Modal panel should use the card color so it appears as a distinct
+        // white/light panel over the app background. Keep text and border
+        // using theme tokens for legibility.
+        style={{ backgroundColor: 'var(--color-card)', color: 'var(--color-text)', borderColor: 'var(--color-border)' }}
       >
-        {title && <h3 className="mb-4 text-lg font-semibold text-apptext">{title}</h3>}
+        {title && <h3 className="mb-4 text-lg font-semibold" style={{ color: 'var(--color-text)' }}>{title}</h3>}
         <div className="mb-4">{children}</div>
         {footer && (
           <div className="mt-4 border-t border-appborder pt-4">{footer}</div>
