@@ -290,8 +290,14 @@ export default function ReportesPage() {
                   <h3 className="font-medium">Partido seleccionado</h3>
                   <Link
                     href={`/reportes/${selectedMatchId}`}
-                    className="block mt-2"
-                    style={{ color: 'var(--color-accent)', cursor: "pointer" }}
+                    className="block mt-3 px-4 py-2 rounded-lg font-medium text-center transition"
+                    role="button"
+                    style={{
+                      backgroundColor: 'var(--color-accent)',
+                      color: '#fff',
+                      cursor: 'pointer',
+                      textDecoration: 'none',
+                    }}
                   >
                     Abrir reporte detallado
                   </Link>
