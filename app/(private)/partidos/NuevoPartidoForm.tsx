@@ -238,9 +238,14 @@ export default function NuevoPartidoForm({
 
       {/* --- Botones (igual que EquipoForm) --- */}
       <div className="flex justify-end gap-2 pt-2">
-        <Button type="button" variant="secondary" onClick={onCancel} disabled={submitting}>
+        <button
+          type="button"
+          onClick={onCancel}
+          disabled={submitting}
+          className="rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200"
+        >
           Cancelar
-        </Button>
+        </button>
         <Button type="submit" variant="primary"  disabled={submitting}>
           {submitting ? 'Creando...' : 'Crear Partido'}
         </Button>

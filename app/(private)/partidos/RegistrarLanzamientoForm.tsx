@@ -60,7 +60,8 @@ export default function RegistrarLanzamientoForm({
         <div>
           <label
             htmlFor="velocidad"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium"
+            style={{ color: 'var(--color-text)' }}
           >
             Velocidad (mph)
           </label>
@@ -70,7 +71,8 @@ export default function RegistrarLanzamientoForm({
             value={velocidad ?? ''}
             onChange={(e) => setVelocidad(e.target.valueAsNumber || null)}
             placeholder="Ej: 65"
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+            className="mt-1 block w-full rounded-md shadow-sm sm:text-sm"
+            style={{ backgroundColor: 'var(--color-card)', color: 'var(--color-text)', border: '1px solid var(--color-border)', cursor: 'pointer' }}
           />
         </div>
 
@@ -78,7 +80,8 @@ export default function RegistrarLanzamientoForm({
         <div>
           <label
             htmlFor="tipoEfecto"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium"
+            style={{ color: 'var(--color-text)' }}
           >
             Tipo de Efecto
           </label>
@@ -87,7 +90,8 @@ export default function RegistrarLanzamientoForm({
             value={tipoId ?? ''} // Controlado por 'tipoId'
             // Convertimos el valor (string) de vuelta a número
             onChange={(e) => setTipoId(e.target.value ? Number(e.target.value) : null)}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+            className="mt-1 block w-full rounded-md shadow-sm sm:text-sm"
+            style={{ backgroundColor: 'var(--color-card)', color: 'var(--color-text)', border: '1px solid var(--color-border)', cursor: 'pointer' }}
             disabled={tipos.isLoading || tipos.isError} // Desactivado si está cargando
             required
           >
@@ -106,7 +110,8 @@ export default function RegistrarLanzamientoForm({
         <div>
           <label
             htmlFor="resultado"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium"
+            style={{ color: 'var(--color-text)' }}
           >
             Resultado
           </label>
@@ -114,7 +119,8 @@ export default function RegistrarLanzamientoForm({
             id="resultado"
             value={resultadoId ?? ''} // Controlado por 'resultadoId'
             onChange={(e) => setResultadoId(e.target.value ? Number(e.target.value) : null)}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+            className="mt-1 block w-full rounded-md shadow-sm sm:text-sm"
+            style={{ backgroundColor: 'var(--color-card)', color: 'var(--color-text)', border: '1px solid var(--color-border)', cursor: 'pointer' }}
             disabled={resultados.isLoading || resultados.isError} // Desactivado si está cargando
             required
           >
@@ -140,7 +146,8 @@ export default function RegistrarLanzamientoForm({
           </button>
           <button
             type="submit"
-            className="rounded-lg bg-gray-800 px-4 py-2 text-sm font-medium text-white hover:bg-gray-900"
+            className="rounded-lg px-4 py-2 text-sm font-medium hover:opacity-90 transition"
+            style={{ backgroundColor: 'var(--color-accent)', color: 'var(--color-on-accent)', border: '1px solid rgba(0,0,0,0.05)' }}
           >
             Guardar
           </button>

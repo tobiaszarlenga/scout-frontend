@@ -339,18 +339,24 @@ export default function PitcherDetallePage({ params }: PitcherDetalleProp) {
         {/* Modal para visualizar zona de strike */}
         {isModalZonaOpen && zonaSeleccionada !== null && (
           <div 
-            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+            className="fixed inset-0 flex items-center justify-center z-50"
             onClick={() => setIsModalZonaOpen(false)}
+            // overlay ligado a tokens de globals.css (con fallback)
+            style={{ backgroundColor: 'var(--color-overlay, rgba(0,0,0,0.5))' }}
           >
             <div 
-              className="bg-white rounded-lg p-6 max-w-md w-full mx-4"
+              className="rounded-lg p-6 max-w-md w-full mx-4"
               onClick={(e) => e.stopPropagation()}
+              // panel usa variables de tema para fondo, texto y borde
+              style={{ backgroundColor: 'var(--color-card)', color: 'var(--color-text)', border: '1px solid var(--color-border)' }}
             >
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-bold">Zona del Lanzamiento</h3>
+                <h3 className="text-xl font-bold" style={{ color: 'var(--color-text)' }}>Zona del Lanzamiento</h3>
                 <button
                   onClick={() => setIsModalZonaOpen(false)}
-                  className="text-gray-500 hover:text-gray-700"
+                  className="hover:opacity-80"
+                  style={{ color: 'var(--color-muted)' }}
+                  aria-label="Cerrar modal zona"
                 >
                   ✕
                 </button>
@@ -365,7 +371,8 @@ export default function PitcherDetallePage({ params }: PitcherDetalleProp) {
               <div className="mt-4 text-center">
                 <button
                   onClick={() => setIsModalZonaOpen(false)}
-                  className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+                  className="px-4 py-2 rounded hover:opacity-90"
+                  style={{ backgroundColor: 'rgba(var(--color-text-rgb),0.04)', color: 'var(--color-text)', border: '1px solid var(--color-border)' }}
                 >
                   Cerrar
                 </button>
@@ -377,18 +384,22 @@ export default function PitcherDetallePage({ params }: PitcherDetalleProp) {
         {/* Modal para editar lanzamiento */}
         {isEditModalOpen && editingId && (
           <div
-            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+            className="fixed inset-0 flex items-center justify-center z-50"
             onClick={() => setIsEditModalOpen(false)}
+            style={{ backgroundColor: 'var(--color-overlay, rgba(0,0,0,0.5))' }}
           >
             <div
-              className="bg-white rounded-lg p-6 max-w-md w-full mx-4"
+              className="rounded-lg p-6 max-w-md w-full mx-4"
               onClick={(e) => e.stopPropagation()}
+              style={{ backgroundColor: 'var(--color-card)', color: 'var(--color-text)', border: '1px solid var(--color-border)' }}
             >
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-bold">Editar Lanzamiento</h3>
+                <h3 className="text-xl font-bold" style={{ color: 'var(--color-text)' }}>Editar Lanzamiento</h3>
                 <button
                   onClick={() => setIsEditModalOpen(false)}
-                  className="text-gray-500 hover:text-gray-700"
+                  className="hover:opacity-80"
+                  style={{ color: 'var(--color-muted)' }}
+                  aria-label="Cerrar modal editar"
                 >
                   ✕
                 </button>
@@ -396,11 +407,12 @@ export default function PitcherDetallePage({ params }: PitcherDetalleProp) {
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Tipo</label>
+                  <label className="block text-sm font-medium" style={{ color: 'var(--color-muted)' }}>Tipo</label>
                   <select
                     value={editTipoId ?? ''}
                     onChange={(e) => setEditTipoId(e.target.value ? Number(e.target.value) : null)}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm"
+                    className="mt-1 block w-full rounded-md sm:text-sm"
+                    style={{ backgroundColor: 'var(--color-card)', color: 'var(--color-text)', border: '1px solid var(--color-border)' }}
                   >
                     <option value="">Seleccionar tipo</option>
                     {tipos.data?.map(t => (
@@ -410,11 +422,12 @@ export default function PitcherDetallePage({ params }: PitcherDetalleProp) {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Resultado</label>
+                  <label className="block text-sm font-medium" style={{ color: 'var(--color-muted)' }}>Resultado</label>
                   <select
                     value={editResultadoId ?? ''}
                     onChange={(e) => setEditResultadoId(e.target.value ? Number(e.target.value) : null)}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm"
+                    className="mt-1 block w-full rounded-md sm:text-sm"
+                    style={{ backgroundColor: 'var(--color-card)', color: 'var(--color-text)', border: '1px solid var(--color-border)' }}
                   >
                     <option value="">Seleccionar resultado</option>
                     {resultados.data?.map(r => (
@@ -424,25 +437,28 @@ export default function PitcherDetallePage({ params }: PitcherDetalleProp) {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Velocidad (km/h)</label>
+                  <label className="block text-sm font-medium" style={{ color: 'var(--color-muted)' }}>Velocidad (km/h)</label>
                   <input
                     type="number"
                     value={editVelocidad ?? ''}
                     onChange={(e) => setEditVelocidad(e.target.valueAsNumber || null)}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm"
+                    className="mt-1 block w-full rounded-md sm:text-sm"
+                    style={{ backgroundColor: 'var(--color-card)', color: 'var(--color-text)', border: '1px solid var(--color-border)' }}
                   />
                 </div>
 
                 <div className="flex justify-end gap-3 pt-2">
                   <button
                     onClick={() => setIsEditModalOpen(false)}
-                    className="px-4 py-2 bg-gray-100 rounded hover:bg-gray-200"
+                    className="px-4 py-2 rounded hover:opacity-90"
+                    style={{ backgroundColor: 'rgba(var(--color-text-rgb),0.04)', color: 'var(--color-text)', border: '1px solid var(--color-border)' }}
                   >
                     Cancelar
                   </button>
                   <button
                     onClick={saveEdit}
-                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                    className="px-4 py-2 rounded hover:opacity-95"
+                    style={{ backgroundColor: 'var(--color-accent)', color: 'var(--color-on-accent)', border: '1px solid rgba(0,0,0,0.05)' }}
                   >
                     Guardar
                   </button>
