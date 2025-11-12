@@ -334,26 +334,18 @@ export default function ReportesPage() {
                       </li>
                     ))}
                   </ul>
-                  <button
-                    className="mt-4 px-3 py-2 rounded-lg font-medium transition"
+                  <Link
+                    href={`/reportes/pitcher/${selectedPitcherId}`}
+                    className="mt-4 inline-block px-3 py-2 rounded-lg font-medium transition text-center"
                     style={{
                       backgroundColor: 'var(--color-accent)',
-                      color: "#fff",
-                      cursor: "pointer",
-                    }}
-                    onClick={async () => {
-                      const ids = matchesForPitcher.map((m) => m.id);
-                      if (ids.length === 0) return alert("No hay partidos");
-                      const agg = await aggregateForMatches(ids);
-                      alert(
-                        `Total: ${agg.total}\nAvg Vel: ${
-                          agg.avgVel ? agg.avgVel.toFixed(1) : "N/A"
-                        }`
-                      );
+                      color: '#fff',
+                      cursor: 'pointer',
+                      textDecoration: 'none',
                     }}
                   >
-                    Ver estadísticas agregadas
-                  </button>
+                    Ver estadísticas históricas
+                  </Link>
                 </div>
               )}
 
