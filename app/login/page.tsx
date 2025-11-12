@@ -61,8 +61,9 @@ export default function LoginPage() {
             <span></span>
             <label>Contraseña</label>
           </div>
-
-          {/* ✅ Solo este mensaje de error se mostrará */}
+ 
+          
+          {/* Mensaje de error de React TanStack Query */}
           {isError && (
             <p className={styles.errorMessage}>
               Error: Las credenciales son inválidas.
