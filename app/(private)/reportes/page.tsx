@@ -5,7 +5,6 @@ import { usePartidos } from "@/hooks/usePartidos";
 import { usePitchers } from "@/hooks/usePitchers";
 import { useEquipos } from "@/hooks/useEquipos";
 import { useLanzamientos } from "@/hooks/useLanzamientos";
-import { lanzamientosApi } from "@/lib/api";
 import Link from "next/link";
 
 type Mode = "recent" | "match" | "pitcher" | "team";
@@ -51,26 +50,7 @@ export default function ReportesPage() {
     );
   }, [partidos, selectedTeamId]);
 
-  const aggregateForMatches = async (matchIds: number[]) => {
-    const promises = matchIds.map((id) => lanzamientosApi.listByPartido(id));
-    const results = await Promise.all(promises);
-    const all = results.flat();
-    const total = all.length;
-    const velocidades = all
-      .map((x) => x.velocidad)
-      .filter((v) => typeof v === "number") as number[];
-    const avgVel = velocidades.length
-      ? velocidades.reduce((a, b) => a + b, 0) / velocidades.length
-      : null;
-    const zoneCounts = new Array<number>(25).fill(0);
-    all.forEach((l) => {
-      if (typeof l.x === "number" && typeof l.y === "number") {
-        const idx = l.y * 5 + l.x;
-        if (idx >= 0 && idx < 25) zoneCounts[idx]++;
-      }
-    });
-    return { total, avgVel, zoneCounts };
-  };
+  // (previously used for client-side aggregation; replaced by server endpoints)
 
   // Flechita del select ▼
   const Chevron = () => (
@@ -371,26 +351,18 @@ export default function ReportesPage() {
                       </li>
                     ))}
                   </ul>
-                  <button
-                    className="mt-4 px-3 py-2 rounded-lg font-medium transition"
+                  <Link
+                    href={`/reportes/equipo/${selectedTeamId}`}
+                    className="mt-4 inline-block px-3 py-2 rounded-lg font-medium transition text-center"
                     style={{
                       backgroundColor: 'var(--color-accent)',
-                      color: "#fff",
-                      cursor: "pointer",
-                    }}
-                    onClick={async () => {
-                      const ids = matchesForTeam.map((m) => m.id);
-                      if (ids.length === 0) return alert("No hay partidos");
-                      const agg = await aggregateForMatches(ids);
-                      alert(
-                        `Total: ${agg.total}\nAvg Vel: ${
-                          agg.avgVel ? agg.avgVel.toFixed(1) : "N/A"
-                        }`
-                      );
+                      color: '#fff',
+                      cursor: 'pointer',
+                      textDecoration: 'none',
                     }}
                   >
-                    Ver estadísticas agregadas
-                  </button>
+                    Ver estadísticas históricas
+                  </Link>
                 </div>
               )}
             </div>
