@@ -19,10 +19,11 @@ import RegistrarLanzamientoForm, {
 
 // --- Importamos los hooks ---
 import { useLookups } from '@/hooks/useLookups';
-import { usePartido } from '@/hooks/usePartidos';
+import { usePartido, usePartidos } from '@/hooks/usePartidos';
+import { useLanzamientos } from '@/hooks/useLanzamientos';
 import { useScout } from '@/context/ScoutContext';
 import type { ActivePitcher, LanzamientoGuardado, PitcherEnPartido } from '@/types/scout';
-import { lanzamientosApi, type CreateLanzamientoDto } from '@/lib/api';
+import type { CreateLanzamientoDto } from '@/lib/api';
 
 // --- Importamos los componentes ---
 import PitcherCard from './PitcherCard';
@@ -32,8 +33,6 @@ export default function ScoutPage({ params }: { params: Promise<{ id: string }> 
   
   // --- Unwrap params (Next.js 15+) ---
   const { id } = React.use(params);
-  
-  // --- Router para navegación ---
   const router = useRouter();
   
   // --- Cargar datos del partido desde la API ---
@@ -41,8 +40,9 @@ export default function ScoutPage({ params }: { params: Promise<{ id: string }> 
   
   // --- Cargamos los lookups (tipos y resultados) ---
   const { tipos, resultados } = useLookups();
-
-  // --- Estado del Pitcher (ya lo teníamos) ---
+  
+  // --- Hook para lanzamientos (listar/crear) ---
+  const { list: lanzamientosRemotos, create: createLanzamiento } = useLanzamientos(id);
   const [activePitcher, setActivePitcher] = useState<ActivePitcher>('local');
   
   // --- Lista de pitchers que han lanzado en el partido ---
@@ -55,7 +55,10 @@ export default function ScoutPage({ params }: { params: Promise<{ id: string }> 
   // --- Inicializar pitchers cuando carguen los datos del partido ---
   useEffect(() => {
     if (!partido) return;
-    
+    // Si ya restauramos desde localStorage/context, no sobrescribimos
+    if (pitchersEnPartido.length > 0) return;
+    if (pitcherActivoLocalId || pitcherActivoVisitanteId) return;
+
     const pitcherLocalInicial: PitcherEnPartido = {
       id: String(partido.pitcherLocal.id),
       nombre: `${partido.pitcherLocal.nombre} ${partido.pitcherLocal.apellido}`,
@@ -63,7 +66,6 @@ export default function ScoutPage({ params }: { params: Promise<{ id: string }> 
       tipo: 'local',
       entroEnInning: 1,
     };
-    
     const pitcherVisitanteInicial: PitcherEnPartido = {
       id: String(partido.pitcherVisitante.id),
       nombre: `${partido.pitcherVisitante.nombre} ${partido.pitcherVisitante.apellido}`,
@@ -71,11 +73,30 @@ export default function ScoutPage({ params }: { params: Promise<{ id: string }> 
       tipo: 'visitante',
       entroEnInning: 1,
     };
-    
     setPitchersEnPartido([pitcherLocalInicial, pitcherVisitanteInicial]);
     setPitcherActivoLocalId(String(partido.pitcherLocal.id));
     setPitcherActivoVisitanteId(String(partido.pitcherVisitante.id));
-  }, [partido]);
+  }, [partido, pitchersEnPartido.length, pitcherActivoLocalId, pitcherActivoVisitanteId]);
+
+  // --- Cargar lanzamientos persistidos desde el backend ---
+  const xyToZona = (x: number, y: number) => y * 5 + x;
+  useEffect(() => {
+    if (!lanzamientosRemotos.data || !partido) return;
+    const isLocalPitcherId = (pid: number) =>
+      partido.equipoLocal.pitchers.some((p) => p.id === pid);
+    const mapped: LanzamientoGuardado[] = lanzamientosRemotos.data.map((l) => ({
+      velocidad: l.velocidad ?? null,
+      tipoId: l.tipoId ?? null,
+      resultadoId: l.resultadoId ?? null,
+      zona: xyToZona(l.x, l.y),
+      pitcher: isLocalPitcherId(l.pitcherId) ? 'local' : 'visitante',
+      timestamp: new Date(l.creadoEn),
+      inning: l.inning,
+      ladoInning: l.ladoInning as 'abre' | 'cierra',
+      pitcherId: String(l.pitcherId),
+    }));
+    setLanzamientos(mapped);
+  }, [lanzamientosRemotos.data, partido]);
   
   // --- Helper para obtener el pitcher activo actual ---
   const getPitcherActivo = (): PitcherEnPartido => {
@@ -96,6 +117,47 @@ export default function ScoutPage({ params }: { params: Promise<{ id: string }> 
   
   // --- NUEVO 2: ESTADOS PARA EL MODAL ---
   // 'isModalOpen' controla si el modal se ve o no.
+  // --- Persistencia ligera en localStorage de contadores/activos ---
+  const LS_KEY = `scoutState:${id}`;
+  const [initialLoaded, setInitialLoaded] = useState(false);
+  useEffect(() => {
+    try {
+      const raw = typeof window !== 'undefined' ? localStorage.getItem(LS_KEY) : null;
+      if (raw) {
+        const s = JSON.parse(raw);
+        if (typeof s.inning === 'number') setInning(s.inning);
+        if (typeof s.bolas === 'number') setBolas(s.bolas);
+        if (typeof s.strikes === 'number') setStrikes(s.strikes);
+        if (typeof s.outs === 'number') setOuts(s.outs);
+        if (s.ladoInning === 'abre' || s.ladoInning === 'cierra') setLadoInning(s.ladoInning);
+        if (s.activePitcher === 'local' || s.activePitcher === 'visitante') setActivePitcher(s.activePitcher);
+        if (typeof s.pitcherActivoLocalId === 'string') setPitcherActivoLocalId(s.pitcherActivoLocalId);
+        if (typeof s.pitcherActivoVisitanteId === 'string') setPitcherActivoVisitanteId(s.pitcherActivoVisitanteId);
+        if (Array.isArray(s.pitchersEnPartido) && s.pitchersEnPartido.length > 0) setPitchersEnPartido(s.pitchersEnPartido);
+      }
+    } catch {}
+    finally {
+      setInitialLoaded(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
+  useEffect(() => {
+    if (!initialLoaded) return; // Evita sobreescribir antes de la primera carga
+    const snapshot = {
+      inning,
+      bolas,
+      strikes,
+      outs,
+      ladoInning,
+      activePitcher,
+      pitcherActivoLocalId,
+      pitcherActivoVisitanteId,
+      pitchersEnPartido,
+    };
+    try {
+      if (typeof window !== 'undefined') localStorage.setItem(LS_KEY, JSON.stringify(snapshot));
+    } catch {}
+  }, [LS_KEY, initialLoaded, inning, bolas, strikes, outs, ladoInning, activePitcher, pitcherActivoLocalId, pitcherActivoVisitanteId, pitchersEnPartido]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   // 'selectedZone' guarda el número (0-24) de la zona clickeada.
   const [selectedZone, setSelectedZone] = useState<number | null>(null);
@@ -106,6 +168,7 @@ export default function ScoutPage({ params }: { params: Promise<{ id: string }> 
   
   // --- Sincronización con el contexto global de Scout ---
   const scout = useScout();
+  const { finalizar } = usePartidos();
   // Cargar si existe previamente
   useEffect(() => {
     const prev = scout.getState(id);
@@ -371,92 +434,117 @@ export default function ScoutPage({ params }: { params: Promise<{ id: string }> 
     console.log('Datos del Formulario:', data);
     console.log('Pitcher Activo:', activePitcher);
     console.log('Zona Seleccionada:', selectedZone);
-    
-    // --- PROCESAR LA LÓGICA DEL BÉISBOL ---
-    procesarResultado(data.resultadoId);
-    
-    // --- GUARDAR EN LA "CAJA" (ARRAY) ---
-    // Creamos un objeto completo con TODOS los datos del lanzamiento
+
+    // Validación extra de seguridad (además del formulario)
+    if (!data.tipoId || !data.resultadoId) {
+      alert('Seleccioná Tipo de Efecto y Resultado para guardar el lanzamiento.');
+      return;
+    }
+
+    // Persistir primero en backend para evitar inconsistencias
     const pitcherActual = getPitcherActivo();
-    const nuevoLanzamiento: LanzamientoGuardado = {
-      ...data, // tipo, resultado, velocidad, comentario
-      zona: selectedZone ?? 0, // La zona donde se clickeó
-      pitcher: activePitcher, // Quién lanzó (local o visitante)
-      timestamp: new Date(), // Cuándo se registró
-      inning: inning, // En qué inning
-      ladoInning: ladoInning, // Si estaba abriendo o cerrando
-      pitcherId: pitcherActual.id, // ID del pitcher que lanzó
-    };
-
-    // Agregamos el nuevo lanzamiento al array local
-    setLanzamientos((prevLanzamientos) => [...prevLanzamientos, nuevoLanzamiento]);
-    
-    // Agregamos al contexto global
-    scout.addLanzamiento(id, nuevoLanzamiento);
-
-    console.log('✅ Lanzamiento guardado en el array:', nuevoLanzamiento);
-    console.log('✅ Lanzamiento agregado al contexto global');
-
-    // Persistir en backend (no bloquea UI si falla)
     try {
       const payload: CreateLanzamientoDto = {
-        tipoId: data.tipoId!,
-        resultadoId: data.resultadoId!,
+        tipoId: data.tipoId,
+        resultadoId: data.resultadoId,
         velocidad: data.velocidad ?? null,
         zona: selectedZone ?? 0,
         inning,
         ladoInning,
         pitcherId: Number(pitcherActual.id),
       };
-      await lanzamientosApi.create(id, payload);
+      await createLanzamiento.mutateAsync(payload);
       console.log('💾 Lanzamiento persistido en backend');
-    } catch (err) {
-      console.warn('No se pudo persistir el lanzamiento. Se mantiene en memoria.', err);
-    }
 
-    handleCloseModal(); // Cerramos el modal después de guardar
+      // --- GUARDAR EN LA "CAJA" (ARRAY) UNA VEZ CONFIRMADO ---
+      const nuevoLanzamiento: LanzamientoGuardado = {
+        ...data,
+        zona: selectedZone ?? 0,
+        pitcher: activePitcher,
+        timestamp: new Date(),
+        inning,
+        ladoInning,
+        pitcherId: pitcherActual.id,
+      };
+
+      setLanzamientos((prev) => [...prev, nuevoLanzamiento]);
+      scout.addLanzamiento(id, nuevoLanzamiento);
+      console.log('✅ Lanzamiento guardado en el array y contexto:', nuevoLanzamiento);
+
+      // --- PROCESAR LA LÓGICA DEL BÉISBOL ---
+      procesarResultado(data.resultadoId);
+
+      handleCloseModal();
+    } catch (err) {
+      console.warn('No se pudo persistir el lanzamiento. Se cancela el guardado local.', err);
+    }
+  };
+
+  // Volver a la lista de partidos
+  const handleVolver = () => {
+    router.push('/partidos');
+  };
+
+  // Finalizar partido: marcar en backend y limpiar contexto local
+  const handleFinalizarPartido = async () => {
+    const ok = window.confirm('¿Deseas finalizar este partido? Esta acción lo moverá a Partidos Finalizados.');
+    if (!ok) return;
+
+    try {
+  await finalizar.mutateAsync(Number(id));
+      scout.clearPartido(id);
+      router.push('/partidos');
+    } catch (err) {
+      console.error('Error finalizando partido', err);
+      alert('No se pudo finalizar el partido. Intenta de nuevo.');
+    }
   };
 
   return (
-    // 1. Tu layout principal (fondo degradado)
-    <main className="min-h-full w-full max-w-full overflow-x-hidden bg-gradient-to-br from-[#90D1F2] to-[#012F8A] px-6 py-6 sm:px-10 sm:py-8">
+    // 1. Tu layout principal (usa variables globales para soportar theme)
+    <main
+      className="min-h-full w-full max-w-full overflow-x-hidden px-6 py-6 sm:px-10 sm:py-8"
+      style={{ background: `linear-gradient(160deg, var(--color-bg), var(--color-sidebar))`, color: 'var(--color-text)' }}
+    >
       <div className="mx-auto w-full max-w-6xl">
         
         {/* 2. Cabecera (Scouting en Vivo) */}
         <header className="flex items-center justify-between pb-8">
           <div>
-            <button className="text-sm text-gray-200 hover:text-white">
+            <button onClick={handleVolver} className="text-sm hover:opacity-80" style={{ color: 'var(--color-muted)' }}>
               &larr; Volver a Partidos
             </button>
-            <h1
-              className="text-3xl md:text-4xl font-bold text-white"
-              style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.3)' }}
-            >
+            <h1 className="text-3xl md:text-4xl font-bold" style={{ color: 'var(--color-text)', textShadow: '2px 2px 4px rgba(0,0,0,0.15)' }}>
               Scouting en Vivo
             </h1>
           </div>
-          <button className="bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 transition-colors">
-            Finalizar Partido
+          <button
+            onClick={handleFinalizarPartido}
+            disabled={finalizar.status === 'pending'}
+            className="px-4 py-2 rounded-lg shadow transition-colors disabled:opacity-60"
+            style={{ backgroundColor: 'var(--color-accent)', color: 'var(--color-on-accent)' }}
+          >
+            {finalizar.status === 'pending' ? 'Finalizando...' : 'Finalizar Partido'}
           </button>
         </header>
 
         {/* Estado de carga */}
         {loadingPartido && (
-          <div className="bg-white p-8 rounded-lg shadow-xl text-center">
-            <p className="text-gray-600">Cargando datos del partido...</p>
+          <div className="p-8 rounded-lg shadow-xl text-center" style={{ backgroundColor: 'var(--color-card)' }}>
+            <p style={{ color: 'var(--color-muted)' }}>Cargando datos del partido...</p>
           </div>
         )}
 
         {/* Error si no existe el partido */}
         {!loadingPartido && !partido && (
-          <div className="bg-white p-8 rounded-lg shadow-xl text-center">
-            <p className="text-red-600">No se pudo cargar el partido</p>
+          <div className="p-8 rounded-lg shadow-xl text-center" style={{ backgroundColor: 'var(--color-card)' }}>
+            <p style={{ color: 'var(--color-accent)' }}>No se pudo cargar el partido</p>
           </div>
         )}
 
         {/* 3. TARJETA BLANCA DE CONTENIDO */}
-        {partido && (
-        <div className="bg-white p-4 md:p-6 rounded-lg shadow-xl">
+  {partido && (
+  <div className="p-4 md:p-6 rounded-lg shadow-xl" style={{ backgroundColor: 'var(--color-card)' }}>
           
           {/* --- MARCADOR (INNING, CUENTA, OUTS) --- */}
           <section className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -501,14 +589,12 @@ export default function ScoutPage({ params }: { params: Promise<{ id: string }> 
           <section className="flex flex-col items-center mt-6">
             {/* Contador de lanzamientos registrados del pitcher activo */}
             <div className="mb-4 text-center">
-              <p className="text-lg font-semibold text-gray-700">
+              <p className="text-lg font-semibold" style={{ color: 'var(--color-text)' }}>
                 Lanzamientos Registrados ({activePitcher === 'local' ? (pitcherLocalActivo?.nombre ?? '-') : (pitcherVisitanteActivo?.nombre ?? '-')}): 
-                <span className="ml-2 text-2xl text-blue-600 font-bold">
-                  {lanzamientosDelPitcherActivo.length}
-                </span>
+                <span className="ml-2 text-2xl font-bold" style={{ color: 'var(--color-accent)' }}>{lanzamientosDelPitcherActivo.length}</span>
               </p>
               {ultimoLanzamiento && (
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm mt-1" style={{ color: 'var(--color-muted)' }}>
                   Último: {getTipoNombre(ultimoLanzamiento.tipoId)} - 
                   {getResultadoNombre(ultimoLanzamiento.resultadoId)} - 
                   Zona {ultimoLanzamiento.zona}
@@ -521,9 +607,9 @@ export default function ScoutPage({ params }: { params: Promise<{ id: string }> 
           </section>
 
           {/* --- CARDS DE PITCHERS --- */}
-          {lanzamientos.length > 0 && partido && (
-            <section className="mt-8">
-              <h2 className="text-xl font-bold text-gray-800 mb-4 text-center">
+                {lanzamientos.length > 0 && partido && (
+                <section className="mt-8">
+              <h2 className="text-xl font-bold mb-4 text-center" style={{ color: 'var(--color-text)' }}>
                 Historial de Lanzamientos por Pitcher
               </h2>
               
@@ -532,7 +618,7 @@ export default function ScoutPage({ params }: { params: Promise<{ id: string }> 
                 
                 {/* COLUMNA IZQUIERDA: PITCHERS LOCALES */}
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-700 mb-3 text-center uppercase tracking-wide">
+                  <h3 className="text-lg font-semibold mb-3 text-center uppercase tracking-wide" style={{ color: 'var(--color-text)' }}>
                     {partido.equipoLocal.nombre}
                   </h3>
                   <div className="space-y-3">
@@ -568,7 +654,7 @@ export default function ScoutPage({ params }: { params: Promise<{ id: string }> 
 
                 {/* COLUMNA DERECHA: PITCHERS VISITANTES */}
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-700 mb-3 text-center uppercase tracking-wide">
+                  <h3 className="text-lg font-semibold mb-3 text-center uppercase tracking-wide" style={{ color: 'var(--color-text)' }}>
                     {partido.equipoVisitante.nombre}
                   </h3>
                   <div className="space-y-3">

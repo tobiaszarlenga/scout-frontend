@@ -11,11 +11,15 @@ export default function Modal({
   onClose,
   title,
   children,
+  size = 'md',
+  footer,
 }: {
   open: boolean;
   onClose: () => void;
-  title?: string;
+  title?: React.ReactNode;
   children: React.ReactNode;
+  size?: 'sm' | 'md' | 'lg' | 'xl';
+  footer?: React.ReactNode;
 }) {
   // Todo este código de useEffect se queda exactamente igual
   useEffect(() => {
@@ -39,22 +43,33 @@ export default function Modal({
   // 2. Usamos el portal para "teletransportar" el JSX del modal
   //    directamente al <body> del documento.
   return createPortal(
-    <div className="fixed inset-0 z-[999] flex items-center justify-center p-4">
+  <div className="fixed inset-0 z-[999] flex items-center justify-center p-4">
       {/* Overlay */}
       <div
-        className="absolute inset-0 bg-black/40"
+        className="absolute inset-0 bg-black/50"
         onClick={onClose}
         aria-label="Cerrar"
         role="button"
       />
-      {/* Caja */}
+      {/* Caja: usar variables de tema (bg-card, border-appborder, text-apptext) */}
       <div
         role="dialog"
         aria-modal="true"
-        className="relative z-10 w-full max-w-md rounded-2xl border border-slate-200 bg-white p-4 shadow-xl"
+        className={`relative z-10 w-full rounded-2xl border border-appborder bg-card p-6 shadow-xl text-apptext ${
+          size === 'sm'
+            ? 'max-w-md'
+            : size === 'md'
+            ? 'max-w-2xl'
+            : size === 'lg'
+            ? 'max-w-4xl'
+            : 'max-w-6xl'
+        }`}
       >
-        {title && <h3 className="mb-3 text-lg font-semibold">{title}</h3>}
-        {children}
+        {title && <h3 className="mb-4 text-lg font-semibold text-apptext">{title}</h3>}
+        <div className="mb-4">{children}</div>
+        {footer && (
+          <div className="mt-4 border-t border-appborder pt-4">{footer}</div>
+        )}
       </div>
     </div>,
     document.body

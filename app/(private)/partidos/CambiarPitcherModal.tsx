@@ -1,8 +1,9 @@
 // En: app/(private)/partidos/CambiarPitcherModal.tsx
-'use client';
+"use client";
 
 import React, { useState } from 'react';
 import Modal from '@/app/components/Modal';
+import Button from '@/app/components/Button';
 
 // Tipo para los pitchers disponibles
 interface PitcherOption {
@@ -87,20 +88,12 @@ export default function CambiarPitcherModal({
         </div>
         
         <div className="flex justify-end space-x-3 pt-4">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
-          >
+          <Button type="button" variant="secondary" onClick={onClose}>
             Cancelar
-          </button>
-          <button
-            type="submit"
-            disabled={!pitcherIdSeleccionado}
-            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
-          >
+          </Button>
+          <Button type="submit" variant="primary" className="bg-blue-600 hover:bg-blue-700" disabled={!pitcherIdSeleccionado}>
             Confirmar Cambio
-          </button>
+          </Button>
         </div>
       </form>
     </Modal>

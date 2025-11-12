@@ -32,38 +32,35 @@ export default function ActivePitcherToggle({
   // (¡Hemos borrado el 'useState' de aquí!)
 
   return (
-    <div className="bg-white p-4 rounded-lg shadow-md border border-gray-200">
-      <h3 className="text-gray-500 font-semibold mb-3 text-sm">
+    <div className="p-4 rounded-lg shadow-md" style={{ backgroundColor: 'var(--color-card)', border: '1px solid var(--color-border)' }}>
+      <h3 className="font-semibold mb-3 text-sm" style={{ color: 'var(--color-muted)' }}>
         Pitcher Activo
       </h3>
-      
-      <div className="relative flex w-full bg-gray-200 rounded-full p-1">
+
+      <div className="relative flex w-full rounded-full p-1" style={{ backgroundColor: 'rgba(var(--color-text-rgb),0.04)' }}>
         
         {/* El "deslizador" (ahora lee el 'active' de las props) */}
-        <div 
-          className={`
-            absolute top-1 bottom-1 w-1/2 bg-white rounded-full shadow-md 
-            transition-transform duration-300 ease-in-out
-            ${active === 'local' ? 'transform translate-x-0' : 'transform translate-x-full'}
-          `}
+        <div
+          className={`absolute top-1 bottom-1 w-1/2 rounded-full shadow-md transition-transform duration-300 ease-in-out ${
+            active === 'local' ? 'transform translate-x-0' : 'transform translate-x-full'
+          }`}
+          style={{ backgroundColor: 'rgba(var(--color-text-rgb),0.08)' }}
         />
         
         {/* Botón Local */}
         <button
-          // --- CAMBIO 3: Llama a la función 'onToggle' de las props ---
           onClick={() => onToggle('local')}
           className="relative z-10 w-1/2 py-2 text-center rounded-full text-sm font-semibold transition-colors"
-          style={{ color: active === 'local' ? '#1D4ED8' : '#4B5563' }}
+          style={{ color: active === 'local' ? 'var(--color-text)' : 'var(--color-muted)' }}
         >
           {localPitcher.nombre} ({localPitcher.equipo})
         </button>
         
         {/* Botón Visitante */}
         <button
-          // --- CAMBIO 4: Llama a la función 'onToggle' de las props ---
           onClick={() => onToggle('visitante')}
           className="relative z-10 w-1/2 py-2 text-center rounded-full text-sm font-semibold transition-colors"
-          style={{ color: active === 'visitante' ? '#1D4ED8' : '#4B5563' }}
+          style={{ color: active === 'visitante' ? 'var(--color-text)' : 'var(--color-muted)' }}
         >
           {visitantePitcher.nombre} ({visitantePitcher.equipo})
         </button>
@@ -71,9 +68,10 @@ export default function ActivePitcherToggle({
       </div>
       
       <div className="text-right mt-2">
-        <button 
+        <button
           onClick={() => onCambiarPitcher(active)}
-          className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+          className="text-xs font-medium hover:opacity-90"
+          style={{ color: 'var(--color-accent)' }}
         >
           Cambiar Pitcher (Relevo)
         </button>

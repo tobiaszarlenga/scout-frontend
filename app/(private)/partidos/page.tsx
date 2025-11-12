@@ -1,91 +1,124 @@
-// scout-frontend/app/(private)/partidos/page.tsx
-'use client';
+"use client";
 
-import React from 'react';
-// Importamos los componentes
-import PartidosProgramados from './PartidosProgramados';
-import PartidosFinalizados from './PartidosFinalizados';
-import NewPartidoModal from './NewPartidoModal';
-// --- ¡CAMBIO 1: Importamos el hook! ---
-import { usePartidos } from 'hooks/usePartidos';
-// (Ya no necesitamos importar PartidoConDetalles aquí,
-// porque el hook 'usePartidos' ya sabe qué tipo de datos devuelve)
+import React from "react";
+import PartidosProgramados from "./PartidosProgramados";
+import PartidosFinalizados from "./PartidosFinalizados";
+import NewPartidoModal from "./NewPartidoModal";
+import { usePartidos } from "hooks/usePartidos";
 
-// --- ¡CAMBIO 2: Borramos TODOS los 'mockPartidos...'! ---
+/** Tema coherente con Inicio (usa variables globales) */
+const THEME = {
+  bgFrom: "var(--color-bg)",
+  bgTo: "var(--color-bg)",
+  surfaceAlt: "var(--color-card)",
+  border: "var(--color-border)",
+  text: "var(--color-text)",
+  muted: "#9aa7b1",
+};
 
+const Card: React.FC<React.PropsWithChildren<{ style?: React.CSSProperties }>> = ({ children, style }) => (
+  <div
+    style={{
+      background: THEME.surfaceAlt,
+      border: `1px solid ${THEME.border}`,
+      borderRadius: 4,
+      padding: "28px 24px",
+      boxShadow: "0 1px 4px rgba(0,0,0,0.25)",
+      transition: "all 0.25s ease",
+      ...style,
+    }}
+    className="hover:shadow-[0_2px_8px_rgba(0,0,0,0.3)] hover:scale-[1.01]"
+  >
+    {children}
+  </div>
+);
 
-// --- COMPONENTE PRINCIPAL DE LA PÁGINA ---
+const Separator = () => (
+  <div style={{ margin: "24px 0 48px", height: 1, width: "100%", background: THEME.border }} />
+);
+
 export default function PartidosPage() {
-  
-  // --- ¡CAMBIO 3: Usamos el hook! ---
   const { list } = usePartidos();
-
-  // --- ¡CAMBIO 4: Filtramos los datos REALES de la API! ---
-  // Usamos 'list.data?' (opcional) por si aún no ha cargado,
-  // y '?? []' para que sea un array vacío por defecto.
-  const programados =
-    list.data?.filter((p) => p.estado === 'PROGRAMADO') ?? [];
-  const finalizados =
-    list.data?.filter((p) => p.estado === 'FINALIZADO') ?? [];
+  const programados = list.data?.filter((p) => p.estado === "PROGRAMADO") ?? [];
+  const finalizados = list.data?.filter((p) => p.estado === "FINALIZADO") ?? [];
 
   return (
-    // 1. Tu layout principal (sin cambios)
-    <main className="min-h-full w-full max-w-full overflow-x-hidden bg-gradient-to-br from-[#90D1F2] to-[#012F8A] px-6 py-6 sm:px-10 sm:py-8">
+    <main
+      style={{
+        minHeight: "100vh",
+        background: `linear-gradient(160deg, ${THEME.bgFrom}, ${THEME.bgTo})`,
+        padding: "40px",
+      }}
+    >
       <div className="mx-auto w-full max-w-6xl">
-        
-        {/* 2. Tu cabecera (sin cambios) */}
-        <header className="flex items-center justify-between pb-8">
+        {/* Header */}
+        <header
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: 32,
+            borderBottom: `1px solid ${THEME.border}`,
+            paddingBottom: 8,
+          }}
+        >
           <div>
-            <h1
-              className="text-4xl font-bold text-white"
-              style={{ textShadow: "2px 2px 4px rgba(0,0,0,0.3)" }}
-            >
+            <h1 style={{ color: THEME.text, fontSize: 28, fontWeight: 600, letterSpacing: -0.3 }}>
               Partidos
             </h1>
-            <p className="text-gray-200">
-              Gestiona y monitorea los partidos de softball
+            <p style={{ color: THEME.muted, fontSize: 14, marginTop: 4 }}>
+              Gestiona y monitorea tus partidos de softball
             </p>
           </div>
           <NewPartidoModal />
         </header>
 
-        {/* 4. Las listas de partidos (¡AHORA CON DATOS REALES!) */}
-        <div className="bg-white p-6 rounded-lg shadow-xl mb-8">
-          <h2 className="text-xl font-semibold mb-4 text-gray-800">Partidos Programados</h2>
-          
-          {/* --- ¡CAMBIO 5: Manejamos los estados de carga! --- */}
-          {list.isPending && (
-            <p className="text-gray-500">Cargando partidos...</p>
-          )}
-          {list.isError && (
-            <p className="text-red-600">
-              Error al cargar partidos: {list.error.message}
-            </p>
-          )}
-          {/* Si ya cargó (isSuccess), pasamos los datos filtrados */}
-          {/* Tu componente 'PartidosProgramados' ya maneja el 'programados.length === 0' */}
-          {list.isSuccess && (
-            <PartidosProgramados partidos={programados} />
-          )}
-        </div>
+        {/* Partidos Programados */}
+        <Card>
+          <h2
+            style={{
+              color: THEME.text,
+              fontSize: 18,
+              fontWeight: 600,
+              marginBottom: 16,
+              borderBottom: `1px solid ${THEME.border}`,
+              paddingBottom: 8,
+            }}
+          >
+            Partidos Programados
+          </h2>
 
-        <div className="bg-white p-6 rounded-lg shadow-xl">
-          <h2 className="text-xl font-semibold mb-4 text-gray-800">Partidos Finalizados</h2>
-          
-          {/* --- ¡CAMBIO 6: Repetimos el manejo de estados! --- */}
-          {list.isPending && (
-            <p className="text-gray-500">Cargando partidos...</p>
-          )}
+          {list.isPending && <p style={{ color: THEME.muted }}>Cargando partidos...</p>}
           {list.isError && (
-            <p className="text-red-600">
-              Error al cargar partidos: {list.error.message}
-            </p>
+            <p style={{ color: "#f87171" }}>Error al cargar partidos: {list.error.message}</p>
           )}
-          {list.isSuccess && (
-            <PartidosFinalizados partidos={finalizados} />
+          {list.isSuccess && <PartidosProgramados partidos={programados} />}
+        </Card>
+
+        {/* Separación clara entre secciones */}
+        <Separator />
+
+        {/* Partidos Finalizados */}
+        <Card>
+          <h2
+            style={{
+              color: THEME.text,
+              fontSize: 18,
+              fontWeight: 600,
+              marginBottom: 16,
+              borderBottom: `1px solid ${THEME.border}`,
+              paddingBottom: 8,
+            }}
+          >
+            Partidos Finalizados
+          </h2>
+
+          {list.isPending && <p style={{ color: THEME.muted }}>Cargando partidos...</p>}
+          {list.isError && (
+            <p style={{ color: "#f87171" }}>Error al cargar partidos: {list.error.message}</p>
           )}
-        </div>
-        
+          {list.isSuccess && <PartidosFinalizados partidos={finalizados} />}
+        </Card>
       </div>
     </main>
   );

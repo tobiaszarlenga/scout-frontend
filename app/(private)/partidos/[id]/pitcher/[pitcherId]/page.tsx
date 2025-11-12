@@ -4,13 +4,15 @@
 import React, { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import StrikeZoneGrid from '@/app/components/StrikeZoneGrid';
-import { useScout } from '@/context/ScoutContext';
-import type { LanzamientoGuardado } from '@/types/scout';
+import { useLanzamientos } from '@/hooks/useLanzamientos';
 import { useLookups } from '@/hooks/useLookups';
+import { usePartido } from '@/hooks/usePartidos';
+import type { LanzamientoDTO } from '@/lib/api';
+import { Eye, Edit, Trash2 } from 'lucide-react';
 
-// Tipo para los lanzamientos (temporal, luego vendrá de la API)
+// Tipo para los lanzamientos procesados para la UI
 interface Lanzamiento {
-  id: string;
+  id: number; // Ahora es el ID de BD
   inning: number;
   ladoInning: 'abre' | 'cierra';
   tipoId: number | null;
@@ -20,7 +22,8 @@ interface Lanzamiento {
   velocidad: number | null;
   zona: number;
   comentario: string | null;
-  timestamp: Date;
+  x: number;
+  y: number;
 }
 
 interface PitcherDetalleProp {
@@ -30,31 +33,25 @@ interface PitcherDetalleProp {
 export default function PitcherDetallePage({ params }: PitcherDetalleProp) {
   const router = useRouter();
   const { id: partidoId, pitcherId } = React.use(params);
-  const scout = useScout();
+  const { data: partido } = usePartido(partidoId);
+  const { list: lanzamientosQuery, remove, update } = useLanzamientos(partidoId);
   const { tipos, resultados } = useLookups();
   
   // Estado para el modal de visualización de zona
   const [zonaSeleccionada, setZonaSeleccionada] = useState<number | null>(null);
   const [isModalZonaOpen, setIsModalZonaOpen] = useState(false);
   
-  // Obtener estado del partido desde el contexto
-  const state = scout.getState(partidoId);
-  const pitcher = state?.pitchersEnPartido.find(p => p.id === String(pitcherId));
-  const pitcherNombre = pitcher?.nombre ?? 'Pitcher';
-  const equipoNombre = pitcher?.equipo ?? '';
+  // Convertir zona x,y a índice 0-24
+  const xyToZona = (x: number, y: number): number => {
+    return y * 5 + x;
+  };
 
-  console.log('🎯 PitcherDetallePage:', { 
-    partidoId, 
-    pitcherId, 
-    state, 
-    pitcher,
-    totalLanzamientos: state?.lanzamientos.length ?? 0,
-    lanzamientosDelPitcher: state?.lanzamientos.filter(l => l.pitcherId === String(pitcherId)).length ?? 0
-  });
-
-  // Filtrar lanzamientos del pitcher
+  // Filtrar lanzamientos del pitcher y procesar
   const lanzamientos: Lanzamiento[] = useMemo(() => {
-    const lista = (state?.lanzamientos ?? []).filter(l => l.pitcherId === String(pitcherId));
+    if (!lanzamientosQuery.data) return [];
+    
+    const lista = lanzamientosQuery.data.filter(l => l.pitcherId === Number(pitcherId));
+    
     // Resolver nombres de lookups
     const nameTipo = (id: number | null) => {
       if (!id || !tipos.data) return '';
@@ -64,20 +61,60 @@ export default function PitcherDetallePage({ params }: PitcherDetalleProp) {
       if (!id || !resultados.data) return '';
       return resultados.data.find(r => r.id === id)?.nombre ?? '';
     };
-    return lista.map((l: LanzamientoGuardado) => ({
-      id: `${l.pitcherId}-${l.timestamp.toString()}-${l.zona}`,
+    
+    return lista.map((l: LanzamientoDTO) => ({
+      id: l.id,
       inning: l.inning,
-      ladoInning: l.ladoInning,
-      tipoId: l.tipoId ?? null,
-      tipoNombre: nameTipo(l.tipoId ?? null),
-      resultadoId: l.resultadoId ?? null,
-      resultadoNombre: nameResultado(l.resultadoId ?? null),
-      velocidad: l.velocidad ?? null,
-      zona: l.zona,
-  comentario: null,
-      timestamp: l.timestamp,
+      ladoInning: l.ladoInning as 'abre' | 'cierra',
+      tipoId: l.tipoId,
+      tipoNombre: nameTipo(l.tipoId),
+      resultadoId: l.resultadoId,
+      resultadoNombre: nameResultado(l.resultadoId),
+      velocidad: l.velocidad,
+      zona: xyToZona(l.x, l.y),
+      comentario: l.comentario,
+      x: l.x,
+      y: l.y,
     }));
-  }, [state?.lanzamientos, pitcherId, tipos.data, resultados.data]);
+  }, [lanzamientosQuery.data, pitcherId, tipos.data, resultados.data]);
+  
+  // Obtener info del pitcher desde los datos del partido
+  const pitcherInfo = useMemo(() => {
+    if (!partido) return null;
+    
+    // Buscar en los pitchers iniciales
+    if (partido.pitcherLocal.id === Number(pitcherId)) {
+      return {
+        nombre: `${partido.pitcherLocal.nombre} ${partido.pitcherLocal.apellido}`,
+        equipo: partido.equipoLocal.nombre,
+      };
+    }
+    if (partido.pitcherVisitante.id === Number(pitcherId)) {
+      return {
+        nombre: `${partido.pitcherVisitante.nombre} ${partido.pitcherVisitante.apellido}`,
+        equipo: partido.equipoVisitante.nombre,
+      };
+    }
+    
+    // Buscar en todos los pitchers de ambos equipos
+    const allPitchers = [
+      ...partido.equipoLocal.pitchers.map(p => ({ ...p, equipo: partido.equipoLocal.nombre })),
+      ...partido.equipoVisitante.pitchers.map(p => ({ ...p, equipo: partido.equipoVisitante.nombre })),
+    ];
+    
+    const found = allPitchers.find(p => p.id === Number(pitcherId));
+    if (found) {
+      return {
+        nombre: `${found.nombre} ${found.apellido}`,
+        equipo: found.equipo,
+      };
+    }
+    
+    return null;
+  }, [partido, pitcherId]);
+  
+  const pitcherNombre = pitcherInfo?.nombre ?? `Pitcher #${pitcherId}`;
+  const equipoNombre = pitcherInfo?.equipo ?? '';
   
   // Agrupar lanzamientos por inning
   const lanzamientosPorInning = lanzamientos.reduce((acc, lanzamiento) => {
@@ -102,107 +139,101 @@ export default function PitcherDetallePage({ params }: PitcherDetalleProp) {
     setIsModalZonaOpen(true);
   };
   
-  const handleEditar = (lanzamientoId: string) => {
+  const handleEditar = (lanzamientoId: number) => {
     openEditModalFor(lanzamientoId);
   };
   
-  const handleEliminar = (lanzamientoId: string) => {
-    confirmDelete(lanzamientoId);
+  const handleEliminar = async (lanzamientoId: number) => {
+    if (!confirm('¿Eliminar este lanzamiento? Esta acción no se puede deshacer.')) return;
+    try {
+      await remove.mutateAsync(lanzamientoId);
+      console.log('✅ Lanzamiento eliminado');
+    } catch (err) {
+      console.error('Error al eliminar lanzamiento:', err);
+      alert('No se pudo eliminar el lanzamiento. Intenta de nuevo.');
+    }
   };
 
   // --- Estados para edición ---
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<number | null>(null);
   const [editTipoId, setEditTipoId] = useState<number | null>(null);
   const [editResultadoId, setEditResultadoId] = useState<number | null>(null);
   const [editVelocidad, setEditVelocidad] = useState<number | null>(null);
 
-  // Helper para generar el id interno igual que en el map
-  const genIdFrom = (l: LanzamientoGuardado) => `${l.pitcherId}-${l.timestamp.toString()}-${l.zona}`;
-
-  const openEditModalFor = (lanzamientoId: string) => {
-    // Encontrar el lanzamiento en el estado global
-  const s = scout.getState(partidoId);
-  const found = s?.lanzamientos.find((l: LanzamientoGuardado) => genIdFrom(l) === lanzamientoId);
+  const openEditModalFor = (lanzamientoId: number) => {
+    const found = lanzamientos.find(l => l.id === lanzamientoId);
     if (!found) return;
     setEditingId(lanzamientoId);
-    setEditTipoId(found.tipoId ?? null);
-    setEditResultadoId(found.resultadoId ?? null);
-    setEditVelocidad(found.velocidad ?? null);
+    setEditTipoId(found.tipoId);
+    setEditResultadoId(found.resultadoId);
+    setEditVelocidad(found.velocidad);
     setIsEditModalOpen(true);
   };
 
-  const saveEdit = () => {
+  const saveEdit = async () => {
     if (!editingId) return;
-    const s = scout.getState(partidoId);
-    if (!s) return;
-    const updated = s.lanzamientos.map((l: LanzamientoGuardado) => {
-      if (genIdFrom(l) === editingId) {
-        return {
-          ...l,
-          tipoId: editTipoId ?? null,
-          resultadoId: editResultadoId ?? null,
-          velocidad: editVelocidad ?? null,
-        } as LanzamientoGuardado;
-      }
-      return l;
-    });
-    // Persistir en el contexto
-    // conservamos pitchersEnPartido
-    const newState = { lanzamientos: updated, pitchersEnPartido: s.pitchersEnPartido };
-    scout.setStateForPartido(partidoId, newState);
-    setIsEditModalOpen(false);
-    setEditingId(null);
-  };
-
-  const confirmDelete = (lanzamientoId: string) => {
-    if (!confirm('¿Eliminar este lanzamiento? Esta acción no se puede deshacer (solo localmente).')) return;
-  const s = scout.getState(partidoId);
-  if (!s) return;
-  const filtered = s.lanzamientos.filter((l: LanzamientoGuardado) => genIdFrom(l) !== lanzamientoId);
-    const newState = { lanzamientos: filtered, pitchersEnPartido: s.pitchersEnPartido };
-    scout.setStateForPartido(partidoId, newState);
+    try {
+      await update.mutateAsync({
+        id: editingId,
+        data: {
+          tipoId: editTipoId ?? undefined,
+          resultadoId: editResultadoId ?? undefined,
+          velocidad: editVelocidad ?? undefined,
+        },
+      });
+      console.log('✅ Lanzamiento actualizado');
+      setIsEditModalOpen(false);
+      setEditingId(null);
+    } catch (err) {
+      console.error('Error al actualizar lanzamiento:', err);
+      alert('No se pudo actualizar el lanzamiento. Intenta de nuevo.');
+    }
   };
 
 
   return (
-    <main className="min-h-full w-full max-w-full overflow-x-hidden bg-gradient-to-br from-[#90D1F2] to-[#012F8A] px-6 py-6 sm:px-10 sm:py-8">
+    <main
+      className="min-h-full w-full max-w-full overflow-x-hidden px-6 py-6 sm:px-10 sm:py-8"
+      style={{ background: `linear-gradient(160deg, var(--color-bg), var(--color-sidebar))`, color: 'var(--color-text)' }}
+    >
       <div className="mx-auto w-full max-w-6xl">
         
         {/* Cabecera */}
         <header className="pb-8">
-          <button 
+          <button
             onClick={() => router.back()}
-            className="text-sm text-gray-200 hover:text-white mb-4"
+            className="text-sm hover:opacity-80 mb-4"
+            style={{ color: 'var(--color-muted)' }}
           >
             &larr; Volver al Scout
           </button>
-          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20">
-            <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
+          <div className="backdrop-blur-sm rounded-lg p-6" style={{ backgroundColor: 'var(--color-card)', border: '1px solid var(--color-border)' }}>
+            <h1 className="text-3xl md:text-4xl font-bold mb-2" style={{ color: 'var(--color-text)' }}>
               {pitcherNombre}
             </h1>
-            <p className="text-xl text-gray-200">
+            <p className="text-xl" style={{ color: 'var(--color-muted)' }}>
               {equipoNombre}
             </p>
-            <div className="mt-4 flex gap-4 text-white">
-              <div className="bg-white/20 px-4 py-2 rounded-lg">
-                <span className="text-sm opacity-80">Total Lanzamientos:</span>
-                <span className="ml-2 text-2xl font-bold">{lanzamientos.length}</span>
+            <div className="mt-4 flex gap-4" style={{ color: 'var(--color-text)' }}>
+              <div style={{ backgroundColor: `rgba(var(--color-text-rgb),0.06)`, padding: '0.5rem 1rem', borderRadius: '0.5rem' }}>
+                <span className="text-sm" style={{ color: 'var(--color-muted)' }}>Total Lanzamientos:</span>
+                <span className="ml-2 text-2xl font-bold" style={{ color: 'var(--color-text)' }}>{lanzamientos.length}</span>
               </div>
-              <div className="bg-white/20 px-4 py-2 rounded-lg">
-                <span className="text-sm opacity-80">Innings:</span>
-                <span className="ml-2 text-2xl font-bold">{innings.length}</span>
+              <div style={{ backgroundColor: `rgba(var(--color-text-rgb),0.06)`, padding: '0.5rem 1rem', borderRadius: '0.5rem' }}>
+                <span className="text-sm" style={{ color: 'var(--color-muted)' }}>Innings:</span>
+                <span className="ml-2 text-2xl font-bold" style={{ color: 'var(--color-text)' }}>{innings.length}</span>
               </div>
             </div>
           </div>
         </header>
 
         {/* Contenido Principal */}
-        <div className="bg-white rounded-lg shadow-xl p-6">
+  <div className="rounded-lg shadow-xl p-6" style={{ backgroundColor: 'var(--color-card)' }}>
           
-          {lanzamientos.length === 0 ? (
+            {lanzamientos.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-500 text-lg">
+              <p className="text-lg" style={{ color: 'var(--color-muted)' }}>
                 Este pitcher aún no ha registrado lanzamientos
               </p>
             </div>
@@ -213,15 +244,15 @@ export default function PitcherDetallePage({ params }: PitcherDetalleProp) {
                 const lanzamientosInning = lanzamientosPorInning[inningKey];
                 
                 return (
-                  <section key={inningKey} className="border-b pb-6 last:border-b-0">
-                    <h2 className="text-xl font-bold text-gray-800 mb-4">
+                  <section key={inningKey} className="border-b pb-6 last:border-b-0" style={{ borderColor: 'var(--color-border)' }}>
+                    <h2 className="text-xl font-bold mb-4" style={{ color: 'var(--color-text)' }}>
                       Inning {inning} ({lado === 'abre' ? 'Abre' : 'Cierra'})
                     </h2>
                     
                     {/* Tabla de lanzamientos */}
                     <div className="overflow-x-auto">
                       <table className="w-full text-sm">
-                        <thead className="bg-gray-100">
+                        <thead style={{ backgroundColor: 'rgba(var(--color-text-rgb),0.04)' }}>
                           <tr>
                             <th className="px-4 py-2 text-left">#</th>
                             <th className="px-4 py-2 text-left">Tipo</th>
@@ -233,52 +264,68 @@ export default function PitcherDetallePage({ params }: PitcherDetalleProp) {
                           </tr>
                         </thead>
                         <tbody>
-                          {lanzamientosInning.map((lanzamiento, index) => (
-                            <tr key={lanzamiento.id} className="border-b hover:bg-gray-50">
-                              <td className="px-4 py-3 font-medium">{index + 1}</td>
-                              <td className="px-4 py-3">{lanzamiento.tipoNombre || '-'}</td>
-                              <td className="px-4 py-3">
-                                <span className={`px-2 py-1 rounded text-xs font-semibold ${
-                                  lanzamiento.resultadoNombre === 'STRIKE' ? 'bg-red-100 text-red-800' :
-                                  lanzamiento.resultadoNombre === 'BOLA' ? 'bg-blue-100 text-blue-800' :
-                                  lanzamiento.resultadoNombre === 'HIT' ? 'bg-green-100 text-green-800' :
-                                  lanzamiento.resultadoNombre === 'OUT' ? 'bg-gray-100 text-gray-800' :
-                                  'bg-yellow-100 text-yellow-800'
-                                }`}>
-                                  {lanzamiento.resultadoNombre || '-'}
-                                </span>
-                              </td>
-                              <td className="px-4 py-3">
-                                {lanzamiento.velocidad ? `${lanzamiento.velocidad} km/h` : '-'}
-                              </td>
-                              <td className="px-4 py-3">{lanzamiento.zona}</td>
-                              <td className="px-4 py-3 max-w-xs truncate">
-                                {lanzamiento.comentario || '-'}
-                              </td>
-                              <td className="px-4 py-3">
-                                <div className="flex justify-center gap-2">
-                                  <button
-                                    onClick={() => handleVerZona(lanzamiento.zona)}
-                                    className="px-3 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600"
-                                  >
-                                    Ver
-                                  </button>
-                                  <button
-                                    onClick={() => handleEditar(lanzamiento.id)}
-                                    className="px-3 py-1 bg-yellow-500 text-white text-xs rounded hover:bg-yellow-600"
-                                  >
-                                    Editar
-                                  </button>
-                                  <button
-                                    onClick={() => handleEliminar(lanzamiento.id)}
-                                    className="px-3 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600"
-                                  >
-                                    Eliminar
-                                  </button>
-                                </div>
-                              </td>
-                            </tr>
-                          ))}
+                          {lanzamientosInning.map((lanzamiento, index) => {
+                            // badge colors using theme vars (fallback hex if needed)
+                            const badge = (() => {
+                              const name = (lanzamiento.resultadoNombre || '').toUpperCase();
+                                if (name === 'STRIKE') return { bg: `rgba(var(--color-danger-rgb),0.12)`, color: 'var(--color-danger)' };
+                                if (name === 'BOLA') return { bg: `rgba(var(--color-accent2-rgb),0.12)`, color: 'var(--color-accent2)' };
+                                if (name === 'HIT') return { bg: `rgba(var(--color-success-rgb),0.12)`, color: 'var(--color-success)' };
+                                if (name === 'OUT') return { bg: `rgba(var(--color-text-rgb),0.06)`, color: 'var(--color-muted)' };
+                                return { bg: `rgba(var(--color-accent-rgb),0.12)`, color: 'var(--color-accent)' };
+                            })();
+
+                            return (
+                              <tr key={lanzamiento.id} className="border-b" style={{ borderColor: 'var(--color-border)' }}>
+                                <td className="px-4 py-3 font-medium">{index + 1}</td>
+                                <td className="px-4 py-3">{lanzamiento.tipoNombre || '-'}</td>
+                                <td className="px-4 py-3">
+                                  <span className="px-2 py-1 rounded text-xs font-semibold" style={{ background: badge.bg, color: badge.color }}>
+                                    {lanzamiento.resultadoNombre || '-'}
+                                  </span>
+                                </td>
+                                <td className="px-4 py-3">{lanzamiento.velocidad ? `${lanzamiento.velocidad} km/h` : '-'}</td>
+                                <td className="px-4 py-3">{lanzamiento.zona}</td>
+                                <td className="px-4 py-3 max-w-xs truncate" style={{ color: 'var(--color-muted)' }}>{lanzamiento.comentario || '-'}</td>
+                                <td className="px-4 py-3">
+                                  <div className="flex justify-center gap-2">
+                                    <button
+                                      type="button"
+                                      onClick={() => handleVerZona(lanzamiento.zona)}
+                                      className="px-3 py-1 text-xs rounded flex items-center justify-center hover:opacity-90"
+                                      style={{ backgroundColor: 'var(--color-accent2)', color: 'var(--color-on-accent)' }}
+                                      aria-label={`Ver lanzamiento ${index + 1}`}
+                                      title="Ver"
+                                    >
+                                      <Eye size={14} />
+                                    </button>
+
+                                    <button
+                                      type="button"
+                                      onClick={() => handleEditar(lanzamiento.id)}
+                                      className="px-3 py-1 text-xs rounded flex items-center justify-center hover:opacity-90"
+                                      style={{ backgroundColor: 'var(--color-accent)', color: 'var(--color-on-accent)' }}
+                                      aria-label={`Editar lanzamiento ${index + 1}`}
+                                      title="Editar"
+                                    >
+                                      <Edit size={14} />
+                                    </button>
+
+                                    <button
+                                      type="button"
+                                      onClick={() => handleEliminar(lanzamiento.id)}
+                                      className="px-3 py-1 text-xs rounded flex items-center justify-center hover:opacity-90"
+                                      style={{ backgroundColor: '#ef4444', color: 'white' }}
+                                      aria-label={`Eliminar lanzamiento ${index + 1}`}
+                                      title="Eliminar"
+                                    >
+                                      <Trash2 size={14} />
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          })}
                         </tbody>
                       </table>
                     </div>

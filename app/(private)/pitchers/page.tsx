@@ -1,42 +1,58 @@
-// app/(private)/pitchers/page.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import Image from 'next/image';
 import { usePitchers } from "@/hooks/usePitchers";
 import type { Pitcher } from "@/types/pitcher";
 import NewPitcherModal from "./NewPitcherModal";
 import EditPitcherModal from "./EditPitcherModal";
-
-// 👇 sumamos el ícono de usuario
 import { PencilIcon, TrashIcon, UserIcon } from "@heroicons/react/24/solid";
 
-/** Avatar reutilizable con fallback a ícono */
-function Avatar({
-  src,
-  alt,
-}: {
-  src?: string | null;
-  alt: string;
-}) {
-  // si viene una foto, la mostramos; si falla o no hay, queda el ícono
-  if (src) {
+// 🎨 Paleta del dashboard (usa variables globales)
+const COLORS = {
+  bgFrom: 'var(--color-sidebar)',
+  bgTo: 'var(--color-sidebar)',
+  card: 'var(--color-card)',
+  text: 'var(--color-text)',
+  accent: 'var(--color-accent)',
+  edit: '#3B82F6', // azul celeste
+};
+
+function Avatar({ src, alt }: { src?: string | null; alt: string }) {
+  const [imgError, setImgError] = useState(false);
+
+  if (src && !imgError) {
     return (
-      <img
-        src={src}
-        alt={alt}
-        className="mx-auto mb-4 h-24 w-24 rounded-full border-4 border-white object-cover shadow-md bg-white"
-        onError={(e) => {
-          // si la URL no carga, ocultamos la imagen para que se vea el ícono de fondo
-          (e.currentTarget as HTMLImageElement).style.display = "none";
+      <div
+        className="mx-auto mb-4 h-24 w-24 rounded-full border-4 overflow-hidden shadow-md"
+        style={{
+          borderColor: 'var(--color-card)',
+          backgroundColor: COLORS.accent,
         }}
-      />
+      >
+        <Image
+          src={src}
+          alt={alt}
+          width={96}
+          height={96}
+          className="rounded-full object-cover"
+          onError={() => setImgError(true)}
+          unoptimized
+        />
+      </div>
     );
   }
 
-  // default avatar (ícono)
+  // --- SIN FOTO: fondo naranja dinámico ---
   return (
-    <div className="mx-auto mb-4 flex h-24 w-24 items-center justify-center rounded-full border-4 border-white bg-gray-200 shadow-md">
-      <UserIcon className="h-12 w-12 text-gray-400" aria-hidden="true" />
+    <div
+      className="mx-auto mb-4 flex h-24 w-24 items-center justify-center rounded-full border-4 shadow-md"
+      style={{
+        borderColor: 'var(--color-card)',
+        backgroundColor: COLORS.accent,
+      }}
+    >
+      <UserIcon className="h-12 w-12" style={{ color: 'var(--color-card)' }} />
     </div>
   );
 }
@@ -44,80 +60,116 @@ function Avatar({
 export default function PitchersPage() {
   const { list, remove } = usePitchers();
   const [pitcherAEditar, setPitcherAEditar] = useState<Pitcher | null>(null);
+  const pitchers = useMemo(() => list.data ?? [], [list.data]);
+
+  const pitchersPorEquipo = useMemo(() => {
+    return (pitchers || []).reduce((acc, pitcher) => {
+      const equipoKey = pitcher.equipo?.nombre ?? "Sin equipo";
+      if (!acc[equipoKey]) acc[equipoKey] = [];
+      acc[equipoKey].push(pitcher);
+      return acc;
+    }, {} as Record<string, Pitcher[]>);
+  }, [pitchers]);
 
   if (list.isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-gradient-to-br from-[#90D1F2] to-[#012F8A]">
-        <p className="text-2xl font-bold text-white">Cargando pitchers...</p>
+      <div className="flex h-screen items-center justify-center bg-bg">
+        <p className="text-2xl font-bold text-apptext">Cargando pitchers...</p>
       </div>
     );
   }
 
-  if (list.isError) {
-    return <p>Error: {(list.error as Error).message}</p>;
-  }
-
-  const pitchers = list.data ?? [];
+  if (list.isError) return <p>Error: {(list.error as Error).message}</p>;
 
   return (
-    <main className="min-h-full w-full max-w-full overflow-x-hidden bg-gradient-to-br from-[#90D1F2] to-[#012F8A] px-6 py-6 pb-10 font-sans sm:px-10 sm:py-8">
+    <main className="min-h-full w-full max-w-full overflow-x-hidden px-6 py-6 pb-10 font-sans sm:px-10 sm:py-8 bg-bg text-apptext">
       <div className="mx-auto w-full max-w-6xl">
+        {/* HEADER */}
         <header className="flex items-center justify-between pb-8">
-          <h1 className="text-4xl font-bold text-white" style={{ textShadow: "2px 2px 4px rgba(0,0,0,0.3)" }}>
-            Pitchers
-          </h1>
+          <h1 className="text-4xl font-bold text-apptext">Pitchers</h1>
           <NewPitcherModal />
         </header>
 
         {pitchers.length > 0 ? (
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {pitchers.map((p) => (
-              <div
-                key={p.id}
-                className="group relative flex transform flex-col rounded-2xl bg-white p-6 text-center shadow-xl transition-transform duration-300 hover:-translate-y-2"
-              >
-                {/* 👇 acá usamos el avatar (sin foto por ahora) */}
-                <Avatar
-                  // si en el futuro tenés campo foto: src={p.fotoUrl ?? p.foto_url}
-                  alt={`Foto de ${p.nombre} ${p.apellido}`}
-                />
-
-                <h2 className="text-2xl font-bold text-gray-800">
-                  {p.nombre} {p.apellido}
+          <div className="flex flex-col gap-10">
+            {Object.keys(pitchersPorEquipo).map((nombreEquipo) => (
+              <section key={nombreEquipo}>
+                <h2 className="mb-4 text-2xl font-bold capitalize text-apptext">
+                  {nombreEquipo}
                 </h2>
-                <p className="text-md text-gray-500">{p.equipo?.nombre ?? "Sin equipo"}</p>
-                <p className="mt-2 text-sm font-semibold text-gray-400">#{p.numero_camiseta}</p>
 
-                <div className="absolute top-4 right-4 flex scale-0 space-x-2 transition-transform duration-200 group-hover:scale-100">
-                  <button
-                    onClick={() => setPitcherAEditar(p)}
-                    className="rounded-full bg-sky-600 p-2 text-white shadow-md hover:bg-sky-700"
-                    title="Editar"
-                  >
-                    <PencilIcon className="h-5 w-5" />
-                  </button>
-                  <button
-                    className="rounded-full bg-red-600 p-2 text-white shadow-md hover:bg-red-700"
-                    title="Borrar"
-                    onClick={() => {
-                      if (confirm(`¿Seguro que quieres eliminar a ${p.nombre} ${p.apellido}?`)) {
-                        remove.mutate(p.id);
-                      }
-                    }}
-                  >
-                    <TrashIcon className="h-5 w-5" />
-                  </button>
+                <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                  {pitchersPorEquipo[nombreEquipo].map((p) => (
+                    <div
+                      key={p.id}
+                      className="group relative flex flex-col rounded-2xl p-6 text-center shadow-lg transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl bg-card text-apptext"
+                    
+                    >
+                      <Avatar
+                        // src={p.fotoUrl ?? p.foto_url}
+                        alt={`Foto de ${p.nombre} ${p.apellido}`}
+                      />
+
+                      <h3 className="text-2xl font-bold">
+                        {p.nombre} {p.apellido}
+                      </h3>
+                      <p className="text-md" style={{ color: "var(--color-text)" }}>
+                        {p.equipo?.nombre ?? "Sin equipo"}
+                      </p>
+                      <p
+                        className="mt-2 text-sm font-semibold"
+                        style={{ color: "rgba(226,232,240,0.9)" }}
+                      >
+                        #{p.numero_camiseta}
+                      </p>
+
+                      {/* Botones */}
+                      <div className="absolute top-4 right-4 flex scale-0 gap-2 transition-transform duration-200 group-hover:scale-100">
+                        <button
+                          onClick={() => setPitcherAEditar(p)}
+                          className="rounded-full p-2 text-white shadow-md transition hover:scale-110"
+                          style={{ backgroundColor: COLORS.edit }}
+                          title="Editar"
+                        >
+                          <PencilIcon className="h-5 w-5" />
+                        </button>
+                        <button
+                          className="rounded-full bg-red-600 p-2 text-white shadow-md transition hover:scale-110"
+                          title="Borrar"
+                          onClick={() => {
+                            if (
+                              confirm(
+                                `¿Seguro que quieres eliminar a ${p.nombre} ${p.apellido}?`
+                              )
+                            ) {
+                              remove.mutate(p.id);
+                            }
+                          }}
+                        >
+                          <TrashIcon className="h-5 w-5" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              </div>
+              </section>
             ))}
           </div>
         ) : (
-          <div className="flex h-64 items-center justify-center rounded-lg bg-white/20">
-            <p className="text-xl text-white">No hay pitchers registrados todavía.</p>
+          <div
+            className="flex h-64 items-center justify-center rounded-xl"
+            style={{ backgroundColor: `var(--color-card)` }}
+          >
+            <p className="text-xl" style={{ color: COLORS.text }}>
+              No hay pitchers registrados todavía.
+            </p>
           </div>
         )}
 
-        <EditPitcherModal pitcher={pitcherAEditar} onClose={() => setPitcherAEditar(null)} />
+        <EditPitcherModal
+          pitcher={pitcherAEditar}
+          onClose={() => setPitcherAEditar(null)}
+        />
       </div>
     </main>
   );

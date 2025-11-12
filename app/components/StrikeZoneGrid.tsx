@@ -34,11 +34,11 @@ export default function StrikeZoneGrid({
 
   return (
     <div className="flex flex-col items-center">
-      <h3 className="text-lg font-semibold text-gray-700 mb-4">
+      <h3 className="text-lg font-semibold text-apptext mb-4">
         Zona de Strike
       </h3>
       
-      <div className="grid grid-cols-5 gap-1 bg-gray-400 p-1 rounded-lg shadow-inner">
+      <div className="grid grid-cols-5 gap-1 bg-[rgba(var(--color-text-rgb),0.25)] p-1 rounded-lg shadow-inner">
         
         {zones.map((_, index) => {
           const isStrikeZone = strikeZoneIndices.includes(index);
@@ -60,7 +60,7 @@ export default function StrikeZoneGrid({
                     ? 'bg-red-500 border-2 border-red-700 shadow-lg'
                     : isStrikeZone
                     ? 'bg-blue-100 border border-blue-300 hover:bg-blue-200'
-                    : 'bg-white border border-gray-300 hover:bg-gray-100'
+                    : 'bg-card border border-appborder hover:bg-[rgba(var(--color-text-rgb),0.05)]'
                 }
                 ${readOnly ? 'cursor-default' : 'cursor-pointer'}
                 ${!readOnly && 'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:z-10'}
@@ -72,7 +72,7 @@ export default function StrikeZoneGrid({
         })}
       </div>
       
-      <p className="text-sm text-gray-500 mt-2">
+      <p className="text-sm text-[rgba(var(--color-text-rgb),0.6)] mt-2">
         Centro: Strike Zone | Exterior: Bolas
       </p>
     </div>

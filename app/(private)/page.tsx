@@ -1,190 +1,187 @@
 "use client";
 
-import { useDashboard } from 'hooks/useDashboard';
-import Link from 'next/link'; // <--- CAMBIO 1: Importamos Link
-import { 
-  PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend,
+import React from "react";
+import Link from "next/link";
+import { useDashboard } from "hooks/useDashboard";
+import {
+  PieChart, Pie, Cell, ResponsiveContainer, Tooltip,
   BarChart, Bar, XAxis, YAxis, CartesianGrid
-} from 'recharts';
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
-import { 
-  ChartPieIcon, ChartBarIcon, CalendarDaysIcon, 
-  UsersIcon, UserGroupIcon, CalendarIcon 
-} from '@heroicons/react/24/solid';
+} from "recharts";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
+import {
+  ChartPieIcon, ChartBarIcon, CalendarDaysIcon,
+  UsersIcon, UserGroupIcon, CalendarIcon
+} from "@heroicons/react/24/solid";
 
-// Colores para el gráfico de torta
-const PIE_COLORS: { [key: string]: string } = {
-  'PROGRAMADO': '#3B82F6',
-  'FINALIZADO': '#16A34A',
-};
+/* ===== Theme tokens (we use Tailwind classes / CSS variables) ===== */
+
+/* ===== Helpers ===== */
+const Card = ({ children, className = "", style }: React.PropsWithChildren<{ className?: string; style?: React.CSSProperties }>) => (
+  <div
+    className={["rounded-md p-4 transition-all duration-200 hover:shadow-lg bg-card border border-appborder hover:border-[rgba(var(--color-text-rgb),0.15)]", className].join(" ")}
+    style={style}
+  >
+    {children}
+  </div>
+);
+
+const SectionHeader = ({ icon, title }: { icon: React.ReactNode; title: string }) => (
+  <div className="mb-3">
+    <div className="flex items-center gap-2 mb-2">
+      <span className="text-accent">{icon}</span>
+      <h3 className="text-sm font-semibold text-apptext">{title}</h3>
+    </div>
+    <div className="h-px bg-appborder" />
+  </div>
+);
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const DarkTooltip = ({ active, payload, label }: any) =>
+  !active || !payload?.length ? null : (
+    <div style={{
+      background: "#0b0f16",
+      border: `1px solid var(--color-border)`,
+      padding: "8px 10px",
+      borderRadius: 6,
+      color: 'var(--color-text)',
+      fontSize: 12
+    }}>
+      <div style={{ opacity: 0.8, marginBottom: 4 }}>{label}</div>
+      <div><b>{payload[0].name ?? payload[0].dataKey}</b>: {payload[0].value}</div>
+    </div>
+  );
+
+/* ===== Página ===== */
+type PiePoint = { name: string; value: number };
+type BarPoint = { name: string; pitchers: number };
 
 export default function InicioPage() {
   const { query } = useDashboard();
 
-  // 1. Manejo de Carga
-  if (query.isLoading) {
-    return (
-      <div className="flex h-screen items-center justify-center bg-gradient-to-br from-[#90D1F2] to-[#012F8A]">
-        <p className="text-2xl font-bold text-white">Cargando tu dashboard...</p>
-      </div>
-    );
-  }
+  if (query.isLoading) return <p className="p-6 text-apptext">Cargando…</p>;
+  if (query.isError)   return <p className="p-6 text-red-300">Error: {(query.error as Error).message}</p>;
+  if (!query.data)     return <p className="p-6 text-apptext">Sin datos.</p>;
 
-  // 2. Manejo de Error
-  if (query.isError) {
-    return (
-      <div className="flex h-screen items-center justify-center bg-gradient-to-br from-[#90D1F2] to-[#012F8A]">
-        <p className="text-2xl font-bold text-red-400">Error: {(query.error as Error).message}</p>
-      </div>
-    );
-  }
-
-  // 3. Si no hay datos
-  if (!query.data) {
-    return (
-      <div className="flex h-screen items-center justify-center bg-gradient-to-br from-[#90D1F2] to-[#012F8A]">
-        <p className="text-2xl font-bold text-white">No se encontraron datos.</p>
-      </div>
-    );
-  }
-
-  // 4. Datos listos para usar
   const { kpis, graficoTorta, graficoBarras, proximosPartidos } = query.data;
+  const pieData = (graficoTorta ?? []) as PiePoint[];
+  const barData = (graficoBarras ?? []) as BarPoint[];
 
   return (
-    <main className="min-h-full w-full max-w-full overflow-x-hidden bg-gradient-to-br from-[#90D1F2] to-[#012F8A] px-6 py-6 font-sans sm:px-10 sm:py-8">
+    <main className="min-h-screen bg-bg text-apptext p-6">
       <div className="mx-auto w-full max-w-7xl">
-        
-        <header className="flex items-center justify-between pb-8">
-          <h1 className="text-4xl font-bold text-white" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.3)' }}>
-            Inicio
-          </h1>
+        {/* Título */}
+        <header className="mb-4 border-b border-appborder pb-2">
+          <h1 className="text-2xl font-semibold text-apptext">Inicio</h1>
         </header>
 
-        {/* --- SECCIÓN 1: Tarjetas de KPIs --- */}
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 mb-6">
-          
-          {/* CAMBIO 2: Envuelto en Link y clases de hover añadidas */}
-          <Link href="/equipos">
-            <div className="rounded-xl bg-white/90 p-5 shadow-xl backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:bg-white cursor-pointer">
-              <div className="flex items-center">
-                <div className="rounded-full bg-sky-100 p-3">
-                  <UsersIcon className="h-6 w-6 text-sky-600" />
-                </div>
-                <h3 className="ml-3 text-lg font-semibold text-gray-700">Mis Equipos</h3>
-              </div>
-              <p className="mt-4 text-5xl font-bold text-gray-900">{kpis.equipos}</p>
-            </div>
-          </Link>
-
-          {/* CAMBIO 3: Envuelto en Link y clases de hover añadidas */}
-          <Link href="/pitchers">
-            <div className="rounded-xl bg-white/90 p-5 shadow-xl backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:bg-white cursor-pointer">
-              <div className="flex items-center">
-                <div className="rounded-full bg-green-100 p-3">
-                  <UserGroupIcon className="h-6 w-6 text-green-600" />
-                </div>
-                <h3 className="ml-3 text-lg font-semibold text-gray-700">Mis Pitchers</h3>
-              </div>
-              <p className="mt-4 text-5xl font-bold text-gray-900">{kpis.pitchers}</p>
-            </div>
-          </Link>
-
-          {/* CAMBIO 4: Envuelto en Link y clases de hover añadidas */}
-          <Link href="/partidos">
-            <div className="rounded-xl bg-white/90 p-5 shadow-xl backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:bg-white cursor-pointer">
-              <div className="flex items-center">
-                <div className="rounded-full bg-indigo-100 p-3">
-                  <CalendarIcon className="h-6 w-6 text-indigo-600" />
-                </div>
-                <h3 className="ml-3 text-lg font-semibold text-gray-700">Mis Partidos</h3>
-              </div>
-              <p className="mt-4 text-5xl font-bold text-gray-900">{kpis.partidos}</p>
-            </div>
-          </Link>
-
+        {/* KPIs */}
+  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 mb-5">
+          {[
+            { href: "/equipos",  label: "Mis Equipos",  icon: <UsersIcon className="h-5 w-5" />,      value: kpis.equipos },
+            { href: "/pitchers", label: "Mis Pitchers", icon: <UserGroupIcon className="h-5 w-5" />,  value: kpis.pitchers },
+            { href: "/partidos", label: "Mis Partidos", icon: <CalendarIcon className="h-5 w-5" />,   value: kpis.partidos },
+          ].map((it) => (
+            <Link key={it.href} href={it.href}>
+              <Card className="bg-card">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted">{it.label}</span>
+                    <span className="text-accent">{it.icon}</span>
+                  </div>
+                  <div className="text-4xl font-semibold text-apptext mt-2 leading-tight">
+                    {it.value}
+                  </div>
+                </Card>
+            </Link>
+          ))}
         </div>
 
-        {/* --- SECCIÓN 2: Gráficos --- */}
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 mb-6">
-          
-          {/* Gráfico de Torta */}
-          <div className="rounded-xl bg-white/90 p-6 shadow-xl backdrop-blur-sm">
-            <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
-              <ChartPieIcon className="h-6 w-6 mr-2 text-gray-600" />
-              Estado de tus Partidos
-            </h3>
-            {graficoTorta.length > 0 ? (
-              <div style={{ width: '100%', height: 300 }}>
+        {/* Resumen */}
+        <div className="flex items-center justify-between mb-3">
+          <div className="text-sm text-muted">Resumen general</div>
+          <div className="flex gap-2">
+            <button className="px-3 py-1 rounded border border-appborder bg-card text-apptext text-sm transition-colors hover:bg-[rgba(var(--color-text-rgb),0.08)]">Últimos 7 días</button>
+            <button className="px-3 py-1 rounded border border-appborder text-muted text-sm transition-colors hover:bg-[rgba(var(--color-text-rgb),0.05)] hover:text-apptext">Últimos 30 días</button>
+          </div>
+        </div>
+
+        {/* Gráficos */}
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2" style={{ marginBottom: 20 }}>
+          {/* Donut */}
+          <Card>
+            <SectionHeader icon={<ChartPieIcon className="h-5 w-5" />} title="Estado de Partidos" />
+            {pieData.length ? (
+              <div style={{ width: "100%", height: 300 }}>
                 <ResponsiveContainer>
                   <PieChart>
-                    <Pie data={graficoTorta as any[]} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} label>
-                      {graficoTorta.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={PIE_COLORS[entry.name.toUpperCase()] || '#8884d8'} />
+                    <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={50} outerRadius={90}>
+                      {pieData.map((e, i) => (
+                        <Cell key={i} fill={e.name?.toUpperCase() === "FINALIZADO" ? 'var(--color-accent2)' : 'var(--color-accent)'} />
                       ))}
                     </Pie>
-                    <Tooltip />
-                    <Legend />
+                    <Tooltip content={<DarkTooltip />} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
-            ) : (
-              <p className="text-gray-500 text-center h-[300px] flex items-center justify-center">No hay datos de partidos para mostrar.</p>
+              ) : (
+              <p className="text-muted flex items-center justify-center h-72">No hay datos de partidos para mostrar.</p>
             )}
-          </div>
-          
-          {/* Gráfico de Barras */}
-          <div className="rounded-xl bg-white/90 p-6 shadow-xl backdrop-blur-sm">
-            <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
-              <ChartBarIcon className="h-6 w-6 mr-2 text-gray-600" />
-              Pitchers por Equipo
-            </h3>
-            {graficoBarras.length > 0 ? (
-              <div style={{ width: '100%', height: 300 }}>
+            <div className="flex gap-3 mt-2 text-sm text-muted">
+              <span className="inline-flex items-center gap-2"><span className="w-2 h-2 rounded-full" style={{ background: 'var(--color-accent)' }} /> Programado</span>
+              <span className="inline-flex items-center gap-2"><span className="w-2 h-2 rounded-full" style={{ background: 'var(--color-accent2)' }} /> Finalizado</span>
+            </div>
+          </Card>
+
+          {/* Barras con animación hover */}
+          <Card>
+            <SectionHeader icon={<ChartBarIcon className="h-5 w-5" />} title="Pitchers por Equipo" />
+            {barData.length ? (
+              <div style={{ width: "100%", height: 300 }}>
                 <ResponsiveContainer>
-                  <BarChart data={graficoBarras} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="name" fontSize={12} />
-                    <YAxis allowDecimals={false} />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="pitchers" name="Pitchers" fill="#3B82F6" />
+                  <BarChart
+                    data={barData}
+                    margin={{ top: 8, right: 20, left: 0, bottom: 0 }}
+                    barSize={54}
+                    barGap={12}
+                    barCategoryGap="22%"
+                  >
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border)" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tickMargin={8} tick={{ fill: 'rgba(226,232,240,0.65)', fontSize: 12 }} />
+                <YAxis allowDecimals={false} axisLine={false} tickLine={false} tick={{ fill: 'rgba(226,232,240,0.65)', fontSize: 12 }} />
+                    <Tooltip content={<DarkTooltip />} />
+                    <Bar
+                      dataKey="pitchers"
+                      name="Pitchers"
+                      fill={'var(--color-accent)'}
+                      radius={[6, 6, 0, 0]}
+                      activeBar={{ fill: "#ffa24c", opacity: 0.9 }}
+                      animationDuration={400}
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
-            ) : (
-              <p className="text-gray-500 text-center h-[300px] flex items-center justify-center">No tienes equipos o pitchers para mostrar.</p>
+              ) : (
+              <p className="text-muted flex items-center justify-center h-72">No tienes equipos o pitchers para mostrar.</p>
             )}
-          </div>
+          </Card>
         </div>
 
-        {/* --- SECCIÓN 3: Próximos Partidos --- */}
-        <div className="rounded-xl bg-white/90 p-6 shadow-xl backdrop-blur-sm">
-          <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
-            <CalendarDaysIcon className="h-6 w-6 mr-2 text-gray-600" />
-            Tus Próximos Partidos Programados
-          </h3>
-          {proximosPartidos.length > 0 ? (
-            <ul className="space-y-4">
-              {proximosPartidos.map(partido => (
-                <li key={partido.id} className="p-4 rounded-lg bg-gray-50 border border-gray-200 flex flex-col sm:flex-row justify-between sm:items-center">
-                  <div>
-                    <div className="font-bold text-lg text-gray-800">
-                      {partido.equipoLocal} vs {partido.equipoVisitante}
-                    </div>
-                  </div>
-                  <div className="text-md font-semibold text-gray-700 text-left sm:text-right mt-2 sm:mt-0">
-                    {format(new Date(partido.fecha), "eeee dd/MM · HH:mm 'hs'", { locale: es })}
-                  </div>
+        {/* Próximos partidos */}
+        <Card>
+          <SectionHeader icon={<CalendarDaysIcon className="h-5 w-5" />} title="Tus Próximos Partidos Programados" />
+          {proximosPartidos.length ? (
+            <ul className="border-t" style={{ borderColor: 'var(--color-border)' }}>
+              {proximosPartidos.map((p, idx) => (
+                <li key={p.id} className="flex items-center justify-between py-2" style={{ borderBottom: idx === proximosPartidos.length - 1 ? 'none' : undefined }}>
+                  <span className="text-apptext text-base font-medium">{p.equipoLocal} <span className="text-muted">vs</span> {p.equipoVisitante}</span>
+                  <span className="text-muted text-sm">{format(new Date(p.fecha), "dd/MM HH:mm", { locale: es })}</span>
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="text-gray-500 text-center py-8">No tienes partidos programados.</p>
+            <p className="text-muted text-center py-5">No tienes partidos programados.</p>
           )}
-        </div>
-
+        </Card>
       </div>
     </main>
   );

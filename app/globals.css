@@ -3,8 +3,69 @@
 @tailwind utilities;
 
 :root {
-  --background: #90D1F2fff;
-  --foreground: #111111;
+  /* Default tokens (dark theme by default). We also provide explicit light/dark scopes below. */
+  --color-sidebar: #1F2E3F; /* sidebar */
+  --color-bg: #0D1118;     /* main background for all pages */
+  --color-card: #1B2434;   /* cards, modals, surfaces */
+  --color-accent: #FF7A1A; /* accents / charts */
+  --color-accent2: #3FA4B7;/* secondary accent */
+  --color-text: #E2E8F0;   /* primary text color */
+
+  /* RGB tokens for using alpha via rgba(var(--...-rgb), a) */
+  --color-accent-rgb: 255,122,26; /* rgb of #FF7A1A */
+  --color-accent2-rgb: 63,164,183; /* rgb of #3FA4B7 */
+
+  /* Semantic tokens for common states */
+  --color-success: #10B981; /* green */
+  --color-success-rgb: 16,185,129;
+  --color-danger: #EF4444; /* red */
+  --color-danger-rgb: 239,68,68;
+
+  /* Derived tokens */
+  --color-border: rgba(255,255,255,0.06);
+  --color-text-rgb: 226,232,240; /* rgb for --color-text (dark default) */
+  --color-muted: rgba(226,232,240,0.6);
+  --color-on-accent: #ffffff;
+}
+
+/* Light theme (optional). Activate by setting data-theme="light" on <html> or <body>. */
+[data-theme="light"] {
+  --color-sidebar: #F8FAFC;
+  --color-bg: #F6F8FA;
+  --color-card: #FFFFFF;
+  --color-accent: #FF7A1A; /* keep accent */
+  --color-accent2: #3FA4B7;
+  --color-text: #0F172A; /* darker text for light bg */
+  --color-accent-rgb: 255,122,26;
+  --color-accent2-rgb: 63,164,183;
+  --color-success: #10B981;
+  --color-success-rgb: 16,185,129;
+  --color-danger: #EF4444;
+  --color-danger-rgb: 239,68,68;
+  --color-text-rgb: 15,23,42; /* rgb for --color-text in light theme */
+  --color-muted: rgba(15,23,42,0.6);
+  --color-on-accent: #ffffff;
+  --color-border: rgba(2,6,23,0.06);
+}
+
+/* Dark theme explicit scope (same as default but explicit) */
+[data-theme="dark"] {
+  --color-sidebar: #1F2E3F;
+  --color-bg: #0D1118;
+  --color-card: #1B2434;
+  --color-accent: #FF7A1A;
+  --color-accent2: #3FA4B7;
+  --color-text: #E2E8F0;
+  --color-accent-rgb: 255,122,26;
+  --color-accent2-rgb: 63,164,183;
+  --color-success: #10B981;
+  --color-success-rgb: 16,185,129;
+  --color-danger: #EF4444;
+  --color-danger-rgb: 239,68,68;
+  --color-text-rgb: 226,232,240;
+  --color-muted: rgba(226,232,240,0.6);
+  --color-on-accent: #ffffff;
+  --color-border: rgba(255,255,255,0.06);
 }
 
 html, body {
@@ -14,7 +75,7 @@ html, body {
 }
 
 body {
-  @apply bg-slate-50 text-slate-800;
-  background: var(--background);
-  color: var(--foreground);
+  /* Prefer using CSS variables for global theming. Tailwind tokens can be mapped to these vars in tailwind.config.js. */
+  background: var(--color-bg);
+  color: var(--color-text);
 }

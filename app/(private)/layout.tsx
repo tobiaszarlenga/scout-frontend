@@ -5,36 +5,42 @@ import { useState } from "react";
 import { Menu } from "lucide-react";
 import AuthGuard from "@/app/components/AuthGuard";
 import Sidebar from "@/app/components/Sidebar";
-import { Toaster } from "react-hot-toast"; // 1. Importa el componente Toaster
+import { Toaster } from "react-hot-toast";
 import { ScoutProvider } from "@/context/ScoutContext";
 
 export default function PrivateLayout({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
 
-  // Este es el Shell que antes estaba en el layout principal
   const Shell = (
-    // Evitamos scroll horizontal y alineamos alto exacto al viewport
     <div className="flex min-h-dvh overflow-x-hidden">
-      {/* 2. Añade el componente Toaster aquí. Se encargará de mostrar las notificaciones. */}
       <Toaster position="top-right" />
 
-  <Sidebar open={open} onClose={() => setOpen(false)} />
-  {/* min-w-0 permite que el contenedor flex hijo pueda encogerse sin forzar overflow */}
-  <div className="flex min-h-dvh flex-1 min-w-0 flex-col">
-        <header className="sticky top-0 z-40 border-b border-slate-200 bg-white lg:hidden">
+      {/* El Sidebar mantiene su fondo blanco, creando la separación */}
+      <Sidebar open={open} onClose={() => setOpen(false)} />
+
+      <div className="flex min-h-dvh flex-1 min-w-0 flex-col">
+        {/* Header de móvil, azul para que combine */}
+        <header className="sticky top-0 z-40 border-b border-white/20 bg-blue-800 lg:hidden">
           <div className="flex items-center gap-3 p-3">
             <button
               aria-label="Abrir menú"
-              className="rounded-lg p-2 hover:bg-slate-100"
+              className="rounded-lg p-2 text-white hover:bg-blue-700"
               onClick={() => setOpen(true)}
             >
               <Menu size={20} />
             </button>
-            <span className="font-semibold">SoftScout</span>
+            <span className="font-semibold text-white">SoftScout</span>
           </div>
         </header>
-        {/* max-w-full/min-w-0 evitan desbordes; overflow-y-auto muestra scroll solo cuando hace falta */}
-        <main className="flex-1 min-w-0 max-w-full overflow-y-auto p-4 lg:p-8">{children}</main>
+
+        {/* CAMBIO PRINCIPAL:
+          Este <main> aplica el fondo gradiente a TODA el área 
+          de contenido. 
+          Quitamos el padding (p-4) para que cada página lo maneje.
+        */}
+        <main className="flex-1 min-w-0 max-w-full overflow-y-auto bg-gradient-to-br from-blue-600 to-blue-800">
+          {children}
+        </main>
       </div>
     </div>
   );

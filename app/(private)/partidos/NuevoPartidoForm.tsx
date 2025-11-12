@@ -2,6 +2,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Button from '@/app/components/Button';
 import type { Equipo } from '@/types/equipo';
 import type { Pitcher } from '@/types/pitcher';
 
@@ -237,21 +238,12 @@ export default function NuevoPartidoForm({
 
       {/* --- Botones (igual que EquipoForm) --- */}
       <div className="flex justify-end gap-2 pt-2">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="rounded-md border px-3 py-2 hover:bg-gray-50 disabled:opacity-50"
-          disabled={submitting}
-        >
+        <Button type="button" variant="secondary" onClick={onCancel} disabled={submitting}>
           Cancelar
-        </button>
-        <button
-          type="submit"
-          className="rounded-md bg-green-600 px-3 py-2 text-white hover:bg-green-700 disabled:opacity-50"
-          disabled={submitting}
-        >
-          {submitting ? "Creando..." : "Crear Partido"}
-        </button>
+        </Button>
+        <Button type="submit" variant="primary"  disabled={submitting}>
+          {submitting ? 'Creando...' : 'Crear Partido'}
+        </Button>
       </div>
     </form>
   );

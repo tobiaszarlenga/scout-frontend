@@ -2,32 +2,38 @@
 "use client";
 
 import { useState } from "react";
+import Modal from '@/app/components/Modal';
+import Button from '@/app/components/Button';
 import { useForm, SubmitHandler } from "react-hook-form";
 import { usePitchers } from "@/hooks/usePitchers";
 import { useEquipos } from "@/hooks/useEquipos";
 import type { CreatePitcherDto } from "@/types/pitcher";
-import { toast } from "react-hot-toast"; // 1. Importamos toast
-import { PlusIcon } from "@heroicons/react/24/solid"; // Opcional: para el botón
+import { toast } from "react-hot-toast";
+import { PlusIcon, UserPlusIcon } from "@heroicons/react/24/solid";
+
+// CAMBIO: Colores de focus actualizados a AZUL con theme-aware tokens
+const inputStyle =
+  "mt-1 block w-full rounded-md border-appborder shadow-sm " +
+  "bg-[rgba(var(--color-text-rgb),0.03)] text-apptext " +
+  "focus:border-blue-500 focus:ring-2 focus:ring-blue-300"; // <-- CAMBIO a AZUL
 
 export default function NewPitcherModal() {
   const [isOpen, setIsOpen] = useState(false);
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<CreatePitcherDto>();
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<CreatePitcherDto>();
   const { create: createPitcher } = usePitchers();
   const { list: equiposList } = useEquipos();
 
   const onSubmit: SubmitHandler<CreatePitcherDto> = async (data) => {
-    // 2. Usamos toast.promise para una mejor experiencia de usuario
-    // Muestra un mensaje mientras se guarda, y luego lo actualiza con el resultado.
-    await toast.promise(
-      createPitcher.mutateAsync(data),
-      {
-        loading: 'Guardando pitcher...',
-        success: '¡Pitcher creado con éxito!',
-        error: 'No se pudo crear el pitcher.',
-      }
-    );
-
-    // Limpiamos y cerramos el modal después de que la promesa se complete
+    await toast.promise(createPitcher.mutateAsync(data), {
+      loading: "Guardando pitcher...",
+      success: "¡Pitcher creado con éxito!",
+      error: "No se pudo crear el pitcher.",
+    });
     reset();
     setIsOpen(false);
   };
@@ -39,111 +45,105 @@ export default function NewPitcherModal() {
 
   return (
     <>
-      {/* 3. Estilizamos el botón para que coincida con el diseño de la app */}
-      <button
-        onClick={() => setIsOpen(true)}
-        className="flex items-center gap-2 rounded-full bg-white px-5 py-2 font-bold text-[#012F8A] shadow-lg transition-transform duration-300 hover:-translate-y-1"
-      >
-        <PlusIcon className="h-5 w-5" />
-        Nuevo Pitcher
-      </button>
+      <Button onClick={() => setIsOpen(true)} variant="secondary" className="flex items-center gap-2 rounded-full">
+        <PlusIcon className="h-5 w-5 text-accent" />
+        <span className="text-accent font-bold">Nuevo Pitcher</span>
+      </Button>
 
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
-            <h2 className="mb-4 text-2xl font-bold">Añadir Nuevo Pitcher</h2>
-            
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              {/* Campo Nombre */}
-              <div>
-                <label htmlFor="nombre" className="block text-sm font-medium text-gray-700">Nombre</label>
-                <input
-                  id="nombre"
-                  type="text"
-                  {...register("nombre", { required: "El nombre es obligatorio" })}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                />
-                {errors.nombre && <p className="mt-1 text-xs text-red-500">{errors.nombre.message}</p>}
-              </div>
-
-              {/* Campo Apellido */}
-              <div>
-                <label htmlFor="apellido" className="block text-sm font-medium text-gray-700">Apellido</label>
-                <input
-                  id="apellido"
-                  type="text"
-                  {...register("apellido", { required: "El apellido es obligatorio" })}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                />
-                {errors.apellido && <p className="mt-1 text-xs text-red-500">{errors.apellido.message}</p>}
-              </div>
-              
-              {/* Campos Edad y Número en la misma fila */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="edad" className="block text-sm font-medium text-gray-700">Edad</label>
-                  <input
-                    id="edad"
-                    type="number"
-                    {...register("edad", { required: "La edad es obligatoria", valueAsNumber: true, min: { value: 1, message: "Edad inválida"} })}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                  />
-                  {errors.edad && <p className="mt-1 text-xs text-red-500">{errors.edad.message}</p>}
-                </div>
-                <div>
-                  <label htmlFor="numero_camiseta" className="block text-sm font-medium text-gray-700">Número</label>
-                  <input
-                    id="numero_camiseta"
-                    type="number"
-                    {...register("numero_camiseta", { required: "El número es obligatorio", valueAsNumber: true, min: { value: 0, message: "Número inválido"} })}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                  />
-                  {errors.numero_camiseta && <p className="mt-1 text-xs text-red-500">{errors.numero_camiseta.message}</p>}
-                </div>
-              </div>
-
-              {/* Selector de Equipo */}
-              <div>
-                <label htmlFor="equipoId" className="block text-sm font-medium text-gray-700">Equipo</label>
-                <select
-                  id="equipoId"
-                  {...register("equipoId", { required: "Debe seleccionar un equipo", valueAsNumber: true })}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                  disabled={equiposList.isLoading}
-                >
-                  <option value="">
-                    {equiposList.isLoading ? "Cargando equipos..." : "Seleccione un equipo"}
-                  </option>
-                  {equiposList.data?.map(equipo => (
-                    <option key={equipo.id} value={equipo.id}>
-                      {equipo.nombre}
-                    </option>
-                  ))}
-                </select>
-                {errors.equipoId && <p className="mt-1 text-xs text-red-500">{errors.equipoId.message}</p>}
-              </div>
-
-              {/* Botones de acción */}
-              <div className="flex justify-end space-x-3 pt-4">
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  className="rounded-md border border-gray-300 bg-white px-4 py-2 font-semibold text-gray-700 hover:bg-gray-50"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  disabled={createPitcher.isPending}
-                  className="rounded-md bg-green-600 px-4 py-2 font-semibold text-white hover:bg-green-700 disabled:opacity-50"
-                >
-                  {createPitcher.isPending ? "Guardando..." : "Guardar"}
-                </button>
-              </div>
-            </form>
+      <Modal
+        open={isOpen}
+        onClose={closeModal}
+        title={
+          <div className="flex items-center gap-3">
+            <UserPlusIcon className="h-6 w-6 text-apptext" />
+            <span>Añadir Nuevo Pitcher</span>
           </div>
-        </div>
-      )}
+        }
+        size="md"
+        footer={
+          <div className="flex justify-end gap-3">
+            <Button type="button" variant="secondary" onClick={closeModal}>
+              Cancelar
+            </Button>
+            <Button type="submit" form="new-pitcher-form" variant="primary" className="bg-blue-500 hover:bg-blue-700" disabled={createPitcher.isPending}>
+              {createPitcher.isPending ? 'Guardando...' : 'Guardar'}
+            </Button>
+          </div>
+        }
+      >
+        <form id="new-pitcher-form" onSubmit={handleSubmit(onSubmit)}>
+          <div className="p-4 sm:p-6 space-y-4">
+                {/* Campo Nombre */}
+                <div>
+                  <label htmlFor="nombre" className="block text-sm font-medium text-apptext">Nombre</label>
+                  <input
+                    id="nombre"
+                    type="text"
+                    {...register("nombre", { required: "El nombre es obligatorio" })}
+                    className={inputStyle}
+                  />
+                  {errors.nombre && <p className="mt-1 text-xs text-red-500">{errors.nombre.message}</p>}
+                </div>
+
+                {/* Campo Apellido */}
+                <div>
+                  <label htmlFor="apellido" className="block text-sm font-medium text-apptext">Apellido</label>
+                  <input
+                    id="apellido"
+                    type="text"
+                    {...register("apellido", { required: "El apellido es obligatorio" })}
+                    className={inputStyle}
+                  />
+                  {errors.apellido && <p className="mt-1 text-xs text-red-500">{errors.apellido.message}</p>}
+                </div>
+
+                {/* Edad y Número */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="edad" className="block text-sm font-medium text-apptext">Edad</label>
+                    <input
+                      id="edad"
+                      type="number"
+                      {...register("edad", { required: "La edad es obligatoria", valueAsNumber: true, min: { value: 1, message: "Edad inválida" } })}
+                      className={inputStyle}
+                    />
+                    {errors.edad && <p className="mt-1 text-xs text-red-500">{errors.edad.message}</p>}
+                  </div>
+                  <div>
+                    <label htmlFor="numero_camiseta" className="block text-sm font-medium text-apptext">Número</label>
+                    <input
+                      id="numero_camiseta"
+                      type="number"
+                      {...register("numero_camiseta", { required: "El número es obligatorio", valueAsNumber: true, min: { value: 0, message: "Número inválido" } })}
+                      className={inputStyle}
+                    />
+                    {errors.numero_camiseta && <p className="mt-1 text-xs text-red-500">{errors.numero_camiseta.message}</p>}
+                  </div>
+                </div>
+
+                {/* Selector de Equipo */}
+                <div>
+                  <label htmlFor="equipoId" className="block text-sm font-medium text-apptext">Equipo</label>
+                  <select
+                    id="equipoId"
+                    {...register("equipoId", { required: "Debe seleccionar un equipo", valueAsNumber: true })}
+                    className={inputStyle}
+                    disabled={equiposList.isLoading}
+                  >
+                    <option value="">
+                      {equiposList.isLoading ? "Cargando equipos..." : "Seleccione un equipo"}
+                    </option>
+                    {equiposList.data?.map(equipo => (
+                      <option key={equipo.id} value={equipo.id}>
+                        {equipo.nombre}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.equipoId && <p className="mt-1 text-xs text-red-500">{errors.equipoId.message}</p>}
+                </div>
+          </div>
+        </form>
+      </Modal>
     </>
   );
 }

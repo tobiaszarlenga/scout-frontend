@@ -38,7 +38,12 @@ export default function RegistrarLanzamientoForm({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+    // Validación: ambos campos son requeridos para guardar en backend
+    if (!tipoId || !resultadoId) {
+      alert('Seleccioná Tipo de Efecto y Resultado para guardar el lanzamiento.');
+      return;
+    }
+
     // --- CAMBIO 6: Enviamos los IDs ---
     onSubmit({
       velocidad,
@@ -84,6 +89,7 @@ export default function RegistrarLanzamientoForm({
             onChange={(e) => setTipoId(e.target.value ? Number(e.target.value) : null)}
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
             disabled={tipos.isLoading || tipos.isError} // Desactivado si está cargando
+            required
           >
             <option value="">Seleccionar efecto</option>
             {/* --- Lógica de Carga --- */}
@@ -110,6 +116,7 @@ export default function RegistrarLanzamientoForm({
             onChange={(e) => setResultadoId(e.target.value ? Number(e.target.value) : null)}
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
             disabled={resultados.isLoading || resultados.isError} // Desactivado si está cargando
+            required
           >
             <option value="">Seleccionar resultado</option>
             {/* --- Lógica de Carga --- */}

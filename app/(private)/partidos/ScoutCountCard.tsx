@@ -17,10 +17,12 @@ export default function ScoutCountCard({ bolas, strikes, onReset }: ScoutCountCa
 
   return (
     // Tarjeta principal
-    <div className="bg-white p-4 rounded-lg shadow-md border border-gray-200 flex flex-col justify-between h-full">
-      
+    <div
+      className="p-4 rounded-lg shadow-md flex flex-col justify-between h-full"
+      style={{ backgroundColor: 'var(--color-card)', border: '1px solid var(--color-border)' }}
+    >
       {/* Título */}
-      <h3 className="text-center text-gray-500 font-semibold mb-3">
+      <h3 className="text-center font-semibold mb-3" style={{ color: 'var(--color-muted)' }}>
         Cuenta
       </h3>
       
@@ -29,27 +31,28 @@ export default function ScoutCountCard({ bolas, strikes, onReset }: ScoutCountCa
         
         {/* Sección Bolas */}
         <div>
-          <span className="text-6xl font-bold text-gray-800">
+          <span className="text-6xl font-bold" style={{ color: 'var(--color-text)' }}>
             {bolas}
           </span>
-          <p className="text-lg text-gray-500">Bolas</p>
+          <p className="text-lg" style={{ color: 'var(--color-muted)' }}>Bolas</p>
         </div>
         
         {/* Sección Strikes */}
         <div>
-          <span className="text-6xl font-bold text-gray-800">
+          <span className="text-6xl font-bold" style={{ color: 'var(--color-text)' }}>
             {strikes}
           </span>
-          <p className="text-lg text-gray-500">Strikes</p>
+          <p className="text-lg" style={{ color: 'var(--color-muted)' }}>Strikes</p>
         </div>
 
       </div>
 
       {/* Botón de Reiniciar */}
       <div className="text-center">
-        <button 
+        <button
           onClick={onReset}
-          className="text-sm text-blue-600 hover:text-blue-800 transition-colors"
+          className="text-sm hover:opacity-90 transition-colors"
+          style={{ color: 'var(--color-accent)' }}
         >
           Reiniciar Cuenta
         </button>

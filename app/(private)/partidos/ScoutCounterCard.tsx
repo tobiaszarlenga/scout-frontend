@@ -71,10 +71,9 @@ export default function ScoutCounterCard({
   // --- 3. Renderizado ---
   return (
     // Tarjeta principal (igual a los divs que teníamos)
-    <div className="bg-white p-4 rounded-lg shadow-md border border-gray-200">
-      
+    <div className="p-4 rounded-lg shadow-md" style={{ backgroundColor: 'var(--color-card)', border: '1px solid var(--color-border)' }}>
       {/* Título */}
-      <h3 className="text-center text-gray-500 font-semibold mb-2">
+      <h3 className="text-center font-semibold mb-2" style={{ color: 'var(--color-muted)' }}>
         {title}
       </h3>
       
@@ -82,12 +81,13 @@ export default function ScoutCounterCard({
       <div className="flex items-center justify-center space-x-4">
         {/* Botón de Restar */}
         {!readOnly && (
-          <button 
+          <button
             onClick={decrement}
             disabled={count === 0}
-            className={`w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-2xl text-gray-600 hover:bg-gray-200 ${
+            className={`w-10 h-10 rounded-full flex items-center justify-center text-2xl ${
               count === 0 ? 'opacity-50 cursor-not-allowed' : ''
             }`}
+            style={{ backgroundColor: 'rgba(var(--color-text-rgb),0.06)', color: 'var(--color-text)' }}
             aria-label={`Disminuir ${title}`}
           >
             -
@@ -95,18 +95,19 @@ export default function ScoutCounterCard({
         )}
 
         {/* Número */}
-        <span className={`text-6xl font-bold text-gray-800 text-center ${readOnly ? 'w-full' : 'w-20'}`}>
+        <span className={`text-6xl font-bold text-center ${readOnly ? 'w-full' : 'w-20'}`} style={{ color: 'var(--color-text)' }}>
           {count}
         </span>
 
         {/* Botón de Sumar */}
         {!readOnly && (
-          <button 
+          <button
             onClick={increment}
             disabled={maxValue !== undefined && count >= maxValue}
-            className={`w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-2xl text-gray-600 hover:bg-gray-200 ${
+            className={`w-10 h-10 rounded-full flex items-center justify-center text-2xl ${
               maxValue !== undefined && count >= maxValue ? 'opacity-50 cursor-not-allowed' : ''
             }`}
+            style={{ backgroundColor: 'rgba(var(--color-text-rgb),0.06)', color: 'var(--color-text)' }}
             aria-label={`Aumentar ${title}`}
           >
             +
@@ -116,7 +117,7 @@ export default function ScoutCounterCard({
 
       {/* Texto de pie de página (opcional) */}
       {footerText && (
-        <p className="text-center text-sm text-gray-500 mt-2">
+        <p className="text-center text-sm mt-2" style={{ color: 'var(--color-muted)' }}>
           {footerText}
         </p>
       )}

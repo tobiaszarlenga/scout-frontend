@@ -36,6 +36,27 @@ export const pitcherApi = {
   create: (data: CreatePitcherDto) => api.post<Pitcher>('/pitchers', data),
   update: (id: number, data: Partial<CreatePitcherDto>) => api.put<Pitcher>(`/pitchers/${id}`, data),
   delete: (id: number) => api.delete(`/pitchers/${id}`),
+  stats: (id: number) => api.get<{
+    total: number;
+    avgVel: number | null;
+    zoneCounts: number[];
+    byResultado: Record<string, number>;
+    byTipo: Record<string, number>;
+  }>(`/pitchers/${id}/stats`),
+};
+
+import type { Equipo } from '@/types/equipo';
+
+export const equipoApi = {
+  getAll: () => api.get<Equipo[]>('/equipos'),
+  stats: (id: number) => api.get<{
+    total: number;
+    avgVel: number | null;
+    zoneCounts: number[];
+    byResultado: Record<string, number>;
+    byTipo: Record<string, number>;
+    pitchers: Array<{ id: number; nombre: string | null; apellido: string | null; total: number; avgVel: number | null }>;
+  }>(`/equipos/${id}/stats`),
 };
 
 // Podrías tener otros objetos similares aquí, por ejemplo:
