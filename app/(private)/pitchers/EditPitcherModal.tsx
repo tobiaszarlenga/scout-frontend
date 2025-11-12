@@ -79,9 +79,9 @@ export default function EditPitcherModal({ pitcher, onClose }: EditPitcherModalP
       title={<div className="flex items-center gap-3"><PencilIcon className="h-6 w-6 text-apptext"/> <span>Editar Pitcher</span></div>}
       size="md"
       footer={
-        <div className="flex justify-end gap-3">
+          <div className="flex justify-end gap-3">
           <Button type="button" variant="secondary" onClick={onClose}>Cancelar</Button>
-          <Button type="submit" form="edit-pitcher-form" variant="primary" className="bg-blue-500 hover:bg-blue-700" disabled={updatePitcher.isPending}>
+          <Button type="submit" form="edit-pitcher-form" variant="primary" disabled={updatePitcher.isPending}>
             {updatePitcher.isPending ? 'Actualizando...' : 'Actualizar'}
           </Button>
         </div>

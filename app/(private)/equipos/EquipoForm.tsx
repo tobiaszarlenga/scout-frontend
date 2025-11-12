@@ -62,45 +62,48 @@ export default function EquipoForm({ initial, onSubmit, onCancel }: Props) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium">Nombre *</label>
+        <label className="block text-sm font-medium" style={{ color: 'var(--color-text)' }}>Nombre *</label>
         <input
           type="text"
           value={nombre}
           onChange={(e) => setNombre(e.target.value)}
-          className="mt-1 w-full rounded-md border px-3 py-2 outline-none focus:ring"
+          className="mt-1 w-full rounded-md px-3 py-2 outline-none"
           placeholder="Ej: Tigres U18"
+          style={{ backgroundColor: 'var(--color-card)', color: 'var(--color-text)', border: '1px solid var(--color-border)' }}
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium">Ciudad</label>
+        <label className="block text-sm font-medium" style={{ color: 'var(--color-text)' }}>Ciudad</label>
         <input
           type="text"
           value={ciudad}
           onChange={(e) => setCiudad(e.target.value)}
-          className="mt-1 w-full rounded-md border px-3 py-2 outline-none focus:ring"
+          className="mt-1 w-full rounded-md px-3 py-2 outline-none"
           placeholder="Opcional"
+          style={{ backgroundColor: 'var(--color-card)', color: 'var(--color-text)', border: '1px solid var(--color-border)' }}
         />
       </div>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm" style={{ color: 'var(--color-danger)' }}>{error}</p>}
 
       <div className="flex justify-end gap-2 pt-2">
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-md border px-3 py-2 hover:bg-gray-50 disabled:opacity-50"
+          className="rounded-md px-3 py-2 disabled:opacity-50"
           disabled={submitting}
+          style={{ backgroundColor: 'rgba(var(--color-text-rgb),0.04)', color: 'var(--color-text)', border: '1px solid var(--color-border)' }}
         >
           Cancelar
         </button>
         <Button type="submit" variant="primary" disabled={submitting}>
-  {submitting ? "Guardando..." : "Guardar"}
-</Button>
+          {submitting ? "Guardando..." : "Guardar"}
+        </Button>
 
       </div>
 
-      <p className="text-xs text-gray-500">* El nombre debe ser único.</p>
+      <p className="text-xs" style={{ color: 'var(--color-muted)' }}>* El nombre debe ser único.</p>
     </form>
   );
 }
