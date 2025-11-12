@@ -98,6 +98,7 @@ export default function EditPitcherModal({ pitcher, onClose }: EditPitcherModalP
                 type="text"
                 {...register("nombre", { required: "El nombre es obligatorio" })}
                 className={inputStyle}
+                style={{ backgroundColor: 'var(--color-card)', color: 'var(--color-text)', border: '1px solid var(--color-border)' }}
               />
               {errors.nombre && <p className="mt-1 text-xs text-red-500">{errors.nombre.message}</p>}
             </div>
@@ -110,6 +111,7 @@ export default function EditPitcherModal({ pitcher, onClose }: EditPitcherModalP
                 type="text"
                 {...register("apellido", { required: "El apellido es obligatorio" })}
                 className={inputStyle}
+                style={{ backgroundColor: 'var(--color-card)', color: 'var(--color-text)', border: '1px solid var(--color-border)' }}
               />
               {errors.apellido && <p className="mt-1 text-xs text-red-500">{errors.apellido.message}</p>}
             </div>
@@ -122,7 +124,8 @@ export default function EditPitcherModal({ pitcher, onClose }: EditPitcherModalP
                   id="edad"
                   type="number"
                   {...register("edad", { required: "La edad es obligatoria", valueAsNumber: true, min: { value: 1, message: "Edad inválida" } })}
-                  className={inputStyle}
+                className={inputStyle}
+                style={{ backgroundColor: 'var(--color-card)', color: 'var(--color-text)', border: '1px solid var(--color-border)' }}
                 />
                 {errors.edad && <p className="mt-1 text-xs text-red-500">{errors.edad.message}</p>}
               </div>
@@ -132,7 +135,8 @@ export default function EditPitcherModal({ pitcher, onClose }: EditPitcherModalP
                   id="numero_camiseta"
                   type="number"
                   {...register("numero_camiseta", { required: "El número es obligatorio", valueAsNumber: true, min: { value: 0, message: "Número inválido" } })}
-                  className={inputStyle}
+                className={inputStyle}
+                style={{ backgroundColor: 'var(--color-card)', color: 'var(--color-text)', border: '1px solid var(--color-border)' }}
                 />
                 {errors.numero_camiseta && <p className="mt-1 text-xs text-red-500">{errors.numero_camiseta.message}</p>}
               </div>
@@ -145,13 +149,14 @@ export default function EditPitcherModal({ pitcher, onClose }: EditPitcherModalP
                 id="equipoId"
                 {...register("equipoId", { required: "Debe seleccionar un equipo", valueAsNumber: true })}
                 className={inputStyle}
+                style={{ backgroundColor: 'var(--color-card)', color: 'var(--color-text)', border: '1px solid var(--color-border)' }}
                 disabled={equiposList.isLoading}
               >
                 <option value="">
                   {equiposList.isLoading ? "Cargando equipos..." : "Seleccione un equipo"}
                 </option>
                 {equiposList.data?.map(equipo => (
-                  <option key={equipo.id} value={equipo.id}>
+                  <option key={equipo.id} value={equipo.id} style={{ backgroundColor: 'var(--color-card)', color: 'var(--color-text)' }}>
                     {equipo.nombre}
                   </option>
                 ))}

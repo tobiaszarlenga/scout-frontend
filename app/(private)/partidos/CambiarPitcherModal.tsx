@@ -54,19 +54,20 @@ export default function CambiarPitcherModal({
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="pitcherSelect" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="pitcherSelect" className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text)' }}>
             Seleccionar pitcher del equipo
           </label>
           <select
             id="pitcherSelect"
             value={pitcherIdSeleccionado}
             onChange={(e) => setPitcherIdSeleccionado(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 rounded-md shadow-sm focus:outline-none"
+            style={{ backgroundColor: 'var(--color-card)', color: 'var(--color-text)', border: '1px solid var(--color-border)' }}
             autoFocus
           >
-            <option value="">Seleccionar pitcher...</option>
+            <option value="" style={{ backgroundColor: 'var(--color-card)', color: 'var(--color-text)' }}>Seleccionar pitcher...</option>
             {pitchersDisponibles.map((pitcher) => (
-              <option key={pitcher.id} value={pitcher.id}>
+              <option key={pitcher.id} value={pitcher.id} style={{ backgroundColor: 'var(--color-card)', color: 'var(--color-text)' }}>
                 {pitcher.nombre} {pitcher.apellido} - #{pitcher.numero_camiseta}
               </option>
             ))}
@@ -91,7 +92,7 @@ export default function CambiarPitcherModal({
           <Button type="button" variant="secondary" onClick={onClose}>
             Cancelar
           </Button>
-          <Button type="submit" variant="primary" className="bg-blue-600 hover:bg-blue-700" disabled={!pitcherIdSeleccionado}>
+          <Button type="submit" variant="primary" disabled={!pitcherIdSeleccionado}>
             Confirmar Cambio
           </Button>
         </div>
