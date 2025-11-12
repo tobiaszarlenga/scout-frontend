@@ -65,7 +65,7 @@ export default function NewPitcherModal() {
             <Button type="button" variant="secondary" onClick={closeModal}>
               Cancelar
             </Button>
-            <Button type="submit" form="new-pitcher-form" variant="primary" className="bg-blue-500 hover:bg-blue-700" disabled={createPitcher.isPending}>
+            <Button type="submit" form="new-pitcher-form" variant="primary" disabled={createPitcher.isPending}>
               {createPitcher.isPending ? 'Guardando...' : 'Guardar'}
             </Button>
           </div>
