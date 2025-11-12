@@ -25,25 +25,25 @@ export default function ReportePage({ params }: { params: Promise<{ id: string }
   const { list: lanzamientosQuery } = useLanzamientos(id);
   const { tipos, resultados } = useLookups();
 
-  const lanzamientos = lanzamientosQuery.data ?? [];
+  const lanzamientos = React.useMemo(() => lanzamientosQuery.data ?? [], [lanzamientosQuery.data]);
 
-  const getTipoNombre = (l: LanzamientoServer) => {
+  const getTipoNombre = React.useCallback((l: LanzamientoServer) => {
     if (l.tipo?.nombre) return l.tipo.nombre;
     if (l.tipoId && tipos.data) {
       const t = tipos.data.find((x) => x.id === l.tipoId);
       return t ? t.nombre : String(l.tipoId);
     }
     return "-";
-  };
+  }, [tipos.data]);
 
-  const getResultadoNombre = (l: LanzamientoServer) => {
+  const getResultadoNombre = React.useCallback((l: LanzamientoServer) => {
     if (l.resultado?.nombre) return l.resultado.nombre;
     if (l.resultadoId && resultados.data) {
       const r = resultados.data.find((x) => x.id === l.resultadoId);
       return r ? r.nombre : String(l.resultadoId);
     }
     return "-";
-  };
+  }, [resultados.data]);
 
   // Métricas
   const total = lanzamientos.length;
@@ -85,6 +85,93 @@ export default function ReportePage({ params }: { params: Promise<{ id: string }
   });
   const maxZone = Math.max(...zoneCounts, 1);
 
+  // ===== Análisis avanzado por pitcher =====
+  const pitcherStats = React.useMemo(() => {
+    const stats: Record<string, {
+      nombre: string;
+      total: number;
+      strikes: number;
+      bolas: number;
+      outs: number;
+      hits: number;
+      avgVel: number | null;
+      zonaFavorita: number | null;
+      efectividad: number;
+    }> = {};
+
+    (lanzamientos as LanzamientoServer[]).forEach((l) => {
+      const pname = l.pitcher
+        ? `${l.pitcher.nombre ?? ""} ${l.pitcher.apellido ?? ""}`.trim()
+        : l.pitcherId
+        ? String(l.pitcherId)
+        : "Desconocido";
+
+      if (!stats[pname]) {
+        stats[pname] = {
+          nombre: pname,
+          total: 0,
+          strikes: 0,
+          bolas: 0,
+          outs: 0,
+          hits: 0,
+          avgVel: null,
+          zonaFavorita: null,
+          efectividad: 0,
+        };
+      }
+
+      const stat = stats[pname];
+      stat.total += 1;
+
+      // Contar resultados
+      const resultado = getResultadoNombre(l).toUpperCase();
+      if (resultado === "STRIKE") stat.strikes += 1;
+      if (resultado === "BOLA") stat.bolas += 1;
+      if (resultado === "OUT") stat.outs += 1;
+      if (resultado === "HIT") stat.hits += 1;
+    });
+
+    // Calcular promedios y zona favorita por pitcher
+    Object.keys(stats).forEach((pname) => {
+      const pitcherLanzamientos = (lanzamientos as LanzamientoServer[]).filter((l) => {
+        const name = l.pitcher
+          ? `${l.pitcher.nombre ?? ""} ${l.pitcher.apellido ?? ""}`.trim()
+          : l.pitcherId
+          ? String(l.pitcherId)
+          : "Desconocido";
+        return name === pname;
+      });
+
+      // Velocidad promedio
+      const vels = pitcherLanzamientos
+        .map((l) => l.velocidad)
+        .filter((v): v is number => typeof v === "number" && !Number.isNaN(v));
+      stats[pname].avgVel = vels.length > 0 ? vels.reduce((a, b) => a + b, 0) / vels.length : null;
+
+      // Zona más usada
+      const pitcherZones: Record<number, number> = {};
+      pitcherLanzamientos.forEach((l) => {
+        if (typeof l.x === "number" && typeof l.y === "number") {
+          const idx = l.y * 5 + l.x;
+          pitcherZones[idx] = (pitcherZones[idx] || 0) + 1;
+        }
+      });
+      const zonaEntries = Object.entries(pitcherZones);
+      if (zonaEntries.length > 0) {
+        const [zona] = zonaEntries.sort((a, b) => b[1] - a[1])[0];
+        stats[pname].zonaFavorita = Number(zona);
+      }
+
+      // Efectividad: (strikes + outs) / total
+      const positivos = stats[pname].strikes + stats[pname].outs;
+      stats[pname].efectividad = stats[pname].total > 0 
+        ? (positivos / stats[pname].total) * 100 
+        : 0;
+    });
+
+    return stats;
+  }, [lanzamientos, getResultadoNombre]);
+
   // ===== Paginación tabla =====
   const [page, setPage] = React.useState(1);
   const [pageSize, setPageSize] = React.useState(25);
@@ -107,11 +194,11 @@ export default function ReportePage({ params }: { params: Promise<{ id: string }
         <header className="flex items-center justify-between pb-6">
           <div>
             <button
-              onClick={() => router.push("/partidos")}
+              onClick={() => router.push("/reportes")}
               className="text-sm hover:opacity-80"
               style={{ color: "var(--color-text)" }}
             >
-              &larr; Volver a Partidos
+              &larr; Volver a Reportes
             </button>
             <h1 className="text-3xl md:text-4xl font-bold" style={{ color: "var(--color-text)" }}>
               Reporte del Partido
@@ -264,10 +351,6 @@ export default function ReportePage({ params }: { params: Promise<{ id: string }
               <div className="grid grid-cols-5 gap-1 w-[250px]">
                 {Array.from({ length: 5 }).map((_, row) =>
                   Array.from({ length: 5 }).map((__, col) => {
-                    // Softer overlay approach: interpolate a muted color, then render it
-                    // as a semi-transparent overlay on top of the card background so
-                    // low counts blend with the card and high counts become visible
-                    // without being blindingly saturated.
                     const idx = row * 5 + col;
                     const count = zoneCounts[idx] || 0;
                     const intensity = Math.min(1, count / maxZone);
@@ -285,15 +368,67 @@ export default function ReportePage({ params }: { params: Promise<{ id: string }
                 )}
               </div>
             </div>
+            
+            {/* Análisis estadístico mejorado */}
             <div className="p-4 border rounded flex-1" style={{ backgroundColor: "var(--color-card)", borderColor: "var(--color-border)" }}>
-              <div className="text-sm mb-2" style={{ color: "var(--color-text)" }}>
-                Interpretación
+              <div className="text-lg font-semibold mb-3" style={{ color: "var(--color-accent2)" }}>
+                📊 Análisis Estadístico
               </div>
-              <div className="text-sm" style={{ color: "var(--color-text)" }}>
-                Mayor número = más lanzamientos en esa zona. La intensidad visual es relativa al mayor recuento en el partido.
+
+              {/* Insights generales */}
+              <div className="mb-4 pb-3 border-b" style={{ borderColor: "var(--color-border)" }}>
+                <div className="text-sm font-semibold mb-2" style={{ color: "var(--color-text)" }}>
+                  Zona más atacada
+                </div>
+                <div className="text-sm" style={{ color: "var(--color-text)", opacity: 0.9 }}>
+                  Zona <strong>#{zoneCounts.indexOf(Math.max(...zoneCounts))}</strong> con{" "}
+                  <strong>{Math.max(...zoneCounts)}</strong> lanzamientos
+                  ({((Math.max(...zoneCounts) / total) * 100).toFixed(1)}% del total)
+                </div>
               </div>
-              <div className="mt-4 text-sm" style={{ color: "var(--color-text)" }}>
-                Máximo en una celda: <strong>{Math.max(...zoneCounts)}</strong>
+
+              {/* Análisis por pitcher */}
+              <div className="text-sm font-semibold mb-2" style={{ color: "var(--color-text)" }}>
+                Análisis por Pitcher
+              </div>
+              <div className="space-y-3">
+                {Object.values(pitcherStats).map((stat) => (
+                  <div key={stat.nombre} className="p-3 rounded" style={{ backgroundColor: "rgba(255,255,255,0.03)" }}>
+                    <div className="font-semibold mb-1" style={{ color: "var(--color-accent)" }}>
+                      {stat.nombre}
+                    </div>
+                    <div className="text-xs space-y-1" style={{ color: "var(--color-text)", opacity: 0.85 }}>
+                      <div>• {stat.total} lanzamientos totales</div>
+                      {stat.avgVel && (
+                        <div>• Velocidad promedio: <strong>{stat.avgVel.toFixed(1)} km/h</strong></div>
+                      )}
+                      <div>
+                        • Efectividad: <strong>{stat.efectividad.toFixed(1)}%</strong> 
+                        <span className="opacity-70"> ({stat.strikes} strikes, {stat.outs} outs)</span>
+                      </div>
+                      {stat.zonaFavorita !== null && (
+                        <div>• Zona preferida: <strong>#{stat.zonaFavorita}</strong></div>
+                      )}
+                      {stat.hits > 0 && (
+                        <div className="text-yellow-400">⚠️ {stat.hits} hit{stat.hits > 1 ? "s" : ""} permitido{stat.hits > 1 ? "s" : ""}</div>
+                      )}
+                      {stat.bolas > stat.strikes && (
+                        <div className="text-orange-400">⚠️ Más bolas ({stat.bolas}) que strikes ({stat.strikes})</div>
+                      )}
+                      {stat.efectividad >= 70 && (
+                        <div className="text-green-400">✓ Excelente control de zona</div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Recomendaciones */}
+              <div className="mt-4 pt-3 border-t" style={{ borderColor: "var(--color-border)" }}>
+                <div className="text-xs" style={{ color: "var(--color-text)", opacity: 0.7 }}>
+                  💡 <strong>Nota:</strong> Efectividad = (Strikes + Outs) / Total de lanzamientos. 
+                  Un valor superior al 60% indica buen control.
+                </div>
               </div>
             </div>
           </div>
