@@ -56,8 +56,7 @@ export default function LoginPage() {
             <span></span>
             <label>Contraseña</label>
           </div>
-          
-          <div className={styles.recordar}>¿Olvidó su contraseña?</div>
+ 
           
           {/* Mensaje de error de React TanStack Query */}
           {isError && (
