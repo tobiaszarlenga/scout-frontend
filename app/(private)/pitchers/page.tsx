@@ -6,7 +6,9 @@ import { usePitchers } from "@/hooks/usePitchers";
 import type { Pitcher } from "@/types/pitcher";
 import NewPitcherModal from "./NewPitcherModal";
 import EditPitcherModal from "./EditPitcherModal";
+import ConfirmDialog from "@/app/components/ConfirmDialog";
 import { PencilIcon, TrashIcon, UserIcon } from "@heroicons/react/24/solid";
+import { toast } from "react-hot-toast";
 
 // 🎨 Paleta del dashboard (usa variables globales)
 const COLORS = {
@@ -60,6 +62,7 @@ function Avatar({ src, alt }: { src?: string | null; alt: string }) {
 export default function PitchersPage() {
   const { list, remove } = usePitchers();
   const [pitcherAEditar, setPitcherAEditar] = useState<Pitcher | null>(null);
+  const [pitcherAEliminar, setPitcherAEliminar] = useState<Pitcher | null>(null);
   const pitchers = useMemo(() => list.data ?? [], [list.data]);
 
   const pitchersPorEquipo = useMemo(() => {
@@ -70,6 +73,29 @@ export default function PitchersPage() {
       return acc;
     }, {} as Record<string, Pitcher[]>);
   }, [pitchers]);
+
+  const handleDeletePitcher = async () => {
+    if (!pitcherAEliminar) return;
+
+    try {
+      await remove.mutateAsync(pitcherAEliminar.id);
+      toast.success(`${pitcherAEliminar.nombre} ${pitcherAEliminar.apellido} ha sido eliminado`);
+      setPitcherAEliminar(null);
+    } catch (error) {
+      // Manejar el error de manera más amigable
+      const errorMessage = error instanceof Error ? error.message : "Error al eliminar el pitcher";
+      
+      if (errorMessage.includes("lanzamientos") || errorMessage.includes("partidos") || errorMessage.includes("referencia")) {
+        toast.error(
+          `No se puede eliminar a ${pitcherAEliminar.nombre} ${pitcherAEliminar.apellido} porque tiene lanzamientos registrados en partidos.`,
+          { duration: 5000 }
+        );
+      } else {
+        toast.error(errorMessage);
+      }
+      setPitcherAEliminar(null);
+    }
+  };
 
   if (list.isLoading) {
     return (
@@ -136,15 +162,7 @@ export default function PitchersPage() {
                         <button
                           className="rounded-full bg-red-600 p-2 text-white shadow-md transition hover:scale-110"
                           title="Borrar"
-                          onClick={() => {
-                            if (
-                              confirm(
-                                `¿Seguro que quieres eliminar a ${p.nombre} ${p.apellido}?`
-                              )
-                            ) {
-                              remove.mutate(p.id);
-                            }
-                          }}
+                          onClick={() => setPitcherAEliminar(p)}
                         >
                           <TrashIcon className="h-5 w-5" />
                         </button>
@@ -169,6 +187,17 @@ export default function PitchersPage() {
         <EditPitcherModal
           pitcher={pitcherAEditar}
           onClose={() => setPitcherAEditar(null)}
+        />
+
+        <ConfirmDialog
+          open={pitcherAEliminar !== null}
+          title="Eliminar Pitcher"
+          message={`¿Estás seguro de que deseas eliminar a ${pitcherAEliminar?.nombre} ${pitcherAEliminar?.apellido}? Esta acción no se puede deshacer.`}
+          confirmLabel="Eliminar"
+          cancelLabel="Cancelar"
+          variant="danger"
+          onConfirm={handleDeletePitcher}
+          onCancel={() => setPitcherAEliminar(null)}
         />
       </div>
     </main>

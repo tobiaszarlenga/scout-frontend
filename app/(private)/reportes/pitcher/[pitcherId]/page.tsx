@@ -107,8 +107,8 @@ export default function PitcherHistoricalReport({ params }: { params: Promise<{ 
               </div>
 
               <div className="p-4 border rounded" style={{ borderColor: "var(--color-border)" }}>
-                <div className="text-sm opacity-80">Heatmap (5x5)</div>
-                <div className="grid grid-cols-5 gap-1 w-[250px] mt-2">
+                <div className="text-sm opacity-80 mb-2">Heatmap (5x5)</div>
+                <div className="grid grid-cols-5 gap-1 mt-2 mx-auto" style={{ width: 'fit-content', maxWidth: '100%' }}>
                   {Array.from({ length: 5 }).map((_, r) =>
                     Array.from({ length: 5 }).map((__, c) => {
                       const idx = r * 5 + c;
@@ -116,7 +116,7 @@ export default function PitcherHistoricalReport({ params }: { params: Promise<{ 
                       const intensity = Math.min(1, count / maxZone);
                       const bg = `rgba(255,122,26,${0.08 + 0.8 * intensity})`;
                       return (
-                        <div key={`${r}-${c}`} className="h-10 w-10 flex items-center justify-center text-sm font-medium rounded" style={{ background: bg }}>
+                        <div key={`${r}-${c}`} className="aspect-square flex items-center justify-center text-xs font-medium rounded" style={{ background: bg, minWidth: '32px', width: '100%' }}>
                           {count}
                         </div>
                       );

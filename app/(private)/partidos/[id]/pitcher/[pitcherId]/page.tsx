@@ -259,7 +259,6 @@ export default function PitcherDetallePage({ params }: PitcherDetalleProp) {
                             <th className="px-4 py-2 text-left">Resultado</th>
                             <th className="px-4 py-2 text-left">Velocidad</th>
                             <th className="px-4 py-2 text-left">Zona</th>
-                            <th className="px-4 py-2 text-left">Comentario</th>
                             <th className="px-4 py-2 text-center">Acciones</th>
                           </tr>
                         </thead>
@@ -286,7 +285,6 @@ export default function PitcherDetallePage({ params }: PitcherDetalleProp) {
                                 </td>
                                 <td className="px-4 py-3">{lanzamiento.velocidad ? `${lanzamiento.velocidad} km/h` : '-'}</td>
                                 <td className="px-4 py-3">{lanzamiento.zona}</td>
-                                <td className="px-4 py-3 max-w-xs truncate" style={{ color: 'var(--color-muted)' }}>{lanzamiento.comentario || '-'}</td>
                                 <td className="px-4 py-3">
                                   <div className="flex justify-center gap-2">
                                     <button

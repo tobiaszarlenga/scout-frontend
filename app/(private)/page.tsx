@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { useDashboard } from "hooks/useDashboard";
+import { useAuth } from "@/context/AuthContext";
 import {
   PieChart, Pie, Cell, ResponsiveContainer, Tooltip,
   BarChart, Bar, XAxis, YAxis, CartesianGrid
@@ -58,6 +59,7 @@ type BarPoint = { name: string; pitchers: number };
 
 export default function InicioPage() {
   const { query } = useDashboard();
+  const { user } = useAuth();
 
   if (query.isLoading) return <p className="p-6 text-apptext">Cargando…</p>;
   if (query.isError)   return <p className="p-6 text-red-300">Error: {(query.error as Error).message}</p>;
@@ -71,8 +73,24 @@ export default function InicioPage() {
     <main className="min-h-screen bg-bg text-apptext p-6">
       <div className="mx-auto w-full max-w-7xl">
         {/* Título */}
-        <header className="mb-4 border-b border-appborder pb-2">
+        <header className="mb-4 border-b border-appborder pb-2 flex items-center justify-between">
           <h1 className="text-2xl font-semibold text-apptext">Inicio</h1>
+          {user?.name && (
+            <div
+              className="flex items-center gap-2 rounded-md px-4 py-2"
+              style={{
+                background: 'linear-gradient(135deg, rgba(var(--color-text-rgb),0.15), rgba(var(--color-text-rgb),0.05))',
+                boxShadow: '0 0 0 1px var(--color-border), 0 4px 14px -2px rgba(0,0,0,0.35)'
+              }}
+            >
+              <span
+                className="text-sm sm:text-base font-semibold tracking-wide"
+                style={{ color: 'var(--greeting-color)', textShadow: '0 1px 1px rgba(0,0,0,0.15)' }}
+              >
+                Hola, {user.name}
+              </span>
+            </div>
+          )}
         </header>
 
         {/* KPIs */}

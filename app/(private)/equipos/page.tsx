@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useEquipos } from "hooks/useEquipos";
 import NewEquipoModal from "./NewEquipoModal";
 import EditEquipoModal from "@/app/(private)/equipos/EditEquipoModal";
+import ConfirmDialog from "@/app/components/ConfirmDialog";
 import type { Equipo } from "@/types/equipo";
 import { toast } from "react-hot-toast";
 import { PencilIcon, TrashIcon, UsersIcon } from "@heroicons/react/24/solid";
@@ -11,6 +12,7 @@ import { PencilIcon, TrashIcon, UsersIcon } from "@heroicons/react/24/solid";
 export default function EquiposPage() {
   const { list, remove, update } = useEquipos();
   const [equipoAEditar, setEquipoAEditar] = useState<Equipo | null>(null);
+  const [equipoAEliminar, setEquipoAEliminar] = useState<Equipo | null>(null);
 
   const handleOpenEditModal = (equipo: Equipo) => setEquipoAEditar(equipo);
   const handleCloseEditModal = () => setEquipoAEditar(null);
@@ -27,6 +29,28 @@ export default function EquiposPage() {
       }
     );
     handleCloseEditModal();
+  };
+
+  const handleDeleteEquipo = async () => {
+    if (!equipoAEliminar) return;
+
+    try {
+      await remove.mutateAsync(equipoAEliminar.id);
+      toast.success(`El equipo "${equipoAEliminar.nombre}" ha sido eliminado`);
+      setEquipoAEliminar(null);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Error al eliminar el equipo";
+      
+      if (errorMessage.includes("pitchers") || errorMessage.includes("partidos") || errorMessage.includes("referencia")) {
+        toast.error(
+          `No se puede eliminar el equipo "${equipoAEliminar.nombre}" porque tiene pitchers o partidos asociados.`,
+          { duration: 5000 }
+        );
+      } else {
+        toast.error(errorMessage);
+      }
+      setEquipoAEliminar(null);
+    }
   };
 
   if (list.isLoading) {
@@ -121,15 +145,7 @@ export default function EquiposPage() {
                   <button
                     className="rounded-full bg-red-600 p-2 text-white shadow-md transition hover:scale-110"
                     title="Borrar"
-                    onClick={() => {
-                      if (
-                        confirm(
-                          `¿Seguro que quieres eliminar al equipo ${e.nombre}?`
-                        )
-                      ) {
-                        remove.mutate(e.id);
-                      }
-                    }}
+                    onClick={() => setEquipoAEliminar(e)}
                   >
                     <TrashIcon className="h-5 w-5" />
                   </button>
@@ -154,6 +170,18 @@ export default function EquiposPage() {
           equipo={equipoAEditar}
           onClose={handleCloseEditModal}
           onSave={handleSaveEquipo}
+        />
+
+        {/* MODAL DE CONFIRMACIÓN DE ELIMINACIÓN */}
+        <ConfirmDialog
+          open={equipoAEliminar !== null}
+          title="Eliminar Equipo"
+          message={`¿Estás seguro de que deseas eliminar el equipo "${equipoAEliminar?.nombre}"? Esta acción no se puede deshacer.`}
+          confirmLabel="Eliminar"
+          cancelLabel="Cancelar"
+          variant="danger"
+          onConfirm={handleDeleteEquipo}
+          onCancel={() => setEquipoAEliminar(null)}
         />
       </div>
     </main>
