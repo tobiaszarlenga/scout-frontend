@@ -40,16 +40,21 @@ const SectionHeader = ({ icon, title }: { icon: React.ReactNode; title: string }
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const DarkTooltip = ({ active, payload, label }: any) =>
   !active || !payload?.length ? null : (
-    <div style={{
-      background: "#0b0f16",
-      border: `1px solid var(--color-border)`,
-      padding: "8px 10px",
-      borderRadius: 6,
-      color: 'var(--color-text)',
-      fontSize: 12
-    }}>
-      <div style={{ opacity: 0.8, marginBottom: 4 }}>{label}</div>
-      <div><b>{payload[0].name ?? payload[0].dataKey}</b>: {payload[0].value}</div>
+    <div
+      style={{
+        background: 'var(--color-card)',
+        border: '1px solid var(--color-border)',
+        padding: '8px 10px',
+        borderRadius: 8,
+        color: 'var(--color-text)',
+        fontSize: 12,
+        boxShadow: '0 6px 20px rgba(0,0,0,0.18)'
+      }}
+    >
+      <div style={{ opacity: 0.75, marginBottom: 4 }}>{label}</div>
+      <div>
+        <b>{payload[0].name ?? payload[0].dataKey}</b>: {payload[0].value}
+      </div>
     </div>
   );
 
@@ -164,8 +169,8 @@ export default function InicioPage() {
                     barCategoryGap="22%"
                   >
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border)" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tickMargin={8} tick={{ fill: 'rgba(226,232,240,0.65)', fontSize: 12 }} />
-                <YAxis allowDecimals={false} axisLine={false} tickLine={false} tick={{ fill: 'rgba(226,232,240,0.65)', fontSize: 12 }} />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tickMargin={8} tick={{ fill: 'var(--color-muted)', fontSize: 12 }} />
+                <YAxis allowDecimals={false} axisLine={false} tickLine={false} tick={{ fill: 'var(--color-muted)', fontSize: 12 }} />
                     <Tooltip content={<DarkTooltip />} />
                     <Bar
                       dataKey="pitchers"
