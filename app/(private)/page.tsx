@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { useDashboard } from "hooks/useDashboard";
+import { usePartidos } from "hooks/usePartidos";
 import { useAuth } from "@/context/AuthContext";
 import {
   PieChart, Pie, Cell, ResponsiveContainer, Tooltip,
@@ -65,6 +66,7 @@ type BarPoint = { name: string; pitchers: number };
 export default function InicioPage() {
   const { query } = useDashboard();
   const { user } = useAuth();
+  const { list: partidosList } = usePartidos();
 
   if (query.isLoading) return <p className="p-6 text-apptext">Cargando…</p>;
   if (query.isError)   return <p className="p-6 text-red-300">Error: {(query.error as Error).message}</p>;
@@ -73,6 +75,18 @@ export default function InicioPage() {
   const { kpis, graficoTorta, graficoBarras, proximosPartidos } = query.data;
   const pieData = (graficoTorta ?? []) as PiePoint[];
   const barData = (graficoBarras ?? []) as BarPoint[];
+
+  // Fallback local derivation of PROGRAMADO matches when dashboard gives none
+  const programadosLocal = (partidosList.data ?? [])
+    .filter(p => p.estado === 'PROGRAMADO')
+    .map(p => ({
+      id: p.id,
+      fecha: p.fecha,
+      equipoLocal: p.equipoLocal.nombre,
+      equipoVisitante: p.equipoVisitante.nombre
+    }));
+
+  const proximos = (proximosPartidos && proximosPartidos.length > 0) ? proximosPartidos : programadosLocal;
 
   return (
     <main className="min-h-screen bg-bg text-apptext p-6">
@@ -192,15 +206,46 @@ export default function InicioPage() {
         {/* Próximos partidos */}
         <Card>
           <SectionHeader icon={<CalendarDaysIcon className="h-5 w-5" />} title="Tus Próximos Partidos Programados" />
-          {proximosPartidos.length ? (
-            <ul className="border-t" style={{ borderColor: 'var(--color-border)' }}>
-              {proximosPartidos.map((p, idx) => (
-                <li key={p.id} className="flex items-center justify-between py-2" style={{ borderBottom: idx === proximosPartidos.length - 1 ? 'none' : undefined }}>
-                  <span className="text-apptext text-base font-medium">{p.equipoLocal} <span className="text-muted">vs</span> {p.equipoVisitante}</span>
-                  <span className="text-muted text-sm">{format(new Date(p.fecha), "dd/MM HH:mm", { locale: es })}</span>
-                </li>
-              ))}
-            </ul>
+          {proximos.length ? (
+            <div className="overflow-x-auto rounded-lg">
+              <table className="w-full text-left min-w-[640px] border-collapse">
+                <thead>
+                  <tr style={{ backgroundColor: 'var(--color-card)', color: 'var(--color-text)' }}>
+                    <th className="py-2 px-4 font-medium">Fecha</th>
+                    <th className="py-2 px-4 font-medium">Horario</th>
+                    <th className="py-2 px-4 font-medium">Equipos</th>
+                    <th className="py-2 px-4 font-medium">Acción</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {proximos.map((p) => {
+                    const fechaHora = new Date(p.fecha);
+                    return (
+                      <tr key={p.id} className="transition-colors" style={{ backgroundColor: 'var(--color-card)', color: 'var(--color-text)' }}>
+                        <td className="py-3 px-4">{format(fechaHora, 'dd-MM-yyyy', { locale: es })}</td>
+                        <td className="py-3 px-4">{format(fechaHora, 'HH:mm', { locale: es })}</td>
+                        <td className="py-3 px-4">{p.equipoLocal} <span className="text-muted">vs</span> {p.equipoVisitante}</td>
+                        <td className="py-3 px-4">
+                          <Link
+                            href={`/partidos/${p.id}/scout`}
+                            className="px-4 py-2 rounded-lg text-sm font-semibold transition-all shadow-sm"
+                            style={{
+                              backgroundColor: 'var(--color-accent)',
+                              color: 'var(--color-text)'
+                            }}
+                            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#C7430D')}
+                            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-accent)')}
+                          >
+                            Empezar
+                          </Link>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           ) : (
             <p className="text-muted text-center py-5">No tienes partidos programados.</p>
           )}
