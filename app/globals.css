@@ -34,7 +34,7 @@
 /* Light theme (optional). Activate by setting data-theme="light" on <html> or <body>. */
 [data-theme="light"] {
   --color-sidebar: #F8FAFC;
-  --color-bg: #F6F8FA;
+  --color-bg: #d3dbe2;
   --color-card: #FFFFFF;
   --color-accent: #FF7A1A; /* keep accent */
   --color-accent2: #3FA4B7;

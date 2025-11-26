@@ -66,7 +66,7 @@ export default function PartidosPage() {
             <h1 style={{ color: THEME.text, fontSize: 28, fontWeight: 600, letterSpacing: -0.3 }}>
               Partidos
             </h1>
-            <p style={{ color: THEME.muted, fontSize: 14, marginTop: 4 }}>
+            <p style={{ color: THEME.text, fontSize: 14, marginTop: 4 }}>
               Gestiona y monitorea tus partidos de softball
             </p>
           </div>

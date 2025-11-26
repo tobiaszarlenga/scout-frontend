@@ -173,7 +173,11 @@ export default function ScoutPage({ params }: { params: Promise<{ id: string }> 
   useEffect(() => {
     const prev = scout.getState(id);
     if (prev) {
-      setPitchersEnPartido(prev.pitchersEnPartido ?? []);
+      // Deduplicar pitchers por ID para evitar duplicados
+      const pitchersDeduped = Array.from(
+        new Map((prev.pitchersEnPartido ?? []).map(p => [p.id, p])).values()
+      );
+      setPitchersEnPartido(pitchersDeduped);
       setLanzamientos(prev.lanzamientos ?? []);
       // Restaurar contadores si existen
       if (typeof prev.inning === 'number') setInning(prev.inning);
@@ -391,6 +395,7 @@ export default function ScoutPage({ params }: { params: Promise<{ id: string }> 
     if (!partido) return;
     
     const equipoNombre = tipo === 'local' ? partido.equipoLocal.nombre : partido.equipoVisitante.nombre;
+    const nuevoId = String(pitcherId);
     
     // Marcar al pitcher actual como que salió en este inning
     setPitchersEnPartido(prev => 
@@ -403,18 +408,20 @@ export default function ScoutPage({ params }: { params: Promise<{ id: string }> 
       })
     );
     
-    // Crear el nuevo pitcher con el ID real
-    const nuevoId = String(pitcherId);
-    const nuevoPitcher: PitcherEnPartido = {
-      id: nuevoId,
-      nombre: nombreCompleto,
-      equipo: equipoNombre,
-      tipo: tipo,
-      entroEnInning: inning,
-    };
+    // Verificar si el pitcher ya existe en la lista
+    const pitcherYaExiste = pitchersEnPartido.some(p => p.id === nuevoId);
     
-    // Agregar el nuevo pitcher
-    setPitchersEnPartido(prev => [...prev, nuevoPitcher]);
+    if (!pitcherYaExiste) {
+      // Si no existe, agregarlo
+      const nuevoPitcher: PitcherEnPartido = {
+        id: nuevoId,
+        nombre: nombreCompleto,
+        equipo: equipoNombre,
+        tipo: tipo,
+        entroEnInning: inning,
+      };
+      setPitchersEnPartido(prev => [...prev, nuevoPitcher]);
+    }
     
     // Actualizar el pitcher activo
     if (tipo === 'local') {
@@ -729,14 +736,12 @@ export default function ScoutPage({ params }: { params: Promise<{ id: string }> 
                 : partido.equipoVisitante.nombre
             }
             pitchersDisponibles={
-              // Filtrar pitchers que ya están en el partido
-              (tipoPitcherACambiar === 'local'
-                ? partido.equipoLocal.pitchers
-                : partido.equipoVisitante.pitchers
-              ).filter(pitcher => 
-                // Excluir pitchers que ya han lanzado en este partido
-                !pitchersEnPartido.some(p => p.id === String(pitcher.id))
-              )
+              // Mostrar todos los pitchers del equipo excepto el pitcher actualmente activo
+              (tipoPitcherACambiar === 'local' ? partido.equipoLocal.pitchers : partido.equipoVisitante.pitchers
+              ).filter(pitcher => {
+                const activeId = tipoPitcherACambiar === 'local' ? pitcherActivoLocalId : pitcherActivoVisitanteId;
+                return String(pitcher.id) !== activeId;
+              })
             }
             onCambiar={handleCambiarPitcher}
           />

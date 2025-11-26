@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import Image from 'next/image';
 import { usePitchers } from "@/hooks/usePitchers";
 import type { Pitcher } from "@/types/pitcher";
@@ -60,6 +61,7 @@ function Avatar({ src, alt }: { src?: string | null; alt: string }) {
 }
 
 export default function PitchersPage() {
+  const router = useRouter();
   const { list, remove } = usePitchers();
   const [pitcherAEditar, setPitcherAEditar] = useState<Pitcher | null>(null);
   const [pitcherAEliminar, setPitcherAEliminar] = useState<Pitcher | null>(null);
@@ -128,8 +130,8 @@ export default function PitchersPage() {
                   {pitchersPorEquipo[nombreEquipo].map((p) => (
                     <div
                       key={p.id}
-                      className="group relative flex flex-col rounded-2xl p-6 text-center shadow-lg transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl bg-card text-apptext"
-                    
+                      className="group relative flex flex-col rounded-2xl p-6 text-center shadow-lg transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl bg-card text-apptext cursor-pointer"
+                      onClick={() => router.push(`/reportes/${p.id}`)}
                     >
                       <Avatar
                         // src={p.fotoUrl ?? p.foto_url}
@@ -152,7 +154,10 @@ export default function PitchersPage() {
                       {/* Botones */}
                       <div className="absolute top-4 right-4 flex scale-0 gap-2 transition-transform duration-200 group-hover:scale-100">
                         <button
-                          onClick={() => setPitcherAEditar(p)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setPitcherAEditar(p);
+                          }}
                           className="rounded-full p-2 text-white shadow-md transition hover:scale-110"
                           style={{ backgroundColor: COLORS.edit }}
                           title="Editar"
@@ -162,7 +167,10 @@ export default function PitchersPage() {
                         <button
                           className="rounded-full bg-red-600 p-2 text-white shadow-md transition hover:scale-110"
                           title="Borrar"
-                          onClick={() => setPitcherAEliminar(p)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setPitcherAEliminar(p);
+                          }}
                         >
                           <TrashIcon className="h-5 w-5" />
                         </button>

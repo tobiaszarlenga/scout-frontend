@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useRef, useEffect } from "react";
 import { usePartidos } from "@/hooks/usePartidos";
 import { usePitchers } from "@/hooks/usePitchers";
 import { useEquipos } from "@/hooks/useEquipos";
@@ -72,6 +72,97 @@ export default function ReportesPage() {
     </svg>
   );
 
+  // Labels map
+  const MODE_LABELS: Record<Mode, string> = {
+    recent: "Último Partido",
+    match: "Por Partido",
+    pitcher: "Por Pitcher",
+    team: "Por Equipo",
+  };
+
+  // Polished filter menu with outside-click and Esc-to-close
+  const FilterMenu = ({ onSelect }: { onSelect?: (m: Mode) => void }) => {
+    const items: { key: Mode; label: string }[] = [
+      { key: "recent", label: MODE_LABELS.recent },
+      { key: "match", label: MODE_LABELS.match },
+      { key: "pitcher", label: MODE_LABELS.pitcher },
+      { key: "team", label: MODE_LABELS.team },
+    ];
+
+    const [open, setOpen] = useState(false);
+    const ref = useRef<HTMLDivElement | null>(null);
+
+    useEffect(() => {
+      function onDoc(e: MouseEvent) {
+        if (!ref.current) return;
+        if (!ref.current.contains(e.target as Node)) setOpen(false);
+      }
+      function onKey(e: KeyboardEvent) {
+        if (e.key === "Escape") setOpen(false);
+      }
+      document.addEventListener("mousedown", onDoc);
+      document.addEventListener("keydown", onKey);
+      return () => {
+        document.removeEventListener("mousedown", onDoc);
+        document.removeEventListener("keydown", onKey);
+      };
+    }, []);
+
+    return (
+      <div ref={ref} className="relative">
+        <button
+          onClick={() => setOpen((s) => !s)}
+          className="flex items-center gap-2 px-3 py-2 rounded-md"
+          style={{
+            backgroundColor: 'var(--color-card)',
+            color: 'var(--color-text)',
+            border: '1px solid var(--color-border)',
+            cursor: 'pointer'
+          }}
+          aria-haspopup="listbox"
+          aria-expanded={open}
+          type="button"
+          title="Abrir filtros"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M6 9l6 6 6-6" stroke="var(--color-text)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
+
+        <div
+          className={`absolute right-0 z-20 mt-2 w-56 rounded-lg overflow-hidden transform origin-top-right transition-all duration-150 ${
+            open ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'
+          }`}
+          style={{ backgroundColor: 'var(--color-card)', border: '1px solid var(--color-border)' }}
+          role="listbox"
+          aria-hidden={!open}
+        >
+          {items.map((it) => (
+            <button
+              key={it.key}
+              onClick={() => {
+                setMode(it.key);
+                setOpen(false);
+                if (onSelect) onSelect(it.key);
+              }}
+              className="w-full text-left px-4 py-2 hover:bg-[rgba(0,0,0,0.04)] transition-colors"
+              style={{
+                backgroundColor: mode === it.key ? 'var(--color-accent)' : 'transparent',
+                color: mode === it.key ? '#fff' : 'var(--color-text)',
+                cursor: 'pointer'
+              }}
+              role="option"
+              aria-selected={mode === it.key}
+              type="button"
+            >
+              {it.label}
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <main
       className="min-h-full w-full max-w-full overflow-x-hidden px-6 py-6 sm:px-10 sm:py-8"
@@ -90,32 +181,20 @@ export default function ReportesPage() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           {/* Sidebar Filtros */}
           <aside
-            className="col-span-1 p-4 rounded-2xl shadow-md"
+            className="col-span-1 p-4 rounded-2xl shadow-md self-start"
             style={{ backgroundColor: 'var(--color-card)' }}
           >
-            <h3 className="font-semibold mb-3" style={{ color: 'var(--color-text)' }}>
-              Filtros
-            </h3>
-            <div className="space-y-2">
-              {[
-                { key: "recent", label: "Último Partido" },
-                { key: "match", label: "Por Partido" },
-                { key: "pitcher", label: "Por Pitcher" },
-                { key: "team", label: "Por Equipo" },
-              ].map((item) => (
-                <button
-                  key={item.key}
-                  onClick={() => setMode(item.key as Mode)}
-                  className="w-full text-left px-3 py-2 rounded-lg transition font-medium"
-                  style={{
-                    backgroundColor: mode === item.key ? 'var(--color-accent)' : "transparent",
-                    color: mode === item.key ? "#fff" : 'var(--color-text)',
-                    cursor: "pointer",
-                  }}
-                >
-                  {item.label}
-                </button>
-              ))}
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <h3 className="font-semibold" style={{ color: 'var(--color-text)' }}>Filtros</h3>
+                {mode && (
+                  <div className="mt-1 text-sm" style={{ color: 'var(--color-text)' }}>
+                    {MODE_LABELS[mode]}
+                  </div>
+                )}
+              </div>
+
+              <FilterMenu />
             </div>
 
             {/* Selects dinámicos con flecha y cursor */}
