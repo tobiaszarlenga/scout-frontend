@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import ThemeToggle from "./ThemeToggle";
+import Logo from "./Logo";
 
 const nav = [
   { href: "/", label: "Inicio", icon: Home },
@@ -53,7 +54,8 @@ export default function Sidebar({
     >
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
-        <div>
+        <div className="flex items-center gap-3">
+          <Logo width={48} height={48} />
           <div className="text-xl font-bold" style={{ color: COLORS.text }}>
             SoftScout
           </div>

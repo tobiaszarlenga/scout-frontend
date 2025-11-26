@@ -8,6 +8,11 @@ import Script from 'next/script';
 export const metadata = {
   title: "SoftScout",
   description: "Sistema de gestión de scouts de softbol",
+  icons: {
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
 };
 
 export default function RootLayout({

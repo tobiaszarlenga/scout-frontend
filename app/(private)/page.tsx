@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useDashboard } from "hooks/useDashboard";
 import { usePartidos } from "hooks/usePartidos";
 import { useAuth } from "@/context/AuthContext";
+import Logo from "@/app/components/Logo";
 import {
   PieChart, Pie, Cell, ResponsiveContainer, Tooltip,
   BarChart, Bar, XAxis, YAxis, CartesianGrid
