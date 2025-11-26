@@ -9,6 +9,8 @@ import { useLookups } from '@/hooks/useLookups';
 import { usePartido } from '@/hooks/usePartidos';
 import type { LanzamientoDTO } from '@/lib/api';
 import { Eye, Edit, Trash2 } from 'lucide-react';
+import ConfirmDialog from '@/app/components/ConfirmDialog';
+import { toast } from 'react-hot-toast';
 
 // Tipo para los lanzamientos procesados para la UI
 interface Lanzamiento {
@@ -144,13 +146,23 @@ export default function PitcherDetallePage({ params }: PitcherDetalleProp) {
   };
   
   const handleEliminar = async (lanzamientoId: number) => {
-    if (!confirm('¿Eliminar este lanzamiento? Esta acción no se puede deshacer.')) return;
+    // Abrir confirmación modal (se maneja más abajo)
+    setLanzamientoAEliminar(lanzamientoId);
+  };
+
+  const [lanzamientoAEliminar, setLanzamientoAEliminar] = useState<number | null>(null);
+
+  const confirmDeleteLanzamiento = async () => {
+    if (!lanzamientoAEliminar) return;
     try {
-      await remove.mutateAsync(lanzamientoId);
-      console.log('✅ Lanzamiento eliminado');
+      await remove.mutateAsync(lanzamientoAEliminar);
+      toast.success('Lanzamiento eliminado');
+      setLanzamientoAEliminar(null);
     } catch (err) {
       console.error('Error al eliminar lanzamiento:', err);
-      alert('No se pudo eliminar el lanzamiento. Intenta de nuevo.');
+      const errorMessage = err instanceof Error ? err.message : 'No se pudo eliminar el lanzamiento.';
+      toast.error(errorMessage);
+      setLanzamientoAEliminar(null);
     }
   };
 
@@ -187,7 +199,8 @@ export default function PitcherDetallePage({ params }: PitcherDetalleProp) {
       setEditingId(null);
     } catch (err) {
       console.error('Error al actualizar lanzamiento:', err);
-      alert('No se pudo actualizar el lanzamiento. Intenta de nuevo.');
+      const errorMessage = err instanceof Error ? err.message : 'No se pudo actualizar el lanzamiento. Intenta de nuevo.';
+      toast.error(errorMessage);
     }
   };
 
@@ -468,6 +481,17 @@ export default function PitcherDetallePage({ params }: PitcherDetalleProp) {
         )}
 
       </div>
+
+        <ConfirmDialog
+          open={lanzamientoAEliminar !== null}
+          title="Eliminar Lanzamiento"
+          message={`¿Eliminar este lanzamiento? Esta acción no se puede deshacer.`}
+          confirmLabel="Eliminar"
+          cancelLabel="Cancelar"
+          variant="danger"
+          onConfirm={confirmDeleteLanzamiento}
+          onCancel={() => setLanzamientoAEliminar(null)}
+        />
     </main>
   );
 }
