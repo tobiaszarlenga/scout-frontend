@@ -137,10 +137,6 @@ export default function InicioPage() {
         {/* Resumen */}
         <div className="flex items-center justify-between mb-3">
           <div className="text-sm text-muted">Resumen general</div>
-          <div className="flex gap-2">
-            <button className="px-3 py-1 rounded border border-appborder bg-card text-apptext text-sm transition-colors hover:bg-[rgba(var(--color-text-rgb),0.08)]">Últimos 7 días</button>
-            <button className="px-3 py-1 rounded border border-appborder text-muted text-sm transition-colors hover:bg-[rgba(var(--color-text-rgb),0.05)] hover:text-apptext">Últimos 30 días</button>
-          </div>
         </div>
 
         {/* Gráficos */}
