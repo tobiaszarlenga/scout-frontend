@@ -80,6 +80,8 @@ export default function LoginPage() {
 
           <div className={styles.registrarse}>
             Quiero hacer el <a href="/register">registro</a>
+            <br />
+            <a href="/forgot-password" style={{ color: 'var(--color-muted)' }}>¿Olvidaste tu contraseña?</a>
           </div>
         </form>
       </div>
