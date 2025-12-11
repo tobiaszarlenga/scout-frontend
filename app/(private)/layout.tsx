@@ -19,26 +19,29 @@ export default function PrivateLayout({ children }: { children: React.ReactNode 
       <Sidebar open={open} onClose={() => setOpen(false)} />
 
       <div className="flex min-h-dvh flex-1 min-w-0 flex-col">
-        {/* Header de móvil, azul para que combine */}
-        <header className="sticky top-0 z-40 border-b border-white/20 bg-blue-800 lg:hidden">
+        {/* Header de móvil con tema consistente */}
+        <header className="sticky top-0 z-40 border-b lg:hidden" style={{ backgroundColor: 'var(--color-card)', borderColor: 'var(--color-border)' }}>
           <div className="flex items-center gap-3 p-3">
             <button
               aria-label="Abrir menú"
-              className="rounded-lg p-2 text-white hover:bg-blue-700"
+              className="rounded-lg p-2 transition-colors"
+              style={{ color: 'var(--color-text)', backgroundColor: 'rgba(var(--color-accent-rgb), 0.1)' }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'rgba(var(--color-accent-rgb), 0.2)')}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'rgba(var(--color-accent-rgb), 0.1)')}
               onClick={() => setOpen(true)}
             >
               <Menu size={20} />
             </button>
-            <span className="font-semibold text-white">SoftScout</span>
+            <span className="font-semibold" style={{ color: 'var(--color-text)' }}>SoftScout</span>
           </div>
         </header>
 
         {/* CAMBIO PRINCIPAL:
-          Este <main> aplica el fondo gradiente a TODA el área 
+          Este <main> aplica el fondo del tema a TODA el área 
           de contenido. 
           Quitamos el padding (p-4) para que cada página lo maneje.
         */}
-        <main className="flex-1 min-w-0 max-w-full overflow-y-auto bg-gradient-to-br from-blue-600 to-blue-800">
+        <main className="flex-1 min-w-0 max-w-full overflow-y-auto" style={{ backgroundColor: 'var(--color-bg)' }}>
           {children}
         </main>
       </div>
