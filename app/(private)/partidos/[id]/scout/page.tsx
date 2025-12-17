@@ -28,6 +28,8 @@ import type { CreateLanzamientoDto } from '@/lib/api';
 // --- Importamos los componentes ---
 import PitcherCard from './PitcherCard';
 import CambiarPitcherModal from '@/app/(private)/partidos/CambiarPitcherModal';
+import ConfirmDialog from '@/app/components/ConfirmDialog';
+import { toast } from 'react-hot-toast';
 
 export default function ScoutPage({ params }: { params: Promise<{ id: string }> }) {
   
@@ -494,16 +496,24 @@ export default function ScoutPage({ params }: { params: Promise<{ id: string }> 
 
   // Finalizar partido: marcar en backend y limpiar contexto local
   const handleFinalizarPartido = async () => {
-    const ok = window.confirm('¿Deseas finalizar este partido? Esta acción lo moverá a Partidos Finalizados.');
-    if (!ok) return;
+    // Abrir el diálogo de confirmación
+    setConfirmFinalizarOpen(true);
+  };
 
+  const [confirmFinalizarOpen, setConfirmFinalizarOpen] = useState(false);
+
+  const confirmFinalizarPartido = async () => {
     try {
-  await finalizar.mutateAsync(Number(id));
+      await finalizar.mutateAsync(Number(id));
       scout.clearPartido(id);
+      toast.success('Partido finalizado');
       router.push('/partidos');
     } catch (err) {
       console.error('Error finalizando partido', err);
-      alert('No se pudo finalizar el partido. Intenta de nuevo.');
+      const errorMessage = err instanceof Error ? err.message : 'No se pudo finalizar el partido. Intenta de nuevo.';
+      toast.error(errorMessage);
+    } finally {
+      setConfirmFinalizarOpen(false);
     }
   };
 
@@ -748,6 +758,16 @@ export default function ScoutPage({ params }: { params: Promise<{ id: string }> 
         )}
 
       </div>
+        <ConfirmDialog
+          open={confirmFinalizarOpen}
+          title="Finalizar Partido"
+          message={`¿Deseas finalizar este partido? Esta acción lo moverá a Partidos Finalizados.`}
+          confirmLabel="Finalizar"
+          cancelLabel="Cancelar"
+          variant="danger"
+          onConfirm={confirmFinalizarPartido}
+          onCancel={() => setConfirmFinalizarOpen(false)}
+        />
     </main>
   );
 }
