@@ -228,8 +228,14 @@ export default function ScoutPage({ params }: { params: Promise<{ id: string }> 
   const pitcherLocalActivo = pitchersEnPartido.find(p => p.id === pitcherActivoLocalId);
   const pitcherVisitanteActivo = pitchersEnPartido.find(p => p.id === pitcherActivoVisitanteId);
   
-  // --- Filtrar lanzamientos del pitcher activo ---
-  const lanzamientosDelPitcherActivo = lanzamientos.filter(l => l.pitcher === activePitcher);
+  // --- Filtrar lanzamientos del pitcher activo ACTUAL (por tipo Y por ID de pitcher) ---
+  const lanzamientosDelPitcherActivo = lanzamientos.filter(l => {
+    if (activePitcher === 'local') {
+      return l.pitcher === 'local' && l.pitcherId === pitcherActivoLocalId;
+    } else {
+      return l.pitcher === 'visitante' && l.pitcherId === pitcherActivoVisitanteId;
+    }
+  });
   const ultimoLanzamiento = lanzamientosDelPitcherActivo.length > 0 
     ? lanzamientosDelPitcherActivo[lanzamientosDelPitcherActivo.length - 1] 
     : null;

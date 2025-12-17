@@ -101,3 +101,4 @@ export default function PartidosProgramados({ partidos }: Props) {
     </div>
   );
 }
+

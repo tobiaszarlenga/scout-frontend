@@ -90,9 +90,18 @@ export default function EquiposPage() {
           {equipos.map((e) => (
             <div
               key={e.id}
-              className="group flex flex-col justify-between rounded-2xl p-4 shadow-lg ring-1 ring-white/5 transform transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl"
+              className="group flex flex-col justify-between rounded-2xl p-4 shadow-lg ring-1 ring-white/5 transform transition-all duration-300 hover:-translate-y-2 cursor-pointer"
               style={{
                 backgroundColor: 'var(--color-card)',
+                border: '2px solid transparent',
+              }}
+              onMouseEnter={(el) => {
+                el.currentTarget.style.border = '2px solid var(--color-accent)';
+                el.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(207, 83, 0, 0.25), 0 0 20px rgba(207, 83, 0, 0.2)';
+              }}
+              onMouseLeave={(el) => {
+                el.currentTarget.style.border = '2px solid transparent';
+                el.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)';
               }}
             >
               <div className="flex items-center gap-3">

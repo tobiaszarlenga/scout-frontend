@@ -4,7 +4,8 @@
 import { useEffect } from "react";
 import Modal from '@/app/components/Modal';
 import Button from '@/app/components/Button';
-import { useForm, SubmitHandler } from "react-hook-form";
+import CustomSelect from '@/app/components/CustomSelect';
+import { useForm, SubmitHandler, Controller } from "react-hook-form";
 import { usePitchers } from "@/hooks/usePitchers";
 import { useEquipos } from "@/hooks/useEquipos";
 import type { Pitcher, CreatePitcherDto } from "@/types/pitcher";
@@ -32,6 +33,7 @@ export default function EditPitcherModal({ pitcher, onClose }: EditPitcherModalP
     handleSubmit,
     reset,
     setValue,
+    control,
     formState: { errors },
   } = useForm<CreatePitcherDto>();
   
@@ -96,7 +98,13 @@ export default function EditPitcherModal({ pitcher, onClose }: EditPitcherModalP
               <input
                 id="nombre"
                 type="text"
-                {...register("nombre", { required: "El nombre es obligatorio" })}
+                {...register("nombre", { 
+                  required: "El nombre es obligatorio",
+                  pattern: {
+                    value: /^[a-záéíóúñA-ZÁÉÍÓÚÑ\s]+$/,
+                    message: "El nombre solo puede contener letras"
+                  }
+                })}
                 className={inputStyle}
                 style={{ backgroundColor: 'var(--color-card)', color: 'var(--color-text)', border: '1px solid var(--color-border)' }}
               />
@@ -109,7 +117,13 @@ export default function EditPitcherModal({ pitcher, onClose }: EditPitcherModalP
               <input
                 id="apellido"
                 type="text"
-                {...register("apellido", { required: "El apellido es obligatorio" })}
+                {...register("apellido", { 
+                  required: "El apellido es obligatorio",
+                  pattern: {
+                    value: /^[a-záéíóúñA-ZÁÉÍÓÚÑ\s]+$/,
+                    message: "El apellido solo puede contener letras"
+                  }
+                })}
                 className={inputStyle}
                 style={{ backgroundColor: 'var(--color-card)', color: 'var(--color-text)', border: '1px solid var(--color-border)' }}
               />
@@ -144,24 +158,23 @@ export default function EditPitcherModal({ pitcher, onClose }: EditPitcherModalP
 
             {/* Selector de Equipo (Full-width) */}
             <div>
-              <label htmlFor="equipoId" className="block text-sm font-medium text-apptext">Equipo</label>
-              <select
-                id="equipoId"
-                {...register("equipoId", { required: "Debe seleccionar un equipo", valueAsNumber: true })}
-                className={inputStyle}
-                style={{ backgroundColor: 'var(--color-card)', color: 'var(--color-text)', border: '1px solid var(--color-border)' }}
-                disabled={equiposList.isLoading}
-              >
-                <option value="">
-                  {equiposList.isLoading ? "Cargando equipos..." : "Seleccione un equipo"}
-                </option>
-                {equiposList.data?.map(equipo => (
-                  <option key={equipo.id} value={equipo.id} style={{ backgroundColor: 'var(--color-card)', color: 'var(--color-text)' }}>
-                    {equipo.nombre}
-                  </option>
-                ))}
-              </select>
-              {errors.equipoId && <p className="mt-1 text-xs text-red-500">{errors.equipoId.message}</p>}
+              <label className="block text-sm font-medium text-apptext mb-2">Equipo</label>
+              <Controller
+                name="equipoId"
+                control={control}
+                rules={{ required: "Debe seleccionar un equipo" }}
+                render={({ field }) => (
+                  <CustomSelect
+                    value={field.value || ''}
+                    onChange={(value) => field.onChange(Number(value))}
+                    options={equiposList.data?.map(e => ({ id: e.id, nombre: e.nombre })) || []}
+                    placeholder="Seleccione un equipo"
+                    disabled={equiposList.isLoading}
+                    isLoading={equiposList.isLoading}
+                    error={errors.equipoId?.message}
+                  />
+                )}
+              />
             </div>
           </div>
       </form>

@@ -130,8 +130,19 @@ export default function PitchersPage() {
                   {pitchersPorEquipo[nombreEquipo].map((p) => (
                     <div
                       key={p.id}
-                      className="group relative flex flex-col rounded-2xl p-6 text-center shadow-lg transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl bg-card text-apptext cursor-pointer"
+                      className="group relative flex flex-col rounded-2xl p-6 text-center shadow-lg transition-all duration-300 hover:-translate-y-2 bg-card text-apptext cursor-pointer"
                       onClick={() => router.push(`/reportes/${p.id}`)}
+                      style={{
+                        border: '2px solid transparent',
+                      }}
+                      onMouseEnter={(el) => {
+                        el.currentTarget.style.border = '2px solid var(--color-accent)';
+                        el.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(207, 83, 0, 0.25), 0 0 20px rgba(207, 83, 0, 0.2)';
+                      }}
+                      onMouseLeave={(el) => {
+                        el.currentTarget.style.border = '2px solid transparent';
+                        el.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)';
+                      }}
                     >
                       <Avatar
                         // src={p.fotoUrl ?? p.foto_url}
@@ -146,7 +157,7 @@ export default function PitchersPage() {
                       </p>
                       <p
                         className="mt-2 text-sm font-semibold"
-                        style={{ color: "rgba(226,232,240,0.9)" }}
+                        style={{ color: "var(--color-text)" }}
                       >
                         #{p.numero_camiseta}
                       </p>
