@@ -92,7 +92,7 @@ export default function Sidebar({
               aria-current={active ? "page" : undefined}
               onClick={onClose}
             >
-              {/* barrita curva animada: blanco en hover, naranja activo */}
+              {/* barrita curva animada: naranja activo, gris en hover */}
               <span
                 className={[
                   "pointer-events-none absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1.5 rounded-r-full transition-all duration-300",
@@ -102,8 +102,8 @@ export default function Sidebar({
               />
               {!active && (
                 <span
-                  className="pointer-events-none absolute left-0 top-1/2 -translate-y-1/2 h-0 w-1.5 rounded-r-full opacity-0 transition-all duration-300 group-hover:h-8 group-hover:opacity-100 dark:!bg-white"
-                  style={{ backgroundColor: COLORS.accent }}
+                  className="pointer-events-none absolute left-0 top-1/2 -translate-y-1/2 h-0 w-1.5 rounded-r-full opacity-0 transition-all duration-300 group-hover:h-8 group-hover:opacity-100"
+                  style={{ backgroundColor: "var(--color-accent2)" }}
                 />
               )}
 
