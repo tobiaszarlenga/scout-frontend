@@ -30,8 +30,8 @@ export default function CustomSelect({
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLButtonElement>(null);
 
-  // Obtener el label de la opción seleccionada
-  const selectedLabel = options.find(opt => opt.id === value)?.nombre || placeholder;
+  // Obtener el label de la opción seleccionada (comparación flexible para string/number)
+  const selectedLabel = options.find(opt => opt.id == value)?.nombre || placeholder;
 
   // Cerrar dropdown al hacer click fuera
   useEffect(() => {
@@ -106,17 +106,17 @@ export default function CustomSelect({
                 className="w-full px-4 py-3 text-left text-sm font-medium transition-colors duration-150 hover:bg-opacity-80"
                 style={{
                   backgroundColor:
-                    value === option.id ? 'var(--color-accent)' : 'transparent',
+                    value == option.id ? 'var(--color-accent)' : 'transparent',
                   color:
-                    value === option.id ? 'white' : 'var(--color-text)',
+                    value == option.id ? 'white' : 'var(--color-text)',
                 }}
                 onMouseEnter={(el) => {
-                  if (value !== option.id) {
+                  if (value != option.id) {
                     el.currentTarget.style.backgroundColor = 'rgba(207, 83, 0, 0.15)';
                   }
                 }}
                 onMouseLeave={(el) => {
-                  if (value !== option.id) {
+                  if (value != option.id) {
                     el.currentTarget.style.backgroundColor = 'transparent';
                   }
                 }}

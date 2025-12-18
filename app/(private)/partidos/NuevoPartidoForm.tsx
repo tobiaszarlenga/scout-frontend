@@ -3,6 +3,7 @@
 
 import React, { useState } from 'react';
 import Button from '@/app/components/Button';
+import CustomSelect from '@/app/components/CustomSelect';
 import type { Equipo } from '@/types/equipo';
 import type { Pitcher } from '@/types/pitcher';
 
@@ -49,15 +50,20 @@ export default function NuevoPartidoForm({
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  // ... (función handleChange sin cambios) ...
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    name: keyof PartidoFormData,
+    value: string
   ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => {
+      const next = { ...prev, [name]: value };
+      if (name === 'equipoLocalId' && value !== prev.equipoLocalId) {
+        next.pitcherLocalId = '';
+      }
+      if (name === 'equipoVisitanteId' && value !== prev.equipoVisitanteId) {
+        next.pitcherVisitanteId = '';
+      }
+      return next;
+    });
   };
   
   // --- ¡CAMBIO AQUÍ! ---
@@ -115,40 +121,24 @@ export default function NuevoPartidoForm({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium">Equipo Local *</label>
-          <select
-            name="equipoLocalId"
+          <CustomSelect
             value={formData.equipoLocalId}
-            onChange={handleChange}
-            className="mt-1 w-full rounded-md border px-3 py-2 outline-none focus:ring"
-            required
+            onChange={(val) => handleChange('equipoLocalId', String(val))}
+            options={equipos.map((eq) => ({ id: eq.id, nombre: eq.nombre }))}
+            placeholder={isLoadingOptions ? 'Cargando...' : 'Seleccionar equipo...'}
             disabled={submitting || isLoadingOptions}
-          >
-            <option value="">
-              {isLoadingOptions ? 'Cargando...' : 'Seleccionar equipo...'}
-            </option>
-            {equipos.map((eq) => (
-              <option key={eq.id} value={eq.id}>{eq.nombre}</option>
-            ))}
-          </select>
+          />
         </div>
         
         <div>
           <label className="block text-sm font-medium">Equipo Visitante *</label>
-          <select
-            name="equipoVisitanteId"
+          <CustomSelect
             value={formData.equipoVisitanteId}
-            onChange={handleChange}
-            className="mt-1 w-full rounded-md border px-3 py-2 outline-none focus:ring"
-            required
+            onChange={(val) => handleChange('equipoVisitanteId', String(val))}
+            options={equipos.map((eq) => ({ id: eq.id, nombre: eq.nombre }))}
+            placeholder={isLoadingOptions ? 'Cargando...' : 'Seleccionar equipo...'}
             disabled={submitting || isLoadingOptions}
-          >
-            <option value="">
-              {isLoadingOptions ? 'Cargando...' : 'Seleccionar equipo...'}
-            </option>
-            {equipos.map((eq) => (
-              <option key={eq.id} value={eq.id}>{eq.nombre}</option>
-            ))}
-          </select>
+          />
         </div>
       </div>
       
@@ -156,40 +146,24 @@ export default function NuevoPartidoForm({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium">Pitcher Local *</label>
-          <select
-            name="pitcherLocalId"
+          <CustomSelect
             value={formData.pitcherLocalId}
-            onChange={handleChange}
-            className="mt-1 w-full rounded-md border px-3 py-2 outline-none focus:ring"
-            required
+            onChange={(val) => handleChange('pitcherLocalId', String(val))}
+            options={pitchersLocales.map((p) => ({ id: p.id, nombre: `${p.nombre} ${p.apellido}` }))}
+            placeholder={formData.equipoLocalId ? 'Seleccionar pitcher...' : 'Selecciona equipo primero'}
             disabled={!formData.equipoLocalId || submitting || isLoadingOptions}
-          >
-            <option value="">
-              {isLoadingOptions ? 'Cargando...' : 'Seleccionar pitcher...'}
-            </option>
-            {pitchersLocales.map((p) => (
-              <option key={p.id} value={p.id}>{p.nombre} {p.apellido}</option>
-            ))}
-          </select>
+          />
         </div>
         
         <div>
           <label className="block text-sm font-medium">Pitcher Visitante *</label>
-          <select
-            name="pitcherVisitanteId"
+          <CustomSelect
             value={formData.pitcherVisitanteId}
-            onChange={handleChange}
-            className="mt-1 w-full rounded-md border px-3 py-2 outline-none focus:ring"
-            required
+            onChange={(val) => handleChange('pitcherVisitanteId', String(val))}
+            options={pitchersVisitantes.map((p) => ({ id: p.id, nombre: `${p.nombre} ${p.apellido}` }))}
+            placeholder={formData.equipoVisitanteId ? 'Seleccionar pitcher...' : 'Selecciona equipo primero'}
             disabled={!formData.equipoVisitanteId || submitting || isLoadingOptions}
-          >
-            <option value="">
-              {isLoadingOptions ? 'Cargando...' : 'Seleccionar pitcher...'}
-            </option>
-            {pitchersVisitantes.map((p) => (
-              <option key={p.id} value={p.id}>{p.nombre} {p.apellido}</option>
-            ))}
-          </select>
+          />
         </div>
       </div>
 
@@ -201,7 +175,7 @@ export default function NuevoPartidoForm({
             type="date"
             name="fecha"
             value={formData.fecha}
-            onChange={handleChange}
+            onChange={(e) => handleChange('fecha', e.target.value)}
             className="mt-1 w-full rounded-md border px-3 py-2 outline-none focus:ring"
             required
             disabled={submitting}
@@ -213,7 +187,7 @@ export default function NuevoPartidoForm({
             type="time"
             name="horario"
             value={formData.horario}
-            onChange={handleChange}
+            onChange={(e) => handleChange('horario', e.target.value)}
             className="mt-1 w-full rounded-md border px-3 py-2 outline-none focus:ring"
             required
             disabled={submitting}
@@ -225,7 +199,7 @@ export default function NuevoPartidoForm({
             type="text"
             name="campo"
             value={formData.campo}
-            onChange={handleChange}
+            onChange={(e) => handleChange('campo', e.target.value)}
             placeholder="Opcional"
             className="mt-1 w-full rounded-md border px-3 py-2 outline-none focus:ring"
             disabled={submitting}
