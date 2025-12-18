@@ -6,8 +6,9 @@ import type { PartidoConDetalles } from 'types/partido';
 import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
 import { usePartidos } from '@/hooks/usePartidos';
-import EditPartidoModal from './EditPartidoModal';
+// Edit modal removed for finalized matches
 import ConfirmDialog from '@/app/components/ConfirmDialog';
+import { FileText, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 // 🎨 Paleta SoftScout (usa variables globales)
@@ -25,7 +26,6 @@ interface Props {
 export default function PartidosFinalizados({ partidos }: Props) {
   const router = useRouter();
   const { remove } = usePartidos();
-  const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [selectedPartido, setSelectedPartido] = useState<PartidoConDetalles | null>(null);
 
@@ -33,10 +33,7 @@ export default function PartidosFinalizados({ partidos }: Props) {
     router.push(`/reportes/${partidoId}`);
   };
 
-  const handleEdit = (p: PartidoConDetalles) => {
-    setSelectedPartido(p);
-    setEditOpen(true);
-  };
+  // Edit action removed for finalized matches
 
   const handleDelete = (p: PartidoConDetalles) => {
     setSelectedPartido(p);
@@ -69,12 +66,12 @@ export default function PartidosFinalizados({ partidos }: Props) {
       <div className="overflow-x-auto mt-6 rounded-lg">
         <table className="w-full text-left min-w-[700px] border-collapse">
         <thead>
-          <tr style={{ backgroundColor: 'var(--color-card)', color: COLORS.text }}>
+            <tr style={{ backgroundColor: 'var(--color-card)', color: COLORS.text }}>
             <th className="py-2 px-4 font-medium">Fecha</th>
             <th className="py-2 px-4 font-medium">Equipos</th>
             <th className="py-2 px-4 font-medium">Pitchers</th>
             <th className="py-2 px-4 font-medium">Campo</th>
-            <th className="py-2 px-4 font-medium">Acción</th>
+            <th className="py-2 px-4 font-medium w-32 text-center">Acción</th>
           </tr>
         </thead>
 
@@ -82,7 +79,7 @@ export default function PartidosFinalizados({ partidos }: Props) {
           {partidos.map((partido) => (
             <tr
               key={partido.id}
-              className="transition-colors"
+              className="transition-colors group"
               style={{
                 backgroundColor: COLORS.rowBg,
                 color: COLORS.text,
@@ -106,60 +103,26 @@ export default function PartidosFinalizados({ partidos }: Props) {
                 {partido.pitcherVisitante.nombre} {partido.pitcherVisitante.apellido}
               </td>
               <td className="py-3 px-4">{partido.campo}</td>
-              <td className="py-3 px-4">
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleVerReporte(partido.id)}
-                    className="px-3 py-2 rounded-lg text-xs font-semibold transition-all shadow-sm"
-                    style={{
-                      backgroundColor: COLORS.accent,
-                      color: COLORS.text,
-                    }}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.backgroundColor = '#C7430D')
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.backgroundColor = COLORS.accent)
-                    }
-                  >
-                    Ver Reporte
-                  </button>
-                  {!selectedPartido && (
-                    <>
-                      <button
-                        onClick={() => handleEdit(partido)}
-                        className="px-3 py-2 rounded-lg text-xs font-semibold transition-all shadow-sm"
-                        style={{
-                          backgroundColor: 'var(--color-accent2)',
-                          color: 'white',
-                        }}
-                        onMouseEnter={(e) =>
-                          (e.currentTarget.style.opacity = '0.8')
-                        }
-                        onMouseLeave={(e) =>
-                          (e.currentTarget.style.opacity = '1')
-                        }
-                      >
-                        Editar
-                      </button>
-                      <button
-                        onClick={() => handleDelete(partido)}
-                        className="px-3 py-2 rounded-lg text-xs font-semibold transition-all shadow-sm"
-                        style={{
-                          backgroundColor: '#EF4444',
-                          color: 'white',
-                        }}
-                        onMouseEnter={(e) =>
-                          (e.currentTarget.style.opacity = '0.8')
-                        }
-                        onMouseLeave={(e) =>
-                          (e.currentTarget.style.opacity = '1')
-                        }
-                      >
-                        Eliminar
-                      </button>
-                    </>
-                  )}
+              <td className="py-3 px-4 text-center w-32">
+                <div className="flex justify-center items-center">
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleVerReporte(partido.id)}
+                      className="rounded-full bg-blue-100 p-2 text-blue-600 hover:bg-blue-200"
+                      aria-label="Ver Reporte"
+                      title="Ver Reporte"
+                    >
+                      <FileText size={16} />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(partido)}
+                      className="rounded-full bg-red-100 p-2 text-red-600 hover:bg-red-200"
+                      aria-label="Eliminar"
+                      title="Eliminar"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
                 </div>
               </td>
             </tr>
@@ -167,14 +130,6 @@ export default function PartidosFinalizados({ partidos }: Props) {
         </tbody>
       </table>
       </div>
-
-      {selectedPartido && (
-        <EditPartidoModal
-          open={editOpen}
-          onClose={() => setEditOpen(false)}
-          partido={selectedPartido}
-        />
-      )}
 
       <ConfirmDialog
         open={deleteOpen}

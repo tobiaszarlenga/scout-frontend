@@ -52,13 +52,11 @@ export default function EquipoHistoricalReport({ params }: { params: Promise<{ e
       <div className="mx-auto w-full max-w-6xl">
         <header className="flex items-center justify-between pb-6">
           <div>
+            <Link href="/reportes" className="text-sm hover:opacity-80" style={{ color: 'var(--color-text)', textDecoration: 'none' }}>
+              &larr; Volver a Reportes
+            </Link>
             <h1 className="text-3xl font-bold">Informe histórico: {equipo ? equipo.nombre : `ID ${equipoId}`}</h1>
             <p className="text-sm text-gray-400">Pitchers incluidos: {pitchers.length}</p>
-          </div>
-          <div>
-            <Link href="/reportes" className="inline-block px-3 py-2 rounded-lg font-medium transition text-center" style={{ backgroundColor: 'var(--color-accent)', color: '#fff', textDecoration: 'none', cursor: 'pointer' }}>
-              Volver a Reportes
-            </Link>
           </div>
         </header>
 

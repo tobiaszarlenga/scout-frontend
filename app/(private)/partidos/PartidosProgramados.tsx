@@ -9,6 +9,7 @@ import { usePartidos } from '@/hooks/usePartidos';
 import { format } from 'date-fns';
 import EditPartidoModal from './EditPartidoModal';
 import ConfirmDialog from '@/app/components/ConfirmDialog';
+import { Play, Edit, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 // 🎨 Paleta SoftScout (usa variables globales)
@@ -107,60 +108,33 @@ export default function PartidosProgramados({ partidos }: Props) {
                 </td>
                 <td className="py-3 px-4">{partido.campo}</td>
 
-                <td className="py-3 px-4">
-                  <div className="flex gap-2">
-                    <Link
-                      href={`/partidos/${partido.id}/scout`}
-                      className="px-3 py-2 rounded-lg text-xs font-semibold transition-all shadow-sm"
-                      style={{
-                        backgroundColor: COLORS.accent,
-                        color: COLORS.text,
-                      }}
-                      onMouseEnter={(e) =>
-                        (e.currentTarget.style.backgroundColor = '#C7430D')
-                      }
-                      onMouseLeave={(e) =>
-                        (e.currentTarget.style.backgroundColor = COLORS.accent)
-                      }
-                    >
-                      {scout.getState(String(partido.id)) ? 'Continuar' : 'Empezar'}
+                <td className="py-3 px-4 text-center w-36">
+                  <div className="flex justify-center items-center gap-2">
+                    <Link href={`/partidos/${partido.id}/scout`} className="rounded-full bg-orange-100 p-2 text-orange-600 hover:bg-orange-200" title={scout.getState(String(partido.id)) ? 'Continuar' : 'Empezar'}>
+                      <Play size={16} />
                     </Link>
+
                     {!scout.getState(String(partido.id)) && (
                       <>
                         <button
                           onClick={() => handleEdit(partido)}
-                          className="px-3 py-2 rounded-lg text-xs font-semibold transition-all shadow-sm"
-                          style={{
-                            backgroundColor: 'var(--color-accent2)',
-                            color: 'white',
-                          }}
-                          onMouseEnter={(e) =>
-                            (e.currentTarget.style.opacity = '0.8')
-                          }
-                          onMouseLeave={(e) =>
-                            (e.currentTarget.style.opacity = '1')
-                          }
+                          className="rounded-full bg-blue-100 p-2 text-blue-600 hover:bg-blue-200"
+                          aria-label="Editar"
+                          title="Editar"
                         >
-                          Editar
+                          <Edit size={16} />
                         </button>
                         <button
                           onClick={() => handleDelete(partido)}
-                          className="px-3 py-2 rounded-lg text-xs font-semibold transition-all shadow-sm"
-                          style={{
-                            backgroundColor: '#EF4444',
-                            color: 'white',
-                          }}
-                          onMouseEnter={(e) =>
-                            (e.currentTarget.style.opacity = '0.8')
-                          }
-                          onMouseLeave={(e) =>
-                            (e.currentTarget.style.opacity = '1')
-                          }
+                          className="rounded-full bg-red-100 p-2 text-red-600 hover:bg-red-200"
+                          aria-label="Eliminar"
+                          title="Eliminar"
                         >
-                          Eliminar
+                          <Trash2 size={16} />
                         </button>
                       </>
                     )}
+
                     {scout.getState(String(partido.id)) && (
                       <span className="px-3 py-2 text-xs font-semibold rounded-lg" style={{ color: 'var(--color-accent)', backgroundColor: 'transparent' }}>
                         Partido en curso

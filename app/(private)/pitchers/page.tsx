@@ -8,7 +8,8 @@ import type { Pitcher } from "@/types/pitcher";
 import NewPitcherModal from "./NewPitcherModal";
 import EditPitcherModal from "./EditPitcherModal";
 import ConfirmDialog from "@/app/components/ConfirmDialog";
-import { PencilIcon, TrashIcon, UserIcon } from "@heroicons/react/24/solid";
+import { UserIcon } from "@heroicons/react/24/solid";
+import { Edit, Trash2 } from "lucide-react";
 import { toast } from "react-hot-toast";
 
 // 🎨 Paleta del dashboard (usa variables globales)
@@ -169,21 +170,22 @@ export default function PitchersPage() {
                             e.stopPropagation();
                             setPitcherAEditar(p);
                           }}
-                          className="rounded-full p-2 text-white shadow-md transition hover:scale-110"
-                          style={{ backgroundColor: COLORS.edit }}
+                          className="rounded-full bg-blue-100 p-2 text-blue-600 hover:bg-blue-200"
+                          aria-label="Editar"
                           title="Editar"
                         >
-                          <PencilIcon className="h-5 w-5" />
+                          <Edit size={16} />
                         </button>
                         <button
-                          className="rounded-full bg-red-600 p-2 text-white shadow-md transition hover:scale-110"
+                          className="rounded-full bg-red-100 p-2 text-red-600 hover:bg-red-200"
+                          aria-label="Borrar"
                           title="Borrar"
                           onClick={(e) => {
                             e.stopPropagation();
                             setPitcherAEliminar(p);
                           }}
                         >
-                          <TrashIcon className="h-5 w-5" />
+                          <Trash2 size={16} />
                         </button>
                       </div>
                     </div>

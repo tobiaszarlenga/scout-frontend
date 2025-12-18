@@ -298,39 +298,36 @@ export default function PitcherDetallePage({ params }: PitcherDetalleProp) {
                                 </td>
                                 <td className="px-4 py-3">{lanzamiento.velocidad ? `${lanzamiento.velocidad} km/h` : '-'}</td>
                                 <td className="px-4 py-3">{lanzamiento.zona}</td>
-                                <td className="px-4 py-3">
+                                <td className="px-4 py-3 text-center">
                                   <div className="flex justify-center gap-2">
                                     <button
                                       type="button"
                                       onClick={() => handleVerZona(lanzamiento.zona)}
-                                      className="px-3 py-1 text-xs rounded flex items-center justify-center hover:opacity-90"
-                                      style={{ backgroundColor: 'var(--color-accent2)', color: 'var(--color-on-accent)' }}
+                                      className="rounded-full bg-blue-100 p-2 text-blue-600 hover:bg-blue-200"
                                       aria-label={`Ver lanzamiento ${index + 1}`}
                                       title="Ver"
                                     >
-                                      <Eye size={14} />
+                                      <Eye size={16} />
                                     </button>
 
                                     <button
                                       type="button"
                                       onClick={() => handleEditar(lanzamiento.id)}
-                                      className="px-3 py-1 text-xs rounded flex items-center justify-center hover:opacity-90"
-                                      style={{ backgroundColor: 'var(--color-accent)', color: 'var(--color-on-accent)' }}
+                                      className="rounded-full bg-orange-100 p-2 text-orange-600 hover:bg-orange-200"
                                       aria-label={`Editar lanzamiento ${index + 1}`}
                                       title="Editar"
                                     >
-                                      <Edit size={14} />
+                                      <Edit size={16} />
                                     </button>
 
                                     <button
                                       type="button"
                                       onClick={() => handleEliminar(lanzamiento.id)}
-                                      className="px-3 py-1 text-xs rounded flex items-center justify-center hover:opacity-90"
-                                      style={{ backgroundColor: '#ef4444', color: 'white' }}
+                                      className="rounded-full bg-red-100 p-2 text-red-600 hover:bg-red-200"
                                       aria-label={`Eliminar lanzamiento ${index + 1}`}
                                       title="Eliminar"
                                     >
-                                      <Trash2 size={14} />
+                                      <Trash2 size={16} />
                                     </button>
                                   </div>
                                 </td>

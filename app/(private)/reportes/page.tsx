@@ -6,6 +6,8 @@ import { usePitchers } from "@/hooks/usePitchers";
 import { useEquipos } from "@/hooks/useEquipos";
 import { useLanzamientos } from "@/hooks/useLanzamientos";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { FileText, BarChart2 } from 'lucide-react';
 
 type Mode = "recent" | "match" | "pitcher" | "team";
 
@@ -22,6 +24,84 @@ export default function ReportesPage() {
   const [selectedMatchId, setSelectedMatchId] = useState<number | null>(null);
   const [selectedPitcherId, setSelectedPitcherId] = useState<number | null>(null);
   const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null);
+
+  const STORAGE_KEY = "reportes.filters.v1";
+  const router = useRouter();
+
+  // Load persisted filters from URL query params first, fallback to localStorage
+  useEffect(() => {
+    try {
+      const sp = new URLSearchParams(window.location.search);
+      const hasQuery = sp.has("mode") || sp.has("selectedMatchId") || sp.has("selectedPitcherId") || sp.has("selectedTeamId");
+
+      if (hasQuery) {
+        const qMode = sp.get("mode");
+        if (qMode) setMode(qMode as Mode);
+        const qMatch = sp.get("selectedMatchId");
+        setSelectedMatchId(qMatch ? Number(qMatch) : null);
+        const qPitcher = sp.get("selectedPitcherId");
+        setSelectedPitcherId(qPitcher ? Number(qPitcher) : null);
+        const qTeam = sp.get("selectedTeamId");
+        setSelectedTeamId(qTeam ? Number(qTeam) : null);
+        return;
+      }
+
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === "object") {
+        if ("mode" in parsed && parsed.mode) setMode(parsed.mode as Mode);
+        setSelectedMatchId(parsed.selectedMatchId ?? null);
+        setSelectedPitcherId(parsed.selectedPitcherId ?? null);
+        setSelectedTeamId(parsed.selectedTeamId ?? null);
+      }
+    } catch (e) {
+      // ignore parse errors
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Persist filters whenever they change
+  useEffect(() => {
+    try {
+      const payload = {
+        mode,
+        selectedMatchId,
+        selectedPitcherId,
+        selectedTeamId,
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    } catch (e) {
+      // ignore storage errors
+    }
+  }, [mode, selectedMatchId, selectedPitcherId, selectedTeamId]);
+
+  // Helper to immediately persist current filters (useful to call before navigation)
+  const saveFilters = () => {
+    try {
+      const payload = { mode, selectedMatchId, selectedPitcherId, selectedTeamId };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    } catch (e) {
+      // ignore
+    }
+  };
+
+  // Also update URL query params so browser back/forward preserves filters
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      params.set("mode", mode);
+      if (selectedMatchId != null) params.set("selectedMatchId", String(selectedMatchId)); else params.delete("selectedMatchId");
+      if (selectedPitcherId != null) params.set("selectedPitcherId", String(selectedPitcherId)); else params.delete("selectedPitcherId");
+      if (selectedTeamId != null) params.set("selectedTeamId", String(selectedTeamId)); else params.delete("selectedTeamId");
+
+      const qs = params.toString();
+      const url = qs ? `${window.location.pathname}?${qs}` : window.location.pathname;
+      router.replace(url);
+    } catch (e) {
+      // ignore
+    }
+  }, [mode, selectedMatchId, selectedPitcherId, selectedTeamId, router]);
 
   const matchLanzamientos = useLanzamientos(selectedMatchId ?? -1);
 
@@ -332,14 +412,18 @@ export default function ReportesPage() {
                   </div>
                   <Link
                     href={`/reportes/${recentMatch.id}`}
-                    className="px-4 py-2 rounded-lg font-medium transition"
+                    onClick={() => saveFilters()}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-md font-medium transition shadow-md"
                     style={{
-                      backgroundColor: 'var(--color-accent)',
-                      color: "#fff",
-                      cursor: "pointer",
+                      background: 'linear-gradient(90deg, var(--color-accent), rgba(199,67,13,0.95))',
+                      color: '#fff',
+                      boxShadow: '0 8px 20px rgba(0,0,0,0.18)',
+                      cursor: 'pointer',
                     }}
+                    title="Ver reporte detallado"
                   >
-                    Ver reporte detallado
+                    <FileText size={16} />
+                    <span>Ver reporte detallado</span>
                   </Link>
                 </div>
               )}
@@ -349,16 +433,19 @@ export default function ReportesPage() {
                   <h3 className="font-medium">Partido seleccionado</h3>
                   <Link
                     href={`/reportes/${selectedMatchId}`}
-                    className="block mt-3 px-4 py-2 rounded-lg font-medium text-center transition"
+                    onClick={() => saveFilters()}
+                    className="inline-flex items-center gap-2 mt-3 px-4 py-2 rounded-md font-medium transition shadow-sm"
                     role="button"
                     style={{
-                      backgroundColor: 'var(--color-accent)',
+                      background: 'linear-gradient(90deg, var(--color-accent), rgba(199,67,13,0.95))',
                       color: '#fff',
                       cursor: 'pointer',
                       textDecoration: 'none',
+                      boxShadow: '0 6px 16px rgba(0,0,0,0.12)'
                     }}
                   >
-                    Abrir reporte detallado
+                    <FileText size={16} />
+                    <span>Abrir reporte detallado</span>
                   </Link>
                   {matchLanzamientos.list.isLoading && (
                     <p className="text-gray-400 mt-2">Cargando lanzamientos...</p>
@@ -384,26 +471,26 @@ export default function ReportesPage() {
                           {m.equipoLocal.nombre} vs {m.equipoVisitante.nombre} —{" "}
                           {new Date(m.fecha).toLocaleString()}
                         </div>
-                        <Link
-                          href={`/reportes/${m.id}`}
-                          style={{ color: 'var(--color-accent)', cursor: "pointer" }}
-                        >
-                          Ver
+                        <Link href={`/reportes/${m.id}`} onClick={() => saveFilters()} title="Ver" className="rounded-full bg-blue-100 p-2 text-blue-600 hover:bg-blue-200">
+                          <FileText size={14} />
                         </Link>
                       </li>
                     ))}
                   </ul>
                   <Link
                     href={`/reportes/pitcher/${selectedPitcherId}`}
-                    className="mt-4 inline-block px-3 py-2 rounded-lg font-medium transition text-center"
+                    onClick={() => saveFilters()}
+                    className="inline-flex items-center gap-2 mt-4 px-4 py-2 rounded-md font-medium transition shadow-sm"
                     style={{
-                      backgroundColor: 'var(--color-accent)',
+                      background: 'linear-gradient(90deg, var(--color-accent), rgba(199,67,13,0.95))',
                       color: '#fff',
                       cursor: 'pointer',
                       textDecoration: 'none',
+                      boxShadow: '0 6px 16px rgba(0,0,0,0.12)'
                     }}
                   >
-                    Ver estadísticas históricas
+                    <BarChart2 size={16} />
+                    <span>Ver estadísticas históricas</span>
                   </Link>
                 </div>
               )}
@@ -421,26 +508,26 @@ export default function ReportesPage() {
                           {m.equipoLocal.nombre} vs {m.equipoVisitante.nombre} —{" "}
                           {new Date(m.fecha).toLocaleString()}
                         </div>
-                        <Link
-                          href={`/reportes/${m.id}`}
-                          style={{ color: 'var(--color-accent)', cursor: "pointer" }}
-                        >
-                          Ver
+                        <Link href={`/reportes/${m.id}`} onClick={() => saveFilters()} title="Ver" className="rounded-full bg-blue-100 p-2 text-blue-600 hover:bg-blue-200">
+                          <FileText size={14} />
                         </Link>
                       </li>
                     ))}
                   </ul>
                   <Link
                     href={`/reportes/equipo/${selectedTeamId}`}
-                    className="mt-4 inline-block px-3 py-2 rounded-lg font-medium transition text-center"
+                    onClick={() => saveFilters()}
+                    className="inline-flex items-center gap-2 mt-4 px-4 py-2 rounded-md font-medium transition shadow-sm"
                     style={{
-                      backgroundColor: 'var(--color-accent)',
+                      background: 'linear-gradient(90deg, var(--color-accent), rgba(199,67,13,0.95))',
                       color: '#fff',
                       cursor: 'pointer',
                       textDecoration: 'none',
+                      boxShadow: '0 6px 16px rgba(0,0,0,0.12)'
                     }}
                   >
-                    Ver estadísticas históricas
+                    <BarChart2 size={16} />
+                    <span>Ver estadísticas históricas</span>
                   </Link>
                 </div>
               )}

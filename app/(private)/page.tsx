@@ -16,6 +16,7 @@ import {
   ChartPieIcon, ChartBarIcon, CalendarDaysIcon,
   UsersIcon, UserGroupIcon, CalendarIcon
 } from "@heroicons/react/24/solid";
+import { Play } from 'lucide-react';
 
 /* ===== Theme tokens (we use Tailwind classes / CSS variables) ===== */
 
@@ -227,15 +228,16 @@ export default function InicioPage() {
                         <td className="py-3 px-4">
                           <Link
                             href={`/partidos/${p.id}/scout`}
-                            className="px-4 py-2 rounded-lg text-sm font-semibold transition-all shadow-sm"
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm font-semibold transition-all shadow-md"
                             style={{
-                              backgroundColor: 'var(--color-accent)',
-                              color: 'var(--color-text)'
+                              background: 'linear-gradient(90deg, var(--color-accent), rgba(199,67,13,0.95))',
+                              color: 'var(--color-text)',
+                              boxShadow: '0 6px 18px rgba(0,0,0,0.18)'
                             }}
-                            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#C7430D')}
-                            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-accent)')}
+                            title="Empezar"
                           >
-                            Empezar
+                            <Play size={16} />
+                            <span>Empezar</span>
                           </Link>
                         </td>
                       </tr>
