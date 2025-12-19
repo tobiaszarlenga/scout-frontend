@@ -39,8 +39,12 @@ const Separator = () => (
 
 export default function PartidosPage() {
   const { list } = usePartidos();
-  const programados = list.data?.filter((p) => p.estado === "PROGRAMADO") ?? [];
-  const finalizados = list.data?.filter((p) => p.estado === "FINALIZADO") ?? [];
+  const programados = (list.data?.filter((p) => p.estado === "PROGRAMADO") ?? []).sort(
+    (a, b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime()
+  );
+  const finalizados = (list.data?.filter((p) => p.estado === "FINALIZADO") ?? []).sort(
+    (a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
+  );
 
   return (
     <main
