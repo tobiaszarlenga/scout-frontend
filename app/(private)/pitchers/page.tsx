@@ -8,7 +8,8 @@ import type { Pitcher } from "@/types/pitcher";
 import NewPitcherModal from "./NewPitcherModal";
 import EditPitcherModal from "./EditPitcherModal";
 import ConfirmDialog from "@/app/components/ConfirmDialog";
-import { PencilIcon, TrashIcon, UserIcon } from "@heroicons/react/24/solid";
+import { UserIcon } from "@heroicons/react/24/solid";
+import { Edit, Trash2 } from "lucide-react";
 import { toast } from "react-hot-toast";
 
 // 🎨 Paleta del dashboard (usa variables globales)
@@ -118,6 +119,18 @@ export default function PitchersPage() {
           <NewPitcherModal />
         </header>
 
+        {/* Hint */}
+        <div
+          className="mb-6 rounded-lg border p-4 text-sm"
+          style={{
+            backgroundColor: 'var(--color-card)',
+            borderColor: 'var(--color-border)',
+            color: 'var(--color-text)'
+          }}
+        >
+          <span className="opacity-90">ℹ️ Selecciona un pitcher para ver sus estadísticas históricas.</span>
+        </div>
+
         {pitchers.length > 0 ? (
           <div className="flex flex-col gap-10">
             {Object.keys(pitchersPorEquipo).map((nombreEquipo) => (
@@ -131,7 +144,7 @@ export default function PitchersPage() {
                     <div
                       key={p.id}
                       className="group relative flex flex-col rounded-2xl p-6 text-center shadow-lg transition-all duration-300 hover:-translate-y-2 bg-card text-apptext cursor-pointer"
-                      onClick={() => router.push(`/reportes/${p.id}`)}
+                      onClick={() => router.push(`/reportes/pitcher/${p.id}`)}
                       style={{
                         border: '2px solid transparent',
                       }}
@@ -169,21 +182,22 @@ export default function PitchersPage() {
                             e.stopPropagation();
                             setPitcherAEditar(p);
                           }}
-                          className="rounded-full p-2 text-white shadow-md transition hover:scale-110"
-                          style={{ backgroundColor: COLORS.edit }}
+                          className="rounded-full bg-blue-100 p-2 text-blue-600 hover:bg-blue-200"
+                          aria-label="Editar"
                           title="Editar"
                         >
-                          <PencilIcon className="h-5 w-5" />
+                          <Edit size={16} />
                         </button>
                         <button
-                          className="rounded-full bg-red-600 p-2 text-white shadow-md transition hover:scale-110"
+                          className="rounded-full bg-red-100 p-2 text-red-600 hover:bg-red-200"
+                          aria-label="Borrar"
                           title="Borrar"
                           onClick={(e) => {
                             e.stopPropagation();
                             setPitcherAEliminar(p);
                           }}
                         >
-                          <TrashIcon className="h-5 w-5" />
+                          <Trash2 size={16} />
                         </button>
                       </div>
                     </div>

@@ -7,7 +7,8 @@ import EditEquipoModal from "@/app/(private)/equipos/EditEquipoModal";
 import ConfirmDialog from "@/app/components/ConfirmDialog";
 import type { Equipo } from "@/types/equipo";
 import { toast } from "react-hot-toast";
-import { PencilIcon, TrashIcon, UsersIcon } from "@heroicons/react/24/solid";
+import { UsersIcon } from "@heroicons/react/24/solid";
+import { Edit, Trash2 } from "lucide-react";
 
 export default function EquiposPage() {
   const { list, remove, update } = useEquipos();
@@ -145,18 +146,19 @@ export default function EquiposPage() {
                 <div className="flex items-center gap-2 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
                   <button
                     onClick={() => handleOpenEditModal(e)}
-                    className="rounded-full p-2 text-white shadow-md transition hover:scale-110"
-                    style={{ backgroundColor: '#3B82F6' }}
+                    className="rounded-full bg-blue-100 p-2 text-blue-600 hover:bg-blue-200"
+                    aria-label="Editar"
                     title="Editar"
                   >
-                    <PencilIcon className="h-5 w-5" />
+                    <Edit size={16} />
                   </button>
                   <button
-                    className="rounded-full bg-red-600 p-2 text-white shadow-md transition hover:scale-110"
+                    className="rounded-full bg-red-100 p-2 text-red-600 hover:bg-red-200"
+                    aria-label="Borrar"
                     title="Borrar"
                     onClick={() => setEquipoAEliminar(e)}
                   >
-                    <TrashIcon className="h-5 w-5" />
+                    <Trash2 size={16} />
                   </button>
                 </div>
               </div>

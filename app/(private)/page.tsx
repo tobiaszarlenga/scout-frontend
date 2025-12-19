@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useDashboard } from "hooks/useDashboard";
 import { usePartidos } from "hooks/usePartidos";
 import { useAuth } from "@/context/AuthContext";
+import { useScout } from "@/context/ScoutContext";
 
 import {
   PieChart, Pie, Cell, ResponsiveContainer, Tooltip,
@@ -16,6 +17,7 @@ import {
   ChartPieIcon, ChartBarIcon, CalendarDaysIcon,
   UsersIcon, UserGroupIcon, CalendarIcon
 } from "@heroicons/react/24/solid";
+import { Play } from 'lucide-react';
 
 /* ===== Theme tokens (we use Tailwind classes / CSS variables) ===== */
 
@@ -68,6 +70,7 @@ export default function InicioPage() {
   const { query } = useDashboard();
   const { user } = useAuth();
   const { list: partidosList } = usePartidos();
+  const scout = useScout();
 
   if (query.isLoading) return <p className="p-6 text-apptext">Cargando…</p>;
   if (query.isError)   return <p className="p-6 text-red-300">Error: {(query.error as Error).message}</p>;
@@ -219,24 +222,35 @@ export default function InicioPage() {
                 <tbody>
                   {proximos.map((p) => {
                     const fechaHora = new Date(p.fecha);
+                    const enCurso = !!scout.getState(String(p.id));
                     return (
                       <tr key={p.id} className="transition-colors" style={{ backgroundColor: 'var(--color-card)', color: 'var(--color-text)' }}>
                         <td className="py-3 px-4">{format(fechaHora, 'dd-MM-yyyy', { locale: es })}</td>
                         <td className="py-3 px-4">{format(fechaHora, 'HH:mm', { locale: es })}</td>
                         <td className="py-3 px-4">{p.equipoLocal} <span className="text-muted">vs</span> {p.equipoVisitante}</td>
                         <td className="py-3 px-4">
-                          <Link
-                            href={`/partidos/${p.id}/scout`}
-                            className="px-4 py-2 rounded-lg text-sm font-semibold transition-all shadow-sm"
-                            style={{
-                              backgroundColor: 'var(--color-accent)',
-                              color: 'var(--color-text)'
-                            }}
-                            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#C7430D')}
-                            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-accent)')}
-                          >
-                            Empezar
-                          </Link>
+                          {enCurso ? (
+                            <span 
+                              className="text-sm font-semibold"
+                              style={{ color: 'var(--color-accent)' }}
+                            >
+                              Partido en curso
+                            </span>
+                          ) : (
+                            <Link
+                              href={`/partidos/${p.id}/scout`}
+                              className="inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm font-semibold transition-all shadow-md"
+                              style={{
+                                background: 'linear-gradient(90deg, var(--color-accent), rgba(199,67,13,0.95))',
+                                color: 'var(--color-text)',
+                                boxShadow: '0 6px 18px rgba(0,0,0,0.18)'
+                              }}
+                              title="Empezar"
+                            >
+                              <Play size={16} />
+                              <span>Empezar</span>
+                            </Link>
+                          )}
                         </td>
                       </tr>
                     );
