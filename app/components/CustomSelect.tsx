@@ -27,11 +27,29 @@ export default function CustomSelect({
   error,
 }: CustomSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [openUpward, setOpenUpward] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLButtonElement>(null);
 
   // Obtener el label de la opción seleccionada (comparación flexible para string/number)
   const selectedLabel = options.find(opt => opt.id == value)?.nombre || placeholder;
+
+  // Detectar si debe abrir hacia arriba o hacia abajo
+  useEffect(() => {
+    if (isOpen && inputRef.current) {
+      const rect = inputRef.current.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const spaceAbove = rect.top;
+      const dropdownHeight = 300; // maxHeight del dropdown
+      
+      // Si no hay suficiente espacio abajo pero sí arriba, abrir hacia arriba
+      if (spaceBelow < dropdownHeight && spaceAbove > spaceBelow) {
+        setOpenUpward(true);
+      } else {
+        setOpenUpward(false);
+      }
+    }
+  }, [isOpen]);
 
   // Cerrar dropdown al hacer click fuera
   useEffect(() => {
@@ -85,7 +103,9 @@ export default function CustomSelect({
       {/* Dropdown menu */}
       {isOpen && (
         <div
-          className="absolute z-50 w-full mt-2 rounded-lg shadow-lg border border-solid overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200"
+          className={`absolute z-50 w-full rounded-lg shadow-lg border border-solid animate-in fade-in duration-200 ${
+            openUpward ? 'bottom-full mb-2 slide-in-from-bottom-2' : 'mt-2 slide-in-from-top-2'
+          }`}
           style={{
             backgroundColor: 'var(--color-card)',
             borderColor: 'var(--color-border)',
