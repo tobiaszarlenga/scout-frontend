@@ -133,7 +133,7 @@ export default function PitchersPage() {
 
         {pitchers.length > 0 ? (
           <div className="flex flex-col gap-10">
-            {Object.keys(pitchersPorEquipo).map((nombreEquipo) => (
+            {Object.keys(pitchersPorEquipo).sort().map((nombreEquipo) => (
               <section key={nombreEquipo}>
                 <h2 className="mb-4 text-2xl font-bold capitalize text-apptext">
                   {nombreEquipo}

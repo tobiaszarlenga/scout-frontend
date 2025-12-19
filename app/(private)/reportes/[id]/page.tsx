@@ -162,10 +162,10 @@ export default function ReportePage({ params }: { params: Promise<{ id: string }
         stats[pname].zonaFavorita = Number(zona);
       }
 
-      // Efectividad: (strikes + outs) / total
-      const positivos = stats[pname].strikes + stats[pname].outs;
-      stats[pname].efectividad = stats[pname].total > 0 
-        ? (positivos / stats[pname].total) * 100 
+      // Efectividad: proporción de strikes sobre (strikes + bolas)
+      const lanzamientosContados = stats[pname].strikes + stats[pname].bolas;
+      stats[pname].efectividad = lanzamientosContados > 0
+        ? (stats[pname].strikes / lanzamientosContados) * 100
         : 0;
     });
 
@@ -268,7 +268,6 @@ export default function ReportePage({ params }: { params: Promise<{ id: string }
                     <th className="py-2 px-4">Tipo</th>
                     <th className="py-2 px-4">Resultado</th>
                     <th className="py-2 px-4">Zona</th>
-                    <th className="py-2 px-4">Comentario</th>
                     <th className="py-2 px-4">Hora</th>
                   </tr>
                 </thead>
@@ -289,7 +288,6 @@ export default function ReportePage({ params }: { params: Promise<{ id: string }
                       <td className="py-2 px-4">
                         {typeof l.x === "number" && typeof l.y === "number" ? l.y * 5 + l.x : "-"}
                       </td>
-                      <td className="py-2 px-4">{l.comentario ?? "-"}</td>
                       <td className="py-2 px-4">
                         {l.creadoEn ? format(new Date(l.creadoEn), "dd-MM-yyyy HH:mm:ss") : "-"}
                       </td>
@@ -404,7 +402,7 @@ export default function ReportePage({ params }: { params: Promise<{ id: string }
                       )}
                       <div>
                         • Efectividad: <strong>{stat.efectividad.toFixed(1)}%</strong> 
-                        <span className="opacity-70"> ({stat.strikes} strikes, {stat.outs} outs)</span>
+                        <span className="opacity-70"> ({stat.strikes} strikes, {stat.bolas} bolas)</span>
                       </div>
                       {stat.zonaFavorita !== null && (
                         <div>• Zona preferida: <strong>#{stat.zonaFavorita}</strong></div>
@@ -426,8 +424,8 @@ export default function ReportePage({ params }: { params: Promise<{ id: string }
               {/* Recomendaciones */}
               <div className="mt-4 pt-3 border-t" style={{ borderColor: "var(--color-border)" }}>
                 <div className="text-xs" style={{ color: "var(--color-text)", opacity: 0.7 }}>
-                  💡 <strong>Nota:</strong> Efectividad = (Strikes + Outs) / Total de lanzamientos. 
-                  Un valor superior al 60% indica buen control.
+                  💡 <strong>Nota:</strong> Efectividad = Strikes / (Strikes + Bolas).
+                  Un valor superior al 60% indica buen control de zona (más strikes que bolas).
                 </div>
               </div>
             </div>
