@@ -1,5 +1,5 @@
 "use client";
-import React, { createContext, useContext, useMemo, useState } from 'react';
+import React, { createContext, useContext, useMemo, useState, useEffect } from 'react';
 import type { LanzamientoGuardado, PitcherEnPartido, ActivePitcher } from '@/types/scout';
 
 export type PartidoScoutState = {
@@ -27,8 +27,37 @@ interface ScoutContextValue {
 
 const ScoutContext = createContext<ScoutContextValue | null>(null);
 
+const STORAGE_KEY = 'softscout_partidos_state';
+
+// Cargar desde localStorage
+const loadFromStorage = (): Store => {
+  if (typeof window === 'undefined') return {};
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    return stored ? JSON.parse(stored) : {};
+  } catch (err) {
+    console.error('Error loading scout state from localStorage:', err);
+    return {};
+  }
+};
+
+// Guardar en localStorage
+const saveToStorage = (store: Store) => {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+  } catch (err) {
+    console.error('Error saving scout state to localStorage:', err);
+  }
+};
+
 export function ScoutProvider({ children }: { children: React.ReactNode }) {
-  const [store, setStore] = useState<Store>({});
+  const [store, setStore] = useState<Store>(loadFromStorage);
+
+  // Persistir cambios en localStorage
+  useEffect(() => {
+    saveToStorage(store);
+  }, [store]);
 
   const value = useMemo<ScoutContextValue>(() => ({
     getState: (partidoId) => {
