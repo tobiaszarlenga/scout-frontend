@@ -1,0 +1,158 @@
+// En: app/(private)/partidos/RegistrarLanzamientoForm.tsx
+'use client';
+
+import React, { useState } from 'react';
+// --- CAMBIO 1: Importamos el nuevo hook ---
+// (Ajusta la ruta si tu alias '@/' es diferente)
+import { useLookups } from '@/hooks/useLookups';
+
+// --- CAMBIO 2: ¡Actualizamos la interfaz de datos! ---
+// Ahora enviaremos los IDs (números) en lugar de texto.
+export interface LanzamientoData {
+  velocidad: number | null;
+  tipoId: number | null;
+  resultadoId: number | null;
+}
+
+interface RegistrarLanzamientoFormProps {
+  onSubmit: (data: LanzamientoData) => void;
+  onCancel: () => void;
+}
+
+// --- CAMBIO 3: ¡Borramos los arrays 'harcodeados'! ---
+// (Ya no necesitamos 'tiposDeEfecto' ni 'resultadosDeLanzamiento')
+
+export default function RegistrarLanzamientoForm({
+  onSubmit,
+  onCancel,
+}: RegistrarLanzamientoFormProps) {
+  
+  // --- CAMBIO 4: Llamamos al hook para cargar los datos ---
+  const { tipos, resultados } = useLookups();
+
+  // --- CAMBIO 5: Actualizamos los estados internos ---
+  // Ahora guardan 'number | null' en lugar de 'string'
+  const [velocidad, setVelocidad] = useState<number | null>(null);
+  const [tipoId, setTipoId] = useState<number | null>(null);
+  const [resultadoId, setResultadoId] = useState<number | null>(null);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Validación: ambos campos son requeridos para guardar en backend
+    if (!tipoId || !resultadoId) {
+      alert('Seleccioná Tipo de Efecto y Resultado para guardar el lanzamiento.');
+      return;
+    }
+
+    // --- CAMBIO 6: Enviamos los IDs ---
+    onSubmit({
+      velocidad,
+      tipoId,
+      resultadoId,
+    });
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <div className="flex flex-col space-y-4">
+        
+        {/* --- Campo Velocidad (Sin cambios) --- */}
+        <div>
+          <label
+            htmlFor="velocidad"
+            className="block text-sm font-medium"
+            style={{ color: 'var(--color-text)' }}
+          >
+            Velocidad (mph)
+          </label>
+          <input
+            type="number"
+            id="velocidad"
+            value={velocidad ?? ''}
+            onChange={(e) => setVelocidad(e.target.valueAsNumber || null)}
+            placeholder="Ej: 65"
+            className="mt-1 block w-full rounded-md shadow-sm sm:text-sm"
+            style={{ backgroundColor: 'var(--color-card)', color: 'var(--color-text)', border: '1px solid var(--color-border)', cursor: 'pointer' }}
+          />
+        </div>
+
+        {/* --- CAMBIO 7: Campo Tipo de Efecto (Ahora dinámico) --- */}
+        <div>
+          <label
+            htmlFor="tipoEfecto"
+            className="block text-sm font-medium"
+            style={{ color: 'var(--color-text)' }}
+          >
+            Tipo de Efecto
+          </label>
+          <select
+            id="tipoEfecto"
+            value={tipoId ?? ''} // Controlado por 'tipoId'
+            // Convertimos el valor (string) de vuelta a número
+            onChange={(e) => setTipoId(e.target.value ? Number(e.target.value) : null)}
+            className="mt-1 block w-full rounded-md shadow-sm sm:text-sm"
+            style={{ backgroundColor: 'var(--color-card)', color: 'var(--color-text)', border: '1px solid var(--color-border)', cursor: 'pointer' }}
+            disabled={tipos.isLoading || tipos.isError} // Desactivado si está cargando
+            required
+          >
+            <option value="">Seleccionar efecto</option>
+            {/* --- Lógica de Carga --- */}
+            {tipos.isLoading && <option>Cargando tipos...</option>}
+            {tipos.isError && <option>Error al cargar</option>}
+            {/* --- Mapeamos los datos de la API --- */}
+            {tipos.data?.map((tipo) => (
+              <option key={tipo.id} value={tipo.id}>{tipo.nombre}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* --- CAMBIO 8: Campo Resultado (Ahora dinámico) --- */}
+        <div>
+          <label
+            htmlFor="resultado"
+            className="block text-sm font-medium"
+            style={{ color: 'var(--color-text)' }}
+          >
+            Resultado
+          </label>
+          <select
+            id="resultado"
+            value={resultadoId ?? ''} // Controlado por 'resultadoId'
+            onChange={(e) => setResultadoId(e.target.value ? Number(e.target.value) : null)}
+            className="mt-1 block w-full rounded-md shadow-sm sm:text-sm"
+            style={{ backgroundColor: 'var(--color-card)', color: 'var(--color-text)', border: '1px solid var(--color-border)', cursor: 'pointer' }}
+            disabled={resultados.isLoading || resultados.isError} // Desactivado si está cargando
+            required
+          >
+            <option value="">Seleccionar resultado</option>
+            {/* --- Lógica de Carga --- */}
+            {resultados.isLoading && <option>Cargando resultados...</option>}
+            {resultados.isError && <option>Error al cargar</option>}
+            {/* --- Mapeamos los datos de la API --- */}
+            {resultados.data?.map((res) => (
+              <option key={res.id} value={res.id}>{res.nombre}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* --- Botones de Acción (Sin cambios) --- */}
+        <div className="flex justify-end space-x-3 pt-4">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            className="rounded-lg px-4 py-2 text-sm font-medium hover:opacity-90 transition"
+            style={{ backgroundColor: 'var(--color-accent)', color: 'var(--color-on-accent)', border: '1px solid rgba(0,0,0,0.05)' }}
+          >
+            Guardar
+          </button>
+        </div>
+      </div>
+    </form>
+  );
+}

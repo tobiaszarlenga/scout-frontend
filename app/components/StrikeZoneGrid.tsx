@@ -1,0 +1,80 @@
+// En: app/components/StrikeZoneGrid.tsx
+'use client';
+
+import React from 'react';
+
+// --- 1. Definimos las Props ---
+interface StrikeZoneGridProps {
+  onZoneClick: (zoneIndex: number) => void;
+  highlightedZone?: number | null; // Zona a resaltar en rojo
+  readOnly?: boolean; // Si es true, no se puede hacer clic
+}
+
+/**
+ * Representa la cuadrícula interactiva de 5x5 (25 zonas).
+ * Puede usarse en modo interactivo (para seleccionar) o 
+ * en modo solo lectura (para visualizar).
+ */
+export default function StrikeZoneGrid({ 
+  onZoneClick, 
+  highlightedZone = null,
+  readOnly = false 
+}: StrikeZoneGridProps) {
+  
+  // (La lógica de zonas y strikeZoneIndices se queda igual)
+  const zones = Array.from({ length: 25 });
+  const strikeZoneIndices = [
+    6, 7, 8,    // Fila 2
+    11, 12, 13, // Fila 3
+    16, 17, 18  // Fila 4
+  ];
+
+  // --- 3. ¡Borramos el 'handleZoneClick' de aquí! ---
+  // (Ya no necesitamos la función que mostraba el 'alert()')
+
+  return (
+    <div className="flex flex-col items-center">
+      <h3 className="text-lg font-semibold text-apptext mb-4">
+        Zona de Strike
+      </h3>
+      
+      <div className="grid grid-cols-5 gap-1 bg-[rgba(var(--color-text-rgb),0.25)] p-1 rounded-lg shadow-inner">
+        
+        {zones.map((_, index) => {
+          const isStrikeZone = strikeZoneIndices.includes(index);
+          const isHighlighted = highlightedZone === index;
+
+          return (
+            <button
+              key={index}
+              
+              // Conectamos el 'onClick' a la Prop (solo si no es readOnly)
+              onClick={() => !readOnly && onZoneClick(index)}
+              disabled={readOnly}
+              
+              className={`
+                w-14 h-14 md:w-16 md:h-16 
+                transition-colors duration-150
+                ${
+                  isHighlighted
+                    ? 'bg-red-500 border-2 border-red-700 shadow-lg'
+                    : isStrikeZone
+                    ? 'bg-blue-100 border border-blue-300 hover:bg-blue-200'
+                    : 'bg-card border border-appborder hover:bg-[rgba(var(--color-text-rgb),0.05)]'
+                }
+                ${readOnly ? 'cursor-default' : 'cursor-pointer'}
+                ${!readOnly && 'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:z-10'}
+              `}
+            >
+              {/* Vacío */}
+            </button>
+          );
+        })}
+      </div>
+      
+      <p className="text-sm text-[rgba(var(--color-text-rgb),0.6)] mt-2">
+        Centro: Strike Zone | Exterior: Bolas
+      </p>
+    </div>
+  );
+}

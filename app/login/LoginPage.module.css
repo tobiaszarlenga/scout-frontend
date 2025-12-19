@@ -1,0 +1,189 @@
+/* ======================
+   LOGIN - SoftScout Dark Edition v2
+   ====================== */
+
+.mainContainer {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(150deg, var(--color-sidebar), var(--color-sidebar));
+  background-image: url('/logo.png'), linear-gradient(150deg, var(--color-sidebar), var(--color-sidebar));
+  background-size: 600px, cover;
+  background-position: center, center;
+  background-repeat: no-repeat, repeat;
+  background-attachment: fixed;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  position: relative;
+}
+
+.mainContainer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(150deg, rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.75));
+  z-index: 1;
+}
+
+.formulario {
+  width: 400px;
+  background: var(--color-card);
+  border-radius: 12px;
+  padding: 0 40px 30px 40px;
+  box-sizing: border-box;
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
+  color: var(--color-text);
+  position: relative;
+  z-index: 2;
+}
+
+.formulario h1 {
+  text-align: center;
+  padding: 25px 0 10px 0;
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--color-text);
+  border-bottom: none;
+}
+
+form .username {
+  position: relative;
+  border-bottom: 2px solid var(--color-border);
+  margin: 30px 0;
+}
+
+.username input {
+  width: 100%;
+  padding: 0 5px;
+  height: 40px;
+  font-size: 16px;
+  border: none;
+  outline: none;
+  background: none;
+  color: var(--color-text);
+}
+
+.username input::placeholder {
+  color: transparent;
+}
+
+.username label {
+  position: absolute;
+  top: 50%;
+  left: 5px;
+  color: var(--color-muted);
+  transform: translateY(-50%);
+  font-size: 16px;
+  pointer-events: none;
+  transition: 0.5s;
+}
+
+.username span::before {
+  content: '';
+  position: absolute;
+  top: 40px;
+  left: 0;
+  width: 0%;
+  height: 2px;
+  background: var(--color-accent);
+  transition: 0.5s;
+}
+
+.username input:focus ~ label,
+.username input:not(:placeholder-shown) ~ label {
+  top: -5px;
+  color: var(--color-accent);
+}
+
+.username input:focus ~ span::before,
+.username input:valid ~ span::before {
+  width: 100%;
+}
+
+.recordar {
+  margin: -5px 0 20px 5px;
+  color: var(--color-muted);
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.recordar:hover {
+  color: var(--color-accent);
+  text-decoration: underline;
+}
+
+.submitBtn {
+  width: 100%;
+  height: 50px;
+  border: none;
+  background: var(--color-accent);
+  border-radius: 15px;
+  color: var(--color-text);
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  outline: none;
+  transition: 0.3s;
+}
+
+.submitBtn:hover {
+  background: #c7430d;
+  transform: translateY(-1px);
+}
+
+.submitBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.registrarse {
+  margin: 30px 0 0 0;
+  text-align: center;
+  font-size: 16px;
+  color: var(--color-text);
+}
+
+.registrarse a {
+  color: var(--color-accent);
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.registrarse a:hover {
+  text-decoration: underline;
+}
+
+.errorMessage {
+  color: #ff7b7b;
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.togglePasswordBtn {
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 8px;
+  color: var(--color-muted);
+  transition: color 0.3s ease;
+}
+
+.togglePasswordBtn:hover:not(:disabled) {
+  color: var(--color-accent);
+}
+
+.togglePasswordBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

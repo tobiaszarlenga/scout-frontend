@@ -1,72 +1,137 @@
-'use client';
+"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  Home, Calendar, Users, UserCircle, Target, BarChart3, FileText, Settings, X
+  Home,
+  Calendar,
+  Users,
+  UserCircle,
+  FileText,
+  X,
+  LogOut,
 } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import ThemeToggle from "./ThemeToggle";
+import Logo from "./Logo";
 
 const nav = [
   { href: "/", label: "Inicio", icon: Home },
   { href: "/partidos", label: "Partidos", icon: Calendar },
   { href: "/equipos", label: "Equipos", icon: Users },
   { href: "/pitchers", label: "Pitchers", icon: UserCircle },
-  { href: "/bateadores", label: "Bateadores", icon: Target },
-  { href: "/lanzamientos", label: "Lanzamientos", icon: BarChart3 },
-  { href: "/estadisticas", label: "Estadísticas", icon: BarChart3 },
   { href: "/reportes", label: "Reportes", icon: FileText },
-  { href: "/configuracion", label: "Configuración", icon: Settings },
 ];
+
+// 🎨 Paleta SoftScout (referencias a variables globales)
+const COLORS = {
+  bgFrom: "var(--color-sidebar)",
+  bgTo: "var(--color-sidebar)",
+  card: "var(--color-card)",
+  text: "var(--color-text)",
+  accent: "var(--color-accent)",
+  edit: "#3B82F6",
+};
 
 export default function Sidebar({
   open,
   onClose,
-}: { open?: boolean; onClose?: () => void }) {
+}: {
+  open?: boolean;
+  onClose?: () => void;
+}) {
   const pathname = usePathname();
+  const { logout } = useAuth();
 
   const content = (
-    <aside className="flex h-full w-64 flex-col gap-2 bg-white p-4 shadow-sm">
-      {/* Header + close (solo mobile) */}
-      <div className="mb-2 flex items-center justify-between lg:hidden">
-        <div className="font-semibold">SoftScout</div>
-        <button
-          aria-label="Cerrar menú"
-          onClick={onClose}
-          className="rounded-lg p-2 hover:bg-slate-100"
-        >
-          <X size={20} />
-        </button>
+    // ⬇️ altura completa de la ventana para evitar "cortes" al fondo
+    <aside
+      className="flex h-screen w-64 flex-col border-r p-4"
+      style={{
+        background: `linear-gradient(180deg, ${COLORS.bgFrom}, ${COLORS.bgTo})`,
+        borderColor: "var(--color-card)",
+      }}
+    >
+      {/* Header */}
+      <div className="mb-6 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Logo width={48} height={48} />
+          <div className="text-xl font-bold" style={{ color: COLORS.text }}>
+            SoftScout
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <button
+            aria-label="Cerrar menú"
+            onClick={onClose}
+            className="rounded-lg p-2 text-[rgba(var(--color-text-rgb),0.6)] hover:bg-[var(--color-card)] lg:hidden"
+          >
+            <X size={20} />
+          </button>
+        </div>
       </div>
 
-      <nav className="space-y-1">
-        {nav.map(({ href, label }) => {
-          const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
+      {/* NAV LINKS — Este contenedor sí tiene scroll si hace falta */}
+      <nav className="space-y-1 flex-1 overflow-y-auto">
+        {nav.map(({ href, label, icon: Icon }) => {
+          const active =
+            href === "/" ? pathname === "/" : pathname.startsWith(href);
           return (
             <Link
               key={href}
               href={href}
               className={[
-                "block rounded-lg px-3 py-2 text-sm",
-                active
-                  ? "bg-slate-100 text-slate-900 font-medium"
-                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
+                "group relative flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition-all duration-200 hover:bg-[var(--color-card)]",
+                active ? "font-semibold" : "",
               ].join(" ")}
+                style={{
+                backgroundColor: active ? "rgba(34,49,63,0.65)" : "transparent",
+                color: COLORS.text,
+              }}
+              aria-current={active ? "page" : undefined}
               onClick={onClose}
             >
-              {label}
+              {/* barrita curva animada: naranja activo, gris en hover */}
+              <span
+                className={[
+                  "pointer-events-none absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1.5 rounded-r-full transition-all duration-300",
+                  active ? "opacity-100" : "opacity-0",
+                ].join(" ")}
+                style={{ backgroundColor: COLORS.accent }}
+              />
+              {!active && (
+                <span
+                  className="pointer-events-none absolute left-0 top-1/2 -translate-y-1/2 h-0 w-1.5 rounded-r-full opacity-0 transition-all duration-300 group-hover:h-8 group-hover:opacity-100"
+                  style={{ backgroundColor: "var(--color-accent2)" }}
+                />
+              )}
+
+              <Icon size={18} />
+              <span>{label}</span>
             </Link>
           );
         })}
       </nav>
 
-      <div className="mt-auto text-xs text-slate-400">SoftScout v1.0</div>
+      {/* FOOTER — siempre visible (fuera del área con scroll) */}
+      <footer className="pt-4 border-t border-[#2c3d4a]">
+        <button
+          onClick={logout}
+          className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-red-400 transition hover:bg-red-900 hover:text-red-300"
+        >
+          <LogOut size={18} />
+          <span className="font-medium">Cerrar Sesión</span>
+        </button>
+      </footer>
     </aside>
   );
 
   return (
     <>
-      {/* Desktop: fijo */}
-      <div className="hidden lg:block">{content}</div>
+      {/* Desktop: sidebar fijo + spacer para no superponer el contenido */}
+      <div className="hidden lg:block fixed inset-y-0 left-0 z-30">{content}</div>
+      <div className="hidden lg:block w-64 shrink-0" aria-hidden />
 
       {/* Mobile: off-canvas */}
       <div
@@ -76,14 +141,13 @@ export default function Sidebar({
           open ? "translate-x-0" : "-translate-x-full",
         ].join(" ")}
       >
-        {/* Overlay clickeable */}
         <div
           onClick={onClose}
           className="absolute inset-0 bg-black/40"
           role="button"
           aria-label="Cerrar overlay"
         />
-        <div className="relative h-full w-72">{content}</div>
+        <div className="relative h-full w-64">{content}</div>
       </div>
     </>
   );

@@ -1,38 +1,39 @@
-"use client";
-import { useState } from "react";
-import { Menu } from "lucide-react";
-import Sidebar from "./components/Sidebar";
+// app/layout.tsx
 import "./globals.css";
+import { Proveedores } from "./proveedores";
+import { AuthProvider } from "../context/AuthContext";
+import { ThemeProvider } from "@/context/ThemeContext";
+import Script from 'next/script';
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const [open, setOpen] = useState(false);
+export const metadata = {
+  title: "SoftScout",
+  description: "Sistema de gestión de scouts de softbol",
+  icons: {
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
+};
 
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <html lang="es">
-      <body className="bg-slate-50 text-slate-800">
-        <div className="flex min-h-screen">
-          {/* Sidebar */}
-          <Sidebar open={open} onClose={() => setOpen(false)} />
-
-          {/* Contenido */}
-          <div className="flex min-h-screen flex-1 flex-col">
-            {/* Topbar (solo mobile) */}
-            <header className="sticky top-0 z-40 border-b border-slate-200 bg-white lg:hidden">
-              <div className="flex items-center gap-3 p-3">
-                <button
-                  className="rounded-lg p-2 hover:bg-slate-100"
-                  aria-label="Abrir menú"
-                  onClick={() => setOpen(true)}
-                >
-                  <Menu size={20} />
-                </button>
-                <span className="font-semibold">SoftScout</span>
-              </div>
-            </header>
-
-            <main className="flex-1 p-4 lg:p-8">{children}</main>
-          </div>
-        </div>
+    <html lang="es" suppressHydrationWarning>
+      <head>
+        {/* Use Next <Script> with beforeInteractive so theme is applied before hydration */}
+        <Script id="set-theme" strategy="beforeInteractive">
+          {`try{const t=localStorage.getItem('softscout:theme');if(t)document.documentElement.setAttribute('data-theme',t);else document.documentElement.setAttribute('data-theme','dark')}catch(e){}`}
+        </Script>
+      </head>
+      <body suppressHydrationWarning>
+        <Proveedores>
+          <ThemeProvider>
+            <AuthProvider>{children}</AuthProvider>
+          </ThemeProvider>
+        </Proveedores>
       </body>
     </html>
   );
