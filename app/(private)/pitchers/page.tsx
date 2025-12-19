@@ -119,6 +119,18 @@ export default function PitchersPage() {
           <NewPitcherModal />
         </header>
 
+        {/* Hint */}
+        <div
+          className="mb-6 rounded-lg border p-4 text-sm"
+          style={{
+            backgroundColor: 'var(--color-card)',
+            borderColor: 'var(--color-border)',
+            color: 'var(--color-text)'
+          }}
+        >
+          <span className="opacity-90">ℹ️ Selecciona un pitcher para ver sus estadísticas históricas.</span>
+        </div>
+
         {pitchers.length > 0 ? (
           <div className="flex flex-col gap-10">
             {Object.keys(pitchersPorEquipo).map((nombreEquipo) => (
@@ -132,7 +144,7 @@ export default function PitchersPage() {
                     <div
                       key={p.id}
                       className="group relative flex flex-col rounded-2xl p-6 text-center shadow-lg transition-all duration-300 hover:-translate-y-2 bg-card text-apptext cursor-pointer"
-                      onClick={() => router.push(`/reportes/${p.id}`)}
+                      onClick={() => router.push(`/reportes/pitcher/${p.id}`)}
                       style={{
                         border: '2px solid transparent',
                       }}
