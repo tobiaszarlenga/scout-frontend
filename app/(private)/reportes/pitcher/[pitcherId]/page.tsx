@@ -5,6 +5,18 @@ import { usePitchers } from "@/hooks/usePitchers";
 import { usePartidos } from "@/hooks/usePartidos";
 import { format } from "date-fns";
 import Link from "next/link";
+import {
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip as ReTooltip,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+} from "recharts";
 
 export default function PitcherHistoricalReport({ params }: { params: Promise<{ pitcherId: string }> }) {
   const { pitcherId } = React.use(params);
@@ -57,6 +69,32 @@ export default function PitcherHistoricalReport({ params }: { params: Promise<{ 
   }, [pitcher, pid]);
 
   const maxZone = Math.max(...zoneCounts, 1);
+
+  const totalResultados = Object.values(byResultado).reduce((a, b) => a + b, 0);
+  const totalTipos = Object.values(byTipo).reduce((a, b) => a + b, 0);
+
+  const resultadoData = useMemo(
+    () =>
+      Object.entries(byResultado).map(([name, value]) => ({
+        name,
+        value,
+        percent: totalResultados > 0 ? (value / totalResultados) * 100 : 0,
+      })),
+    [byResultado, totalResultados]
+  );
+
+  const tipoData = useMemo(
+    () =>
+      Object.entries(byTipo).map(([name, value]) => ({
+        name,
+        value,
+        percent: totalTipos > 0 ? (value / totalTipos) * 100 : 0,
+      })),
+    [byTipo, totalTipos]
+  );
+
+  const RESULT_COLORS = ["#ff7a1a", "#7ad7f0", "#9ae6b4", "#f6ad55", "#c084fc", "#f472b6"];
+  const TIPO_COLORS = ["#2dd4bf", "#fb923c", "#60a5fa", "#a78bfa", "#fca5a5", "#34d399"];
 
   return (
     <main className="min-h-full w-full max-w-full px-6 py-6 sm:px-10 sm:py-8" style={{ backgroundColor: "var(--color-bg)", color: "var(--color-text)" }}>
@@ -124,6 +162,104 @@ export default function PitcherHistoricalReport({ params }: { params: Promise<{ 
               </div>
             </div>
           )}
+        </div>
+
+        {/* Sección de Gráficos */}
+        <div className="mt-6 p-6 rounded-lg shadow-xl" style={{ backgroundColor: "var(--color-card)" }}>
+          <h2 className="text-lg font-semibold mb-4" style={{ color: "var(--color-text)" }}>Análisis de Resultados y Tipos de Tiro</h2>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Gráfico de Resultados */}
+            <div className="p-4 border rounded" style={{ borderColor: "var(--color-border)" }}>
+              <div className="text-sm font-semibold mb-3" style={{ color: "var(--color-text)" }}>Distribución de Resultados (%)</div>
+              {resultadoData.length === 0 ? (
+                <p className="text-sm opacity-70 text-center py-8">Sin datos todavía.</p>
+              ) : (
+                <>
+                  <div style={{ width: "100%", height: 280 }}>
+                    <ResponsiveContainer>
+                      <PieChart>
+                        <Pie
+                          data={resultadoData}
+                          dataKey="value"
+                          nameKey="name"
+                          innerRadius={50}
+                          outerRadius={100}
+                          paddingAngle={2}
+                        >
+                          {resultadoData.map((_, idx) => (
+                            <Cell key={idx} fill={RESULT_COLORS[idx % RESULT_COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <ReTooltip
+                          formatter={(value: number) => `${value}`}
+                          contentStyle={{ background: "var(--color-card)", border: "1px solid var(--color-border)", color: "var(--color-text)" }}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div className="mt-4 space-y-2 text-xs">
+                    {resultadoData.map((r, idx) => (
+                      <div key={r.name} className="flex items-center justify-between">
+                        <span className="inline-flex items-center gap-2">
+                          <span className="w-3 h-3 rounded" style={{ background: RESULT_COLORS[idx % RESULT_COLORS.length] }} />
+                          {r.name}
+                        </span>
+                        <span className="font-semibold">{r.value} ({r.percent.toFixed(1)}%)</span>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Gráfico de Tipos de Tiro */}
+            <div className="p-4 border rounded" style={{ borderColor: "var(--color-border)" }}>
+              <div className="text-sm font-semibold mb-3" style={{ color: "var(--color-text)" }}>Distribución de Tipos de Tiro (%)</div>
+              {tipoData.length === 0 ? (
+                <p className="text-sm opacity-70 text-center py-8">Sin datos todavía.</p>
+              ) : (
+                <>
+                  <div style={{ width: "100%", height: 280 }}>
+                    <ResponsiveContainer>
+                      <BarChart data={tipoData} margin={{ top: 8, right: 12, left: 0, bottom: 40 }}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border)" />
+                        <XAxis
+                          dataKey="name"
+                          tick={{ fill: "var(--color-muted)", fontSize: 11 }}
+                          axisLine={false}
+                          tickLine={false}
+                          angle={-30}
+                          textAnchor="end"
+                          height={60}
+                        />
+                        <YAxis tick={{ fill: "var(--color-muted)", fontSize: 11 }} axisLine={false} tickLine={false} allowDecimals={false} />
+                        <ReTooltip
+                          formatter={(value: number) => `${value}`}
+                          contentStyle={{ background: "var(--color-card)", border: "1px solid var(--color-border)", color: "var(--color-text)" }}
+                        />
+                        <Bar dataKey="value" radius={[6, 6, 0, 0]}>
+                          {tipoData.map((_, idx) => (
+                            <Cell key={idx} fill={TIPO_COLORS[idx % TIPO_COLORS.length]} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div className="mt-4 space-y-2 text-xs">
+                    {tipoData.map((t, idx) => (
+                      <div key={t.name} className="flex items-center justify-between">
+                        <span className="inline-flex items-center gap-2">
+                          <span className="w-3 h-3 rounded" style={{ background: TIPO_COLORS[idx % TIPO_COLORS.length] }} />
+                          {t.name}
+                        </span>
+                        <span className="font-semibold">{t.value} ({t.percent.toFixed(1)}%)</span>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
         </div>
 
         <div className="mt-6 p-4 rounded-lg" style={{ backgroundColor: "var(--color-card)", border: "1px solid var(--color-border)" }}>

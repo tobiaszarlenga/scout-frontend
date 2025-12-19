@@ -3,6 +3,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { Eye, EyeOff } from 'lucide-react';
 import styles from '../login/LoginPage.module.css';
 import { useAuth } from '@/context/AuthContext';
 
@@ -12,6 +13,7 @@ export default function RegisterPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
 
   // 🔹 Función de validación
@@ -108,7 +110,7 @@ export default function RegisterPage() {
 
           <div className={styles.username}>
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               required
               minLength={8}
               pattern="(?=.*[A-Z]).{8,}"
@@ -121,6 +123,15 @@ export default function RegisterPage() {
             />
             <span></span>
             <label>Contraseña</label>
+            <button
+              type="button"
+              className={styles.togglePasswordBtn}
+              onClick={() => setShowPassword(!showPassword)}
+              title={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+              style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+            >
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
           </div>
 
           {/* 🔹 Mensaje de error */}

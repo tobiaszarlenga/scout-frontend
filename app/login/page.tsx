@@ -3,6 +3,7 @@
 
 import { useState } from 'react';
 import { useLogin } from '../../hooks/useAuth';
+import { Eye, EyeOff } from 'lucide-react';
 import styles from './LoginPage.module.css';
 
 export default function LoginPage() {
@@ -10,6 +11,7 @@ export default function LoginPage() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,7 +52,7 @@ export default function LoginPage() {
 
           <div className={styles.username}>
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -60,6 +62,16 @@ export default function LoginPage() {
             />
             <span></span>
             <label>Contraseña</label>
+            <button
+              type="button"
+              className={styles.togglePasswordBtn}
+              onClick={() => setShowPassword(!showPassword)}
+              disabled={isPending}
+              title={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+              style={{ background: 'none', border: 'none', cursor: isPending ? 'not-allowed' : 'pointer', opacity: isPending ? 0.5 : 1 }}
+            >
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
           </div>
  
           
