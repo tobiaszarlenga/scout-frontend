@@ -193,6 +193,8 @@ export default function PitcherHistoricalReport({ params }: { params: Promise<{ 
                         <ReTooltip
                           formatter={(value: number) => `${value}`}
                           contentStyle={{ background: "var(--color-card)", border: "1px solid var(--color-border)", color: "var(--color-text)" }}
+                          labelStyle={{ color: "var(--color-text)" }}
+                          itemStyle={{ color: "var(--color-text)" }}
                         />
                       </PieChart>
                     </ResponsiveContainer>
@@ -236,6 +238,8 @@ export default function PitcherHistoricalReport({ params }: { params: Promise<{ 
                         <ReTooltip
                           formatter={(value: number) => `${value}`}
                           contentStyle={{ background: "var(--color-card)", border: "1px solid var(--color-border)", color: "var(--color-text)" }}
+                          labelStyle={{ color: "var(--color-text)" }}
+                          itemStyle={{ color: "var(--color-text)" }}
                         />
                         <Bar dataKey="value" radius={[6, 6, 0, 0]}>
                           {tipoData.map((_, idx) => (
